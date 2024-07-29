@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  email          String   @unique
+  password       String
+  name           String
+  bio            String?
+  profilePicture String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  sentFriendRequests     FriendRequest[] @relation("SentFriendRequests")
+  receivedFriendRequests FriendRequest[] @relation("ReceivedFriendRequests")
+
+  friends  User[] @relation("UserFriends", fields: [friendIds], references: [id])
+  friendOf User[] @relation("UserFriends", fields: [friendOfIds], references: [id])
+
+  friendIds   String[] @db.ObjectId
+  friendOfIds String[] @db.ObjectId
+
+  initiatedChats    OneOnOneChat[] @relation("ChatInitiator")
+  participatedChats OneOnOneChat[] @relation("ChatParticipant")
+
+  sentMessages Message[] @relation("SentMessages")
+
+  ownedGroups    GroupChat[] @relation("GroupOwner")
+  memberOfGroups GroupChat[] @relation("GroupMembers", fields: [memberOfGroupIds], references: [id])
+
+  memberOfGroupIds String[] @db.ObjectId
+}
+
+model FriendRequest {
+  id         String              @id @default(auto()) @map("_id") @db.ObjectId
+  senderId   String              @db.ObjectId
+  receiverId String              @db.ObjectId
+  status     FriendRequestStatus @default(PENDING)
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  sender   User @relation("SentFriendRequests", fields: [senderId], references: [id])
+  receiver User @relation("ReceivedFriendRequests", fields: [receiverId], references: [id])
+
+  @@unique([senderId, receiverId])
+}
+
+model OneOnOneChat {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  initiatorId   String   @db.ObjectId
+  participantId String   @db.ObjectId
+  vanishMode    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  lastMessageAt DateTime @default(now())
+
+  initiator   User @relation("ChatInitiator", fields: [initiatorId], references: [id])
+  participant User @relation("ChatParticipant", fields: [participantId], references: [id])
+
+  messages Message[]
+
+  deletedForInitiator   DateTime?
+  deletedForParticipant DateTime?
+
+  @@unique([initiatorId, participantId])
+}
+
+model GroupChat {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  ownerId   String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner    User      @relation("GroupOwner", fields: [ownerId], references: [id])
+  members  User[]    @relation("GroupMembers", fields: [memberIds], references: [id])
+  messages Message[]
+
+  memberIds String[] @db.ObjectId
+}
+
+model Message {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  content        String
+  senderId       String   @db.ObjectId
+  oneOnOneChatId String?  @db.ObjectId
+  groupChatId    String?  @db.ObjectId
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  sender       User          @relation("SentMessages", fields: [senderId], references: [id])
+  oneOnOneChat OneOnOneChat? @relation(fields: [oneOnOneChatId], references: [id])
+  groupChat    GroupChat?    @relation(fields: [groupChatId], references: [id])
+}
+
+enum ChatType {
+  ONE_ON_ONE
+  GROUP
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
