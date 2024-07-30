@@ -16,16 +16,18 @@ class AppError extends Error {
 const errorHandler = (err: Error, req: Request, res: Response) => {
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
-      status: 'error',
+      success: false,
       message: err.message,
+      data: null,
     });
   }
 
   logger.error(err.stack);
 
   res.status(500).json({
-    status: 'error',
+    success: false,
     message: 'Internal server error',
+    data: null,
   });
 };
 
