@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import logger from '../utils/logger';
+import { StatusCodes } from 'http-status-codes';
 
 class AppError extends Error {
   statusCode: number;
@@ -24,7 +25,7 @@ const errorHandler = (err: Error, req: Request, res: Response) => {
 
   logger.error(err.stack);
 
-  res.status(500).json({
+  res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
     success: false,
     message: 'Internal server error',
     data: null,
