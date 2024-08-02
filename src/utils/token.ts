@@ -47,7 +47,7 @@ const generateRefreshToken = (user: JwtUserPayload) => {
     { expiresIn: refreshTokenExpiryDuration }, // Refresh token expires in 7 days
   );
 
-  return refresh_token;
+  return { refresh_token, refreshTokenExpiryDuration };
 };
 
 export { generateAccessToken, generateRefreshToken };
