@@ -8,6 +8,7 @@ import rateLimit from 'express-rate-limit';
 import logger from './utils/logger';
 import { errorHandler } from './middlewares/errorHandler';
 import authRouter from './routes/auth.routes';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(cors());
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Rate limiting
 const limiter = rateLimit({

@@ -5,6 +5,7 @@ import { StatusCodes } from 'http-status-codes';
 import { generateAccessToken, generateRefreshToken } from '../utils/token';
 import { AppError } from '../middlewares/errorHandler';
 import cloudinary from '../config/cloudinary';
+import { NODE_ENV } from '../utils/env-variables';
 
 /**
  * Register a new user
@@ -54,13 +55,21 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
     // Create a payload for the access token and refresh token
     const userPayload = { id: newUser.id, email: newUser.email };
     const { access_token, expires_in } = generateAccessToken(userPayload);
-    const refresh_token = generateRefreshToken(userPayload);
+    const { refresh_token, refreshTokenExpiryDuration } = generateRefreshToken(userPayload);
+
+    // Set the refresh token as an HTTP-only cookie
+    res.cookie('refresh_token', refresh_token, {
+      httpOnly: true,
+      secure: NODE_ENV === 'production', // Use secure cookies in production
+      sameSite: 'strict',
+      maxAge: refreshTokenExpiryDuration,
+    });
 
     // Respond with success message and data
     res.status(StatusCodes.CREATED).json({
       success: true,
       message: 'Registration successful!',
-      data: { user: newUser, access_token, refresh_token, expires_in },
+      data: { user: newUser, access_token, expires_in },
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
