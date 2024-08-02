@@ -8,7 +8,11 @@ const validateRequest = (schema: AnyZodObject | ZodEffects<AnyZodObject>) => {
       await schema.parseAsync(req.body);
       return next();
     } catch (error) {
-      return res.status(StatusCodes.BAD_REQUEST).json();
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: 'Validation failed',
+        data: null,
+      });
     }
   };
 };
