@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import logger from './utils/logger';
 import { errorHandler } from './middlewares/errorHandler';
+import authRouter from './routes/auth.routes';
 
 const app = express();
 
@@ -28,6 +29,9 @@ app.get('/', (req, res) => {
   logger.info('Home route accessed');
   res.json({ message: 'Welcome to the API' });
 });
+
+// Auth Routes
+app.use('/api/v1/auth', authRouter);
 
 app.use(errorHandler);
 
