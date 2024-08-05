@@ -1,7 +1,7 @@
 import express from 'express';
 import validateRequest from '../middlewares/validateRequest';
-import { register } from '../controllers/auth.controllers';
-import { userRegistrationSchema } from '../schemas/auth.schemas';
+import { login, register } from '../controllers/auth.controllers';
+import { userLoginSchema, userRegistrationSchema } from '../schemas/auth.schemas';
 import upload from '../middlewares/multer';
 
 const authRouter = express.Router();
@@ -12,5 +12,7 @@ authRouter.post(
   validateRequest(userRegistrationSchema),
   register,
 );
+
+authRouter.post('/login', validateRequest(userLoginSchema), login);
 
 export default authRouter;
