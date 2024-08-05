@@ -77,4 +77,49 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { register };
+/**
+ * Login a user
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Express next middleware function
+ * @returns {Promise<void>}
+ */
+const login = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract user data from request body
+    const { email, password } = req.body;
+
+    // Check if the user exists in the database
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (!existingUser) throw new AppError('User does not exist!', StatusCodes.BAD_REQUEST);
+
+    // Check if the password is correct
+    const isPasswordCorrect = await bcrypt.compare(password, existingUser.password);
+    if (!isPasswordCorrect) throw new AppError('Incorrect password!', StatusCodes.BAD_REQUEST);
+
+    // Create a payload for the access token and refresh token
+    const userPayload = { id: existingUser.id, email: existingUser.email };
+    const { access_token, expires_in } = generateAccessToken(userPayload);
+    const { refresh_token, refreshTokenExpiryDuration } = generateRefreshToken(userPayload);
+
+    // Set the refresh token as an HTTP-only cookie
+    res.cookie('refresh_token', refresh_token, {
+      httpOnly: true,
+      secure: NODE_ENV === 'production', // Use secure cookies in production
+      sameSite: 'strict',
+      maxAge: refreshTokenExpiryDuration,
+    });
+
+    // Respond with success message and data
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Login successful!',
+      data: { user: existingUser, access_token, expires_in },
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export { register, login };
