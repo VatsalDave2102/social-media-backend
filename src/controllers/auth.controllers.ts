@@ -122,4 +122,28 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { register, login };
+/**
+ * Logout a user
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Express next middleware function
+ * @returns {Promise<void>}
+ */
+const logout = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Delete the refresh token cookie
+    res.clearCookie('refresh_token');
+
+    // Respond with success message
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Logout successful!',
+      data: null,
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export { register, login, logout };
