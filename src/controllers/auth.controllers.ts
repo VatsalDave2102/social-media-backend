@@ -146,4 +146,32 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { register, login, logout };
+/**
+ * Generate a new access token using a refresh token
+ * @param req Express request object
+ * @param res Express response object
+ * @param next Express next middleware function
+ * @returns {Promise<void>}
+ */
+const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract user data from request body
+    const { userId, email } = req.user;
+
+    // Create a payload for the access token
+    const userPayload = { id: userId, email: email };
+    const { access_token, expires_in } = generateAccessToken(userPayload);
+
+    // Respond with success message and data
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Access token refreshed successfully!',
+      data: { access_token, expires_in },
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export { register, login, logout, refreshToken };
