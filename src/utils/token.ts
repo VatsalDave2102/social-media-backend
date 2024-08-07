@@ -1,8 +1,14 @@
 import jwt from 'jsonwebtoken';
 import { JwtUserPayload } from '../types/auth.types';
-import { ACCESS_TOKEN_SECRET_KEY, REFRESH_TOKEN_SECRET_KEY } from './env-variables';
+import {
+  ACCESS_TOKEN_SECRET_KEY,
+  NODE_ENV,
+  REFRESH_TOKEN_SECRET_KEY,
+  RESET_PASSWORD_SECRET_KEY,
+} from './env-variables';
 import { AppError } from '../middlewares/errorHandler';
 import { StatusCodes } from 'http-status-codes';
+
 /**
  * Generates an access token for the given user
  * @param {JwtUserPayload} user - User payload for JWT
@@ -50,4 +56,33 @@ const generateRefreshToken = (user: JwtUserPayload) => {
   return { refresh_token, refreshTokenExpiryDuration };
 };
 
-export { generateAccessToken, generateRefreshToken };
+/**
+ * Generates a reset password token for the given user
+ * @param {JwtUserPayload} user - User payload for JWT
+ * @returns {string} Reset password token
+ */
+const generateResetPasswordToken = (user: JwtUserPayload) => {
+  const resetPasswordSecretKey = RESET_PASSWORD_SECRET_KEY;
+  const resetPasswordExpiryDuration = 60 * 15; // 15 minutes in seconds
+
+  if (!resetPasswordSecretKey) {
+    if (NODE_ENV === 'development') {
+      throw new AppError(
+        'RESET PASSWORD SECRET KEY is not defined',
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    } else {
+      throw new AppError('Internal Server Error', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  const reset_password_token = jwt.sign(
+    user,
+    resetPasswordSecretKey,
+    { expiresIn: resetPasswordExpiryDuration }, // Reset password token expires in 7 days
+  );
+
+  return { reset_password_token };
+};
+
+export { generateAccessToken, generateRefreshToken, generateResetPasswordToken };
