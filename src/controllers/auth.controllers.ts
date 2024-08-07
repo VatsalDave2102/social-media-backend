@@ -2,10 +2,15 @@ import bcrypt from 'bcryptjs';
 import prisma from '../config/db';
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { generateAccessToken, generateRefreshToken } from '../utils/token';
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  generateResetPasswordToken,
+} from '../utils/token';
 import { AppError } from '../middlewares/errorHandler';
 import cloudinary from '../config/cloudinary';
-import { NODE_ENV } from '../utils/env-variables';
+import { FRONTEND_URL, NODE_ENV } from '../utils/env-variables';
+import { sendEmail } from '../utils/email';
 
 /**
  * Register a new user
@@ -174,4 +179,49 @@ const refreshToken = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
-export { register, login, logout, refreshToken };
+/**
+ * Send a password reset email to the user
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Express next middleware function
+ * @returns {Promise<void>}
+ */
+const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract user email from request body
+    const { email } = req.body;
+
+    // Check if the user exists in the database
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (!existingUser) throw new AppError('User does not exist!', StatusCodes.BAD_REQUEST);
+
+    // Create a payload for the reset password token
+    const userPayload = { id: existingUser.id, email: existingUser.email };
+    const { reset_password_token } = generateResetPasswordToken(userPayload);
+
+    // Create a reset password URL with the reset password token
+    const resetPasswordUrl = `${FRONTEND_URL}/reset-password?token=${reset_password_token}`;
+
+    // Construct the email Subject and Body
+    const emailSubject = 'Reset your password';
+    const emailBody = `
+    <p>You requested a password reset. Click the link below to reset your password:</p>
+    <a href="${resetPasswordUrl}">Reset Password</a>
+    <p>If you didn't request this, please ignore this email.</p>
+  `;
+
+    // Send the email to the user
+    await sendEmail(email, emailSubject, emailBody);
+
+    // Respond with success message
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Password reset email sent!',
+      data: null,
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+export { register, login, logout, refreshToken, forgotPassword };
