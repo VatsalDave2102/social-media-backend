@@ -6,6 +6,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
   generateResetPasswordToken,
+  verifyResetPasswordToken,
 } from '../utils/token';
 import { AppError } from '../middlewares/errorHandler';
 import cloudinary from '../config/cloudinary';
@@ -224,4 +225,58 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
     next(error);
   }
 };
-export { register, login, logout, refreshToken, forgotPassword };
+
+/**
+ * Reset a user's password
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Express next middleware function
+ * @returns {Promise<void>}
+ */
+const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract password and confirm password from request body
+    const { password, confirmPassword } = req.body;
+
+    // Check if the passwords match
+    if (password !== confirmPassword)
+      throw new AppError('Passwords do not match', StatusCodes.BAD_REQUEST);
+
+    // Extract reset password token from request query
+    const { token } = req.query;
+
+    // Verify the reset password token
+    if (typeof token !== 'string') {
+      throw new AppError('Invalid token', StatusCodes.BAD_REQUEST);
+    }
+    const decodedToken = verifyResetPasswordToken(token);
+
+    // Extract user id and email from decoded token
+    const { id, email } = decodedToken;
+
+    // Check if the user exists in the database
+    const existingUser = await prisma.user.findUnique({ where: { id, email } });
+    if (!existingUser) throw new AppError('User does not exist!', StatusCodes.BAD_REQUEST);
+
+    // Hash the user's new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Update the user's password in the database
+    await prisma.user.update({
+      where: { id },
+      data: { password: hashedPassword },
+    });
+
+    // Respond with success message
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Password reset successfully!',
+      data: null,
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export { register, login, logout, refreshToken, forgotPassword, resetPassword };

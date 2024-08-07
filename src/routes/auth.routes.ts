@@ -6,6 +6,7 @@ import {
   logout,
   refreshToken,
   register,
+  resetPassword,
 } from '../controllers/auth.controllers';
 import { userLoginSchema, userRegistrationSchema } from '../schemas/auth.schemas';
 import upload from '../middlewares/multer';
@@ -27,5 +28,7 @@ authRouter.post('/logout', verifyToken('accessToken'), logout);
 authRouter.post('/refresh-token', verifyToken('refreshToken'), refreshToken);
 
 authRouter.post('/forgot-password', forgotPassword);
+
+authRouter.post('/reset-password', resetPassword);
 
 export default authRouter;

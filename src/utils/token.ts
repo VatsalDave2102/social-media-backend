@@ -77,12 +77,43 @@ const generateResetPasswordToken = (user: JwtUserPayload) => {
   }
 
   const reset_password_token = jwt.sign(
-    user,
-    resetPasswordSecretKey,
-    { expiresIn: resetPasswordExpiryDuration }, // Reset password token expires in 7 days
+    user, 
+    resetPasswordSecretKey, 
+    { expiresIn: resetPasswordExpiryDuration }, // Reset password token expires in 15 minutes
   );
 
   return { reset_password_token };
 };
 
-export { generateAccessToken, generateRefreshToken, generateResetPasswordToken };
+const verifyResetPasswordToken = (token: string) => {
+  const resetPasswordSecretKey = RESET_PASSWORD_SECRET_KEY;
+
+  if (!resetPasswordSecretKey) {
+    if (NODE_ENV === 'development') {
+      throw new AppError(
+        'RESET PASSWORD SECRET KEY is not defined',
+        StatusCodes.INTERNAL_SERVER_ERROR,
+      );
+    } else {
+      throw new AppError('Internal Server Error', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  try {
+    // Decode the token to get the payload
+    const decodedToken = jwt.verify(token, resetPasswordSecretKey) as CustomJwtPayload;
+    if (!decodedToken) throw new AppError('Invalid token', StatusCodes.UNAUTHORIZED);
+
+    // Return the decoded token
+    return decodedToken;
+  } catch (error) {
+    throw new AppError('Invalid token', StatusCodes.UNAUTHORIZED);
+  }
+};
+
+export {
+  generateAccessToken,
+  generateRefreshToken,
+  generateResetPasswordToken,
+  verifyResetPasswordToken,
+};
