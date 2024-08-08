@@ -235,12 +235,8 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
  */
 const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Extract password and confirm password from request body
-    const { password, confirmPassword } = req.body;
-
-    // Check if the passwords match
-    if (password !== confirmPassword)
-      throw new AppError('Passwords do not match', StatusCodes.BAD_REQUEST);
+    // Extract password from request body
+    const { password } = req.body;
 
     // Extract reset password token from request query
     const { token } = req.query;
