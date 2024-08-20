@@ -18,8 +18,13 @@ const generateAccessToken = (user: JwtUserPayload) => {
   const accessTokenSecretKey = ACCESS_TOKEN_SECRET_KEY;
   // TODO: Update expiration time to 1 hour
   const accessTokenExpiryDuration = 60 * 1; // 1 minute (for testing)
+
   if (!accessTokenSecretKey) {
-    throw new AppError('ACCESS TOKEN SECRET KEY is not defined', StatusCodes.INTERNAL_SERVER_ERROR);
+    const errorMessage =
+      NODE_ENV === 'development'
+        ? 'ACCESS TOKEN SECRET KEY is not defined'
+        : 'Internal Server Error';
+    throw new AppError(errorMessage, StatusCodes.INTERNAL_SERVER_ERROR);
   }
 
   const access_token = jwt.sign(
@@ -41,10 +46,11 @@ const generateRefreshToken = (user: JwtUserPayload) => {
   const refreshTokenExpiryDuration = 60 * 60 * 24 * 7; // 7 days in seconds
 
   if (!refreshTokenSecretKey) {
-    throw new AppError(
-      'REFRESH TOKEN SECRET KEY is not defined',
-      StatusCodes.INTERNAL_SERVER_ERROR,
-    );
+    const errorMessage =
+      NODE_ENV === 'development'
+        ? 'REFRESH TOKEN SECRET KEY is not defined'
+        : 'Internal Server Error';
+    throw new AppError(errorMessage, StatusCodes.INTERNAL_SERVER_ERROR);
   }
 
   const refresh_token = jwt.sign(
@@ -66,19 +72,16 @@ const generateResetPasswordToken = (user: JwtUserPayload) => {
   const resetPasswordExpiryDuration = 60 * 15; // 15 minutes in seconds
 
   if (!resetPasswordSecretKey) {
-    if (NODE_ENV === 'development') {
-      throw new AppError(
-        'RESET PASSWORD SECRET KEY is not defined',
-        StatusCodes.INTERNAL_SERVER_ERROR,
-      );
-    } else {
-      throw new AppError('Internal Server Error', StatusCodes.INTERNAL_SERVER_ERROR);
-    }
+    const errorMessage =
+      NODE_ENV === 'development'
+        ? 'RESET PASSWORD SECRET KEY is not defined'
+        : 'Internal Server Error';
+    throw new AppError(errorMessage, StatusCodes.INTERNAL_SERVER_ERROR);
   }
 
   const reset_password_token = jwt.sign(
-    user, 
-    resetPasswordSecretKey, 
+    user,
+    resetPasswordSecretKey,
     { expiresIn: resetPasswordExpiryDuration }, // Reset password token expires in 15 minutes
   );
 
@@ -89,14 +92,11 @@ const verifyResetPasswordToken = (token: string) => {
   const resetPasswordSecretKey = RESET_PASSWORD_SECRET_KEY;
 
   if (!resetPasswordSecretKey) {
-    if (NODE_ENV === 'development') {
-      throw new AppError(
-        'RESET PASSWORD SECRET KEY is not defined',
-        StatusCodes.INTERNAL_SERVER_ERROR,
-      );
-    } else {
-      throw new AppError('Internal Server Error', StatusCodes.INTERNAL_SERVER_ERROR);
-    }
+    const errorMessage =
+      NODE_ENV === 'development'
+        ? 'RESET PASSWORD SECRET KEY is not defined'
+        : 'Internal Server Error';
+    throw new AppError(errorMessage, StatusCodes.INTERNAL_SERVER_ERROR);
   }
 
   try {

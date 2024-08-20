@@ -16,7 +16,10 @@ import { AppError } from './errorHandler';
 const verifyToken = (tokenType: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     // Extract the token from the request headers/cookies
-    const token = tokenType === 'accessToken' ? req.headers.authorization?.split(' ')[1] : req.cookies.refresh_token;
+    const token =
+      tokenType === 'accessToken'
+        ? req.headers.authorization?.split(' ')[1]
+        : req.cookies.refresh_token;
     if (!token) throw new AppError('Token is missing', StatusCodes.UNAUTHORIZED);
 
     try {
@@ -25,11 +28,9 @@ const verifyToken = (tokenType: string) => {
         tokenType === 'accessToken' ? ACCESS_TOKEN_SECRET_KEY : REFRESH_TOKEN_SECRET_KEY;
 
       if (!SECRET_KEY) {
-        if (NODE_ENV === 'development') {
-          throw new AppError('SECRET_KEY is not defined', StatusCodes.INTERNAL_SERVER_ERROR);
-        } else {
-          throw new AppError('Internal Server Error', StatusCodes.INTERNAL_SERVER_ERROR);
-        }
+        const errorMessage =
+          NODE_ENV === 'development' ? 'SECRET_KEY is not defined' : 'Internal Server Error';
+        throw new AppError(errorMessage, StatusCodes.INTERNAL_SERVER_ERROR);
       }
 
       // Decode the token to get the payload
