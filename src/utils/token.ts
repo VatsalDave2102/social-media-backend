@@ -16,8 +16,7 @@ import { StatusCodes } from 'http-status-codes';
  */
 const generateAccessToken = (user: JwtUserPayload) => {
   const accessTokenSecretKey = ACCESS_TOKEN_SECRET_KEY;
-  // TODO: Update expiration time to 1 hour
-  const accessTokenExpiryDuration = 60 * 1; // 1 minute (for testing)
+  const accessTokenExpiryDuration = 60 * 60; // 1 hour in seconds
 
   if (!accessTokenSecretKey) {
     const errorMessage =
