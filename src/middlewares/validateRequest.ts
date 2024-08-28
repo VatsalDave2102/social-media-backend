@@ -1,18 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
-import { StatusCodes } from 'http-status-codes';
-import { AnyZodObject, ZodEffects } from 'zod';
+import { AnyZodObject } from 'zod';
 
-const validateRequest = (schema: AnyZodObject | ZodEffects<AnyZodObject>) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+const validateRequest = (schema: AnyZodObject) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await schema.parseAsync(req.body);
+      await schema.safeParseAsync({
+        body: req.body,
+        query: req.query,
+        params: req.params,
+      });
       return next();
     } catch (error) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        success: false,
-        message: 'Validation failed',
-        data: null,
-      });
+      return res.status(400).json(error);
     }
   };
 };
