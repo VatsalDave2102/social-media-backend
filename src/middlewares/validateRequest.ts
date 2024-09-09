@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import { StatusCodes } from 'http-status-codes';
 import { AnyZodObject, ZodEffects } from 'zod';
+import { NextFunction, Request, Response } from 'express';
+import { StatusCodes } from 'http-status-codes';
 
 const validateRequest = (schema: AnyZodObject | ZodEffects<AnyZodObject>) => {
   return async (req: Request, res: Response, next: NextFunction) => {

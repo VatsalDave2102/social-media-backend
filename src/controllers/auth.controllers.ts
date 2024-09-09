@@ -1,7 +1,8 @@
-import bcrypt from 'bcryptjs';
-import prisma from '../config/db';
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import bcrypt from 'bcryptjs';
+
+import { FRONTEND_URL, NODE_ENV } from '../utils/env-variables';
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -10,7 +11,7 @@ import {
 } from '../utils/token';
 import { AppError } from '../middlewares/errorHandler';
 import cloudinary from '../config/cloudinary';
-import { FRONTEND_URL, NODE_ENV } from '../utils/env-variables';
+import prisma from '../config/db';
 import { sendEmail } from '../utils/email';
 
 /**
@@ -275,4 +276,4 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
   }
 };
 
-export { register, login, logout, refreshToken, forgotPassword, resetPassword };
+export { forgotPassword, login, logout, refreshToken, register, resetPassword };

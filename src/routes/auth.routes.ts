@@ -1,5 +1,5 @@
 import express from 'express';
-import validateRequest from '../middlewares/validateRequest';
+
 import {
   forgotPassword,
   login,
@@ -15,6 +15,7 @@ import {
   userRegistrationSchema,
 } from '../schemas/auth.schemas';
 import upload from '../middlewares/multer';
+import validateRequest from '../middlewares/validateRequest';
 import verifyToken from '../middlewares/verifyToken';
 
 const authRouter = express.Router();

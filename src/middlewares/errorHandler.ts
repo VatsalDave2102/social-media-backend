@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import logger from '../utils/logger';
 import { StatusCodes } from 'http-status-codes';
+
+import logger from '../utils/logger';
 
 class AppError extends Error {
   statusCode: number;

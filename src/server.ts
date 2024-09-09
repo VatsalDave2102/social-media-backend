@@ -1,5 +1,5 @@
-import app from './app';
 import { PORT } from './utils/env-variables';
+import app from './app';
 
 const port = PORT || 3000;
 

@@ -1,7 +1,8 @@
-import nodemailer from 'nodemailer';
-import { AppError } from '../middlewares/errorHandler';
 import { StatusCodes } from 'http-status-codes';
+import nodemailer from 'nodemailer';
+
 import { EMAIL_PASSWORD, EMAIL_USERNAME } from './env-variables';
+import { AppError } from '../middlewares/errorHandler';
 
 // Create reusable transporter object using the default SMTP transport
 const transporter = nodemailer.createTransport({

@@ -1,8 +1,9 @@
 import multer, { FileFilterCallback } from 'multer';
 import { Request } from 'express';
-import path from 'path';
-import { AppError } from './errorHandler';
 import { StatusCodes } from 'http-status-codes';
+import path from 'path';
+
+import { AppError } from './errorHandler';
 
 const storage = multer.diskStorage({
   filename: (

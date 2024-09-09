@@ -1,14 +1,15 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import express from 'express';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import express from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import logger from './utils/logger';
-import { errorHandler } from './middlewares/errorHandler';
+
 import authRouter from './routes/auth.routes';
-import cookieParser from 'cookie-parser';
+import { errorHandler } from './middlewares/errorHandler';
+import logger from './utils/logger';
 
 const app = express();
 

@@ -1,5 +1,6 @@
+import { StatusCodes } from 'http-status-codes';
 import jwt from 'jsonwebtoken';
-import { JwtUserPayload } from '../types/auth.types';
+
 import {
   ACCESS_TOKEN_SECRET_KEY,
   NODE_ENV,
@@ -7,7 +8,7 @@ import {
   RESET_PASSWORD_SECRET_KEY,
 } from './env-variables';
 import { AppError } from '../middlewares/errorHandler';
-import { StatusCodes } from 'http-status-codes';
+import { JwtUserPayload } from '../types/auth.types';
 
 /**
  * Generates an access token for the given user
@@ -114,5 +115,6 @@ export {
   generateAccessToken,
   generateRefreshToken,
   generateResetPasswordToken,
-  verifyResetPasswordToken,
+  verifyResetPasswordToken
 };
+

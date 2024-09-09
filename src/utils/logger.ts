@@ -1,4 +1,5 @@
 import winston from 'winston';
+
 import { NODE_ENV } from './env-variables';
 
 const logger = winston.createLogger({
