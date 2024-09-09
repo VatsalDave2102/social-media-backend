@@ -1,5 +1,5 @@
-import { faker } from '@faker-js/faker';
 import { FriendRequestStatus } from '@prisma/client';
+import { faker } from '@faker-js/faker';
 
 import prisma from '../config/db';
 
@@ -22,7 +22,7 @@ async function main() {
     });
   }
 
-  const createdUsers = await prisma.user.createMany({
+  await prisma.user.createMany({
     data: users,
   });
 
@@ -57,7 +57,7 @@ async function main() {
     }
   }
 
-  const createdOneOnOneChats = await prisma.oneOnOneChat.createMany({
+  await prisma.oneOnOneChat.createMany({
     data: oneOnOneChats,
   });
 
@@ -75,7 +75,7 @@ async function main() {
     groupChats.push(groupChat);
   }
 
-  const createdGroupChats = await prisma.groupChat.createMany({
+  await prisma.groupChat.createMany({
     data: groupChats,
   });
 
