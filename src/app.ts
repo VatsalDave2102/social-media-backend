@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
 import authRouter from './routes/auth.routes';
+import { errorConverter } from './middlewares/errorConverter';
 import { errorHandler } from './middlewares/errorHandler';
 import logger from './utils/logger';
 
@@ -33,6 +34,7 @@ app.get('/', (req, res) => {
 // Auth Routes
 app.use('/api/v1/auth', authRouter);
 
+app.use(errorConverter);
 app.use(errorHandler);
 
 export default app;
