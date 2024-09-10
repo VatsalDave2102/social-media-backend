@@ -1,6 +1,7 @@
-import { Request, Response } from 'express';
+import { ErrorRequestHandler } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
+import { NODE_ENV } from '../utils/env-variables';
 import logger from '../utils/logger';
 
 class AppError extends Error {
@@ -15,22 +16,24 @@ class AppError extends Error {
   }
 }
 
-const errorHandler = (err: Error, req: Request, res: Response) => {
-  if (err instanceof AppError) {
-    return res.status(err.statusCode).json({
-      success: false,
-      message: err.message,
-      data: null,
-    });
+const errorHandler: ErrorRequestHandler = (err, req, res) => {
+  const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+  const message = err.message || StatusCodes[statusCode];
+
+  const response = {
+    success: false,
+    message,
+    data: null,
+    ...(NODE_ENV === 'development' && { stack: err.stack }),
+  };
+
+  if (NODE_ENV === 'development') {
+    logger.error(err);
+  } else {
+    logger.error(`${statusCode} - ${message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
   }
 
-  logger.error(err.stack);
-
-  res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-    success: false,
-    message: 'Internal server error',
-    data: null,
-  });
+  res.status(statusCode).json(response);
 };
 
 export { AppError, errorHandler };
