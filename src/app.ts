@@ -8,6 +8,7 @@ import authRouter from './routes/auth.routes';
 import { errorConverter } from './middlewares/errorConverter';
 import { errorHandler } from './middlewares/errorHandler';
 import logger from './utils/logger';
+import oneOnOneChatRouter from './routes/one-on-one-chats.routes';
 
 const app = express();
 
@@ -33,6 +34,9 @@ app.get('/', (req, res) => {
 
 // Auth Routes
 app.use('/api/v1/auth', authRouter);
+
+// One on one chat routes 
+app.use('/api/v1/chats/one-on-one', oneOnOneChatRouter);
 
 app.use(errorConverter);
 app.use(errorHandler);

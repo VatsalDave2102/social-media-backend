@@ -16,7 +16,8 @@ class AppError extends Error {
   }
 }
 
-const errorHandler: ErrorRequestHandler = (err, req, res) => {
+//eslint-disable-next-line @typescript-eslint/no-unused-vars
+const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
   const message = err.message || StatusCodes[statusCode];
 
