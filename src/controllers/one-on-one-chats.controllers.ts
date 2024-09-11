@@ -79,4 +79,47 @@ const createOneOnOneChat = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export { createOneOnOneChat };
+/**
+ * Retrieves details of a specific one-on-one chat.
+ *
+ * @async
+ * @function getOneOnOneChat
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @throws {AppError} - Throws an error if the chat is not found or the user is not allowed to view it
+ * @returns {Promise<void>}
+ */
+const getOneOnOneChatDetails = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract the user from the request
+    const { user } = req;
+    if (!user) throw new AppError('User not found!', StatusCodes.NOT_FOUND);
+
+    // Extract the chat id from the url
+    const { chatId } = req.params;
+    if (!chatId) throw new AppError('Chat ID is missing!', StatusCodes.NOT_FOUND);
+
+    // Check if the chat exists in the database
+    const existingChat = await prisma.oneOnOneChat.findUnique({
+      where: { id: chatId },
+    });
+    if (!existingChat) throw new AppError('Chat not found!', StatusCodes.NOT_FOUND);
+
+    // Check if the user is either the initiator or the participant of the chat
+    if (existingChat.initiatorId !== user.userId && existingChat.participantId !== user.userId)
+      throw new AppError('You are not allowed to view this chat!', StatusCodes.FORBIDDEN);
+
+    // Respond with success message and data
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Chat details retrieved successfully!',
+      data: { chat: existingChat },
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export { createOneOnOneChat, getOneOnOneChatDetails };

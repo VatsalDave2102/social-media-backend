@@ -1,6 +1,9 @@
 import express from 'express';
 
-import { createOneOnOneChat } from '../controllers/one-on-one-chats.controllers';
+import {
+  createOneOnOneChat,
+  getOneOnOneChatDetails,
+} from '../controllers/one-on-one-chats.controllers';
 import { createOneOnOneChatSchema } from '../schemas/one-on-one-chats.schemas';
 import validateRequest from '../middlewares/validateRequest';
 import verifyToken from '../middlewares/verifyToken';
@@ -13,5 +16,7 @@ oneOnOneChatRouter.post(
   verifyToken('accessToken'),
   createOneOnOneChat,
 );
+
+oneOnOneChatRouter.get('/:chatId', verifyToken('accessToken'), getOneOnOneChatDetails);
 
 export default oneOnOneChatRouter;
