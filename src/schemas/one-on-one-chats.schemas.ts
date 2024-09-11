@@ -25,3 +25,9 @@ export const createOneOnOneChatSchema = oneOnOneChatSchema
     message: 'Initiator and participant cannot be the same user',
     path: ['initiatorId'],
   });
+
+export const updateOneOnOneChatSettingsSchema = oneOnOneChatSchema
+  .pick({
+    vanishMode: true,
+  })
+  .transform((data) => ({ settings: data }));

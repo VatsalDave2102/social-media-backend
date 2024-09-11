@@ -3,8 +3,12 @@ import express from 'express';
 import {
   createOneOnOneChat,
   getOneOnOneChatDetails,
+  updateOneOnOneChatSettings,
 } from '../controllers/one-on-one-chats.controllers';
-import { createOneOnOneChatSchema } from '../schemas/one-on-one-chats.schemas';
+import {
+  createOneOnOneChatSchema,
+  updateOneOnOneChatSettingsSchema,
+} from '../schemas/one-on-one-chats.schemas';
 import validateRequest from '../middlewares/validateRequest';
 import verifyToken from '../middlewares/verifyToken';
 
@@ -18,5 +22,12 @@ oneOnOneChatRouter.post(
 );
 
 oneOnOneChatRouter.get('/:chatId', verifyToken('accessToken'), getOneOnOneChatDetails);
+
+oneOnOneChatRouter.patch(
+  '/:chatId/settings',
+  validateRequest(updateOneOnOneChatSettingsSchema),
+  verifyToken('accessToken'),
+  updateOneOnOneChatSettings,
+);
 
 export default oneOnOneChatRouter;

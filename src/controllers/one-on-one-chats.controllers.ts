@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { AppError } from '../middlewares/errorHandler';
 import prisma from '../config/db';
+import { MESSAGES_BATCH } from '../utils/constants';
 
 /**
  * Creates a new one-on-one chat between two users who are friends.
@@ -122,4 +123,58 @@ const getOneOnOneChatDetails = async (req: Request, res: Response, next: NextFun
   }
 };
 
-export { createOneOnOneChat, getOneOnOneChatDetails };
+/**
+ * Updates the settings of a specific one-on-one chat.
+ *
+ * @param req - Express Request object containing user information and chat settings
+ * @param res - Express Response object
+ * @param next - Express NextFunction
+ * @throws {AppError} - If the chat is not found or the user is not allowed to view the messages
+ * @returns {Promise<void>}
+ */
+const updateOneOnOneChatSettings = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract the user from the request
+    const { user } = req;
+    if (!user) throw new AppError('User not found!', StatusCodes.NOT_FOUND);
+
+    // Extract the chat id from the url
+    const { chatId } = req.params;
+    if (!chatId) throw new AppError('Chat ID is missing!', StatusCodes.NOT_FOUND);
+
+    // Extract the requested settings update from the request body
+    const { vanishMode } = req.body.settings;
+
+    // Check if the chat exists in the database
+    const existingChat = await prisma.oneOnOneChat.findUnique({
+      where: { id: chatId },
+    });
+    if (!existingChat) throw new AppError('Chat not found!', StatusCodes.NOT_FOUND);
+
+    // Check if the user is the initiiator or participant of the chat
+    if (user.userId !== existingChat.initiatorId && user.userId !== existingChat.participantId) {
+      throw new AppError(
+        `You are not allowed to update this chat's settings!`,
+        StatusCodes.FORBIDDEN,
+      );
+    }
+
+    // Update the chat settings
+    await prisma.oneOnOneChat.update({
+      where: { id: chatId },
+      data: { vanishMode: vanishMode },
+    });
+
+    // Respond with success message and data
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Chat settings updated successfully!',
+      data: null,
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export { createOneOnOneChat, getOneOnOneChatDetails, updateOneOnOneChatSettings };
