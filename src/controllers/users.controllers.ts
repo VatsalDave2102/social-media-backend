@@ -183,4 +183,50 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
-export { getUsers, getUserChats };
+/**
+ * Retrieves a single user by their ID.
+ * @param {Request} req - Express request object containing the user ID in params
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
+const getUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract the user ID from the request parameters
+    const { id } = req.params;
+
+    // Fetch the user from the database using Prisma
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        bio: true,
+        profilePicture: true,
+        friendIds: true,
+        friendOfIds: true,
+        memberOfGroupIds: true,
+        updatedAt: true,
+        createdAt: true,
+      },
+    });
+
+    // If the user is not found, throw a custom error
+    if (!user) {
+      throw new AppError('User not found', StatusCodes.NOT_FOUND);
+    }
+
+    // Send a successful response with the user data
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'User fetched successfully',
+      data: user,
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export { getUsers, getUserChats, getUser };
