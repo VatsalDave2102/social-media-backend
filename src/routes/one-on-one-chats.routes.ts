@@ -3,6 +3,7 @@ import express from 'express';
 import {
   createOneOnOneChat,
   getOneOnOneChatDetails,
+  getOneOnOneChatMessages,
   updateOneOnOneChatSettings,
 } from '../controllers/one-on-one-chats.controllers';
 import {
@@ -29,5 +30,7 @@ oneOnOneChatRouter.patch(
   verifyToken('accessToken'),
   updateOneOnOneChatSettings,
 );
+
+oneOnOneChatRouter.get('/:chatId/messages', verifyToken('accessToken'), getOneOnOneChatMessages);
 
 export default oneOnOneChatRouter;

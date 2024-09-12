@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import { AppError } from '../middlewares/errorHandler';
-import prisma from '../config/db';
 import { MESSAGES_BATCH } from '../utils/constants';
+import prisma from '../config/db';
 
 /**
  * Creates a new one-on-one chat between two users who are friends.
@@ -177,4 +177,76 @@ const updateOneOnOneChatSettings = async (req: Request, res: Response, next: Nex
   }
 };
 
-export { createOneOnOneChat, getOneOnOneChatDetails, updateOneOnOneChatSettings };
+/**
+ * Retrieves messages for a one-on-one chat.
+ *
+ * @param req - Express Request object
+ * @param res - Express Response object
+ * @param next - Express NextFunction
+ * @throws {AppError} - If the chat is not found or the user is not authorized to view the messages
+ * @returns {Promise<void>}
+ */
+const getOneOnOneChatMessages = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract the user from the request
+    const { user } = req;
+    if (!user) throw new AppError('User not found!', StatusCodes.NOT_FOUND);
+
+    // Extract the chat id from the url
+    const { chatId } = req.params;
+    if (!chatId) throw new AppError('Chat ID is missing!', StatusCodes.NOT_FOUND);
+
+    // Extract the cursor from the query parameters
+    const { cursor } = req.query;
+
+    // Set the take value
+    const take = Number(req.query.take) || MESSAGES_BATCH;
+
+    // Check if the chat exists in the database
+    const existingChat = await prisma.oneOnOneChat.findUnique({
+      where: { id: chatId },
+    });
+    if (!existingChat) throw new AppError('Chat not found!', StatusCodes.NOT_FOUND);
+
+    // Check if the user is either the initiator or the participant of the chat
+    if (existingChat.initiatorId !== user.userId && existingChat.participantId !== user.userId)
+      throw new AppError(
+        'You are not allowed to view the messages of this chat!',
+        StatusCodes.FORBIDDEN,
+      );
+
+    // Get the chat messages
+    const chatMessages = await prisma.message.findMany({
+      where: { oneOnOneChatId: chatId },
+      take: take + 1, // Fetch one extra to determine if there are more messages
+      skip: cursor ? 1 : undefined,
+      cursor: cursor ? { id: cursor as string } : undefined,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Determine if there are more messages and get the next cursor
+    const totalCount = await prisma.message.count({ where: { oneOnOneChatId: chatId } });
+    const hasNextPage = chatMessages.length > take;
+    const nextCursor = hasNextPage ? chatMessages[take - 1].id : null;
+
+    // Respond with success message and data
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Chat messages retrieved successfully!',
+      data: {
+        messages: chatMessages.slice(0, take),
+        pagination: { totalCount, hasNextPage, nextCursor },
+      },
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export {
+  createOneOnOneChat,
+  getOneOnOneChatDetails,
+  updateOneOnOneChatSettings,
+  getOneOnOneChatMessages,
+};
