@@ -3,7 +3,9 @@ import { StatusCodes } from 'http-status-codes';
 
 import { AppError } from '../middlewares/errorHandler';
 import { ChatCursor } from '../types/chat.types';
+import { User } from '@prisma/client';
 import { USERS_BATCH } from '../utils/constants';
+import cloudinary from '../config/cloudinary';
 import prisma from '../config/db';
 
 /**
@@ -229,4 +231,77 @@ const getUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { getUsers, getUserChats, getUser };
+/**
+ * Updates a user's profile information including name, bio, and profile picture.
+ * @param {Request} req - Express request object containing user ID in params, name and bio in body, and profile picture file
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
+const updateUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract user ID from request parameters
+    const { id } = req.params;
+    // Extract name and bio from request body
+    const { name, bio } = req.body;
+    // Get the uploaded profile picture file
+    const profilePicture = req.file;
+    // Get the current user's ID from the authenticated user object
+    const { userId } = req.user;
+
+    // Check if the user is trying to update their own profile
+    if (id !== userId) {
+      throw new AppError('You can only update your own profile', StatusCodes.FORBIDDEN);
+    }
+
+    // Fetch the current user from the database
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new AppError('User not found', StatusCodes.NOT_FOUND);
+    }
+
+    // Prepare the data to be updated
+    const updateData: Partial<Pick<User, 'name' | 'bio' | 'profilePicture'>> = { name, bio };
+
+    // Handle profile picture update if a new file is provided
+    if (profilePicture) {
+      // Upload the new profile picture to Cloudinary
+      const updatedProfilePicture = await cloudinary.uploader.upload(profilePicture.path, {
+        folder: 'profile_image',
+      });
+
+      if (!updatedProfilePicture) {
+        throw new AppError('Failed to update profile picture', StatusCodes.INTERNAL_SERVER_ERROR);
+      }
+
+      // Add the new profile picture URL to the update data
+      updateData.profilePicture = updatedProfilePicture.secure_url;
+
+      // Delete the old profile picture from Cloudinary if it exists
+      if (user.profilePicture) {
+        const publicId = user.profilePicture.split('/').pop()?.split('.')[0];
+        if (publicId) {
+          await cloudinary.uploader.destroy(`profile_images/${publicId}`);
+        }
+      }
+    }
+
+    // Update the user in the database
+    const updatedUser = await prisma.user.update({
+      where: { id },
+      data: updateData,
+    });
+
+    // Send the response with the updated user data
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'User updated successfully',
+      data: updatedUser,
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export { getUsers, getUserChats, getUser, updateUser };

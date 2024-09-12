@@ -34,3 +34,8 @@ export const resetPasswordSchema = authSchema
     message: "Passwords don't match",
     path: ['confirmPassword'],
   });
+
+export const updateUserSchema = authSchema.pick({
+  name: true,
+  bio: true,
+});
