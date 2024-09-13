@@ -23,6 +23,7 @@ const getUsers = async (req: Request, res: Response, next: NextFunction) => {
 
     // Fetch users with pagination
     const users = await prisma.user.findMany({
+      where: { isDeleted: false },
       take: take + 1, // Fetch one extra to determine if there's a next page
       ...(cursor && {
         skip: 1,
@@ -79,7 +80,7 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
 
     // Verify the current user exists
     const user = await prisma.user.findUnique({
-      where: { id: currentUser.userId },
+      where: { id: currentUser.userId, isDeleted: false },
     });
 
     if (!user) {
@@ -99,7 +100,7 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
           select: { id: true, name: true, profilePicture: true, isDeleted: true },
         },
         participant: {
-          select: { id: true, name: true, profilePicture: true },
+          select: { id: true, name: true, profilePicture: true, isDeleted: true },
         },
         messages: {
           take: 1,
@@ -110,6 +111,7 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
                 id: true,
                 name: true,
                 profilePicture: true,
+                isDeleted: true,
               },
             },
           },
@@ -199,7 +201,7 @@ const getUser = async (req: Request, res: Response, next: NextFunction) => {
 
     // Fetch the user from the database using Prisma
     const user = await prisma.user.findUnique({
-      where: { id },
+      where: { id, isDeleted: false },
       select: {
         id: true,
         name: true,
@@ -255,7 +257,7 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     // Fetch the current user from the database
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await prisma.user.findUnique({ where: { id, isDeleted: false } });
     if (!user) {
       throw new AppError('User not found', StatusCodes.NOT_FOUND);
     }
@@ -346,7 +348,13 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
         profilePicture: null,
         bio: null,
         isDeleted: true,
+        deletedAt: new Date(),
       },
+    });
+
+    // Remove all the sent and received friend requests of user
+    await prisma.friendRequest.deleteMany({
+      where: { OR: [{ senderId: id }, { receiverId: id }] },
     });
 
     // Send the response indicating successful deletion
