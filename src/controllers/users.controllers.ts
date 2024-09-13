@@ -96,7 +96,7 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
       orderBy: { lastMessageAt: 'desc' },
       include: {
         initiator: {
-          select: { id: true, name: true, profilePicture: true },
+          select: { id: true, name: true, profilePicture: true, isDeleted: true },
         },
         participant: {
           select: { id: true, name: true, profilePicture: true },
@@ -304,4 +304,61 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { getUsers, getUserChats, getUser, updateUser };
+/**
+ * Soft deletes a user by setting the isDeleted flag to true.
+ * @param {Request} req - Express request object containing user ID in params
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
+const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract user ID from request parameters
+    const { id } = req.params;
+    // Get the current user's ID from the authenticated user object
+    const { userId } = req.user;
+
+    // Check if the user is trying to delete their own profile
+    if (id !== userId) {
+      throw new AppError('You can only delete your own profile', StatusCodes.FORBIDDEN);
+    }
+
+    // Fetch the current user from the database
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new AppError('User not found', StatusCodes.NOT_FOUND);
+    }
+
+    // Delete the old profile picture from Cloudinary if it exists
+    if (user.profilePicture) {
+      const publicId = user.profilePicture.split('/').pop()?.split('.')[0];
+      if (publicId) {
+        await cloudinary.uploader.destroy(`profile_images/${publicId}`);
+      }
+    }
+
+    // Update the user in the database, setting isDeleted to true
+    await prisma.user.update({
+      where: { id },
+      data: {
+        name: 'Anonymous User',
+        email: `deleted@${new Date().toISOString()}.com`,
+        profilePicture: null,
+        bio: null,
+        isDeleted: true,
+      },
+    });
+
+    // Send the response indicating successful deletion
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'User deleted successfully',
+      data: null,
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export { deleteUser, getUsers, getUserChats, getUser, updateUser };

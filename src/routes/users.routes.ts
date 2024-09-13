@@ -1,6 +1,12 @@
 import { Router } from 'express';
 
-import { getUser, getUserChats, getUsers, updateUser } from '../controllers/users.controllers';
+import {
+  deleteUser,
+  getUser,
+  getUserChats,
+  getUsers,
+  updateUser,
+} from '../controllers/users.controllers';
 import { updateUserSchema } from '../schemas/auth.schemas';
 import upload from '../middlewares/multer';
 import validateRequest from '../middlewares/validateRequest';
@@ -21,5 +27,7 @@ userRouter.put(
   validateRequest(updateUserSchema),
   updateUser,
 );
+
+userRouter.delete('/:id', verifyToken('accessToken'), deleteUser);
 
 export default userRouter;
