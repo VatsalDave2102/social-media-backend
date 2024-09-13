@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import { User } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 import { AppError } from '../middlewares/errorHandler';
 import { ChatCursor } from '../types/chat.types';
-import { User } from '@prisma/client';
 import { USERS_BATCH } from '../utils/constants';
 import cloudinary from '../config/cloudinary';
 import prisma from '../config/db';
@@ -369,4 +370,53 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { deleteUser, getUsers, getUserChats, getUser, updateUser };
+/**
+ * Changes the user's password after verifying the old password.
+ * @param {Request} req - Express request object containing oldPassword, newPassword, and confirmPassword in the body
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
+const changePassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { oldPassword, newPassword } = req.body;
+    const { userId } = req.user;
+
+    // Check if the user is trying to delete their own profile
+    if (id !== userId) {
+      throw new AppError('You can only delete your own profile', StatusCodes.FORBIDDEN);
+    }
+
+    // Fetch the user from the database
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new AppError('User not found', StatusCodes.NOT_FOUND);
+    }
+
+    // Check if the old password is correct
+    const isPasswordCorrect = await bcrypt.compare(oldPassword, user.password);
+    if (!isPasswordCorrect) throw new AppError('Incorrect password!', StatusCodes.BAD_REQUEST);
+
+    // Hash the user's new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update the user's password in the database
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    // Send success response
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Password changed successfully',
+      data: null,
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export { changePassword, deleteUser, getUsers, getUserChats, getUser, updateUser };

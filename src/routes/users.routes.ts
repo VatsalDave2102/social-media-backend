@@ -1,13 +1,14 @@
 import { Router } from 'express';
 
 import {
+  changePassword,
   deleteUser,
   getUser,
   getUserChats,
   getUsers,
   updateUser,
 } from '../controllers/users.controllers';
-import { updateUserSchema } from '../schemas/auth.schemas';
+import { changePasswordSchema, updateUserSchema } from '../schemas/auth.schemas';
 import upload from '../middlewares/multer';
 import validateRequest from '../middlewares/validateRequest';
 import verifyToken from '../middlewares/verifyToken';
@@ -30,4 +31,10 @@ userRouter.put(
 
 userRouter.delete('/:id', verifyToken('accessToken'), deleteUser);
 
+userRouter.put(
+  '/:id/change-password',
+  verifyToken('accessToken'),
+  validateRequest(changePasswordSchema),
+  changePassword,
+);
 export default userRouter;

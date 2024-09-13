@@ -39,3 +39,26 @@ export const updateUserSchema = authSchema.pick({
   name: true,
   bio: true,
 });
+
+export const changePasswordSchema = z
+  .object({
+    oldPassword: authSchema.shape.password,
+    newPassword: authSchema.shape.password,
+    confirmNewPassword: authSchema.shape.password,
+  })
+  .superRefine((data, ctx) => {
+    if (data.newPassword !== data.confirmNewPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "New password and confirm password don't match",
+        path: ['confirmPassword'],
+      });
+    }
+    if (data.oldPassword === data.newPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'New password must be different from the old password',
+        path: ['newPassword'],
+      });
+    }
+  });
