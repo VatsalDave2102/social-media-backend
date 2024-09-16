@@ -8,6 +8,7 @@ import {
   getUser,
   getUserChats,
   getUsers,
+  unfriendUser,
   updateUser,
 } from '../controllers/users.controllers';
 import { changePasswordSchema, updateUserSchema } from '../schemas/auth.schemas';
@@ -43,5 +44,7 @@ userRouter.put(
 userRouter.get('/:id/friends', verifyToken('accessToken'), getFriends);
 
 userRouter.get('/:id/friend-requests', verifyToken('accessToken'), getFriendRequests);
+
+userRouter.post('/:id/unfriend/:friendId', verifyToken('accessToken'), unfriendUser);
 
 export default userRouter;

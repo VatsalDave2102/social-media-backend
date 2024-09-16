@@ -560,6 +560,82 @@ const getFriendRequests = async (req: Request, res: Response, next: NextFunction
   }
 };
 
+/**
+ * Removes a friend relationship between two users.
+ * @param {Request} req - Express request object containing user ID and friend ID in params
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
+const unfriendUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id, friendId } = req.params;
+    const { userId } = req.user;
+
+    // Ensure the user is attempting to unfriend their own friend
+    if (id !== userId) {
+      throw new AppError('You can only unfriend your friends', StatusCodes.FORBIDDEN);
+    }
+
+    // Ensure user is not attempting to unfriend himself
+    if (id === friendId) {
+      throw new AppError('You cannot unfriend yourself', StatusCodes.FORBIDDEN);
+    }
+
+    // Fetch both users simultaneously
+    const [user, friend] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id, isDeleted: false },
+      }),
+      prisma.user.findUnique({ where: { id: friendId, isDeleted: false } }),
+    ]);
+
+    // Verify both users exist
+    if (!user || !friend) {
+      throw new AppError('User or friend not found', StatusCodes.NOT_FOUND);
+    }
+
+    // Check if the users are actually friends
+    const areFriends = user.friendIds.includes(friendId) || user.friendOfIds.includes(friendId);
+
+    if (!areFriends) {
+      throw new AppError('You are not friends with this user', StatusCodes.NOT_FOUND);
+    }
+
+    // Perform the unfriend operation in a transaction
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: userId },
+        data: {
+          friendIds: { set: user.friendIds.filter((id) => id !== friendId) },
+          friendOfIds: {
+            set: user.friendOfIds.filter((id) => id !== friendId),
+          },
+        },
+      }),
+      prisma.user.update({
+        where: { id: friendId },
+        data: {
+          friendIds: { set: friend.friendIds.filter((id) => id !== userId) },
+          friendOfIds: {
+            set: friend.friendOfIds.filter((id) => id !== userId),
+          },
+        },
+      }),
+    ]);
+
+    // Send successful response
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Friend removed successfully',
+      data: null,
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
 export {
   changePassword,
   deleteUser,
@@ -568,5 +644,6 @@ export {
   getUsers,
   getUserChats,
   getUser,
+  unfriendUser,
   updateUser,
 };
