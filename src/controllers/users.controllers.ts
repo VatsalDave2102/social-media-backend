@@ -656,7 +656,7 @@ const getSuggestedFriends = async (req: Request, res: Response, next: NextFuncti
 
     // Ensure the user is requesting their own friend requests
     if (id !== userId) {
-      throw new AppError('You can only fetch your own friend requests', StatusCodes.FORBIDDEN);
+      throw new AppError('You can only fetch your suggested friends', StatusCodes.FORBIDDEN);
     }
 
     // Verify the user exists
