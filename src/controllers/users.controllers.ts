@@ -636,11 +636,93 @@ const unfriendUser = async (req: Request, res: Response, next: NextFunction) => 
   }
 };
 
+/**
+ * Retrieves a paginated list of suggested friends for a specific user.
+ * Suggested friends are users who are friends of the user's friends but not yet friends with the user.
+ * @param {Request} req - Express request object containing user ID in params and pagination details in query
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
+const getSuggestedFriends = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+
+    // Extract pagination parameters from query string
+    const cursor = req.query.cursor as string;
+    const take = Number(req.query.take) || FRIENDS_BATCH;
+
+    const { userId } = req.user;
+
+    // Ensure the user is requesting their own friend requests
+    if (id !== userId) {
+      throw new AppError('You can only fetch your own friend requests', StatusCodes.FORBIDDEN);
+    }
+
+    // Verify the user exists
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
+    if (!user) {
+      throw new AppError('User not found', StatusCodes.NOT_FOUND);
+    }
+
+    // Combine friendIds and friendOfIds to get all existing friend IDs
+    const existingFriendIds = Array.from([...user.friendIds, ...user.friendOfIds]);
+
+    // Fetch suggested friends with pagination
+    const suggestedFriends = await prisma.user.findMany({
+      where: {
+        AND: [
+          { id: { notIn: [...existingFriendIds, id] }, isDeleted: false },
+          {
+            OR: [
+              { friendIds: { hasSome: existingFriendIds } },
+              { friendOfIds: { hasSome: existingFriendIds } },
+            ],
+          },
+        ],
+      },
+      take: take + 1, // Fetch one extra to determine if there's a next page
+      ...(cursor && {
+        skip: 1,
+        cursor: { id: cursor },
+      }),
+      orderBy: { id: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profilePicture: true,
+      },
+    });
+
+    // Determine if there's a next page and prepare pagination info
+    const hasNextPage = suggestedFriends.length > take;
+    const nextCursor = hasNextPage ? suggestedFriends[take - 1].id : null;
+    const paginatedSuggestions = suggestedFriends.slice(0, take);
+
+    // Send response with suggested friends data and pagination info
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Suggested friends fetched successfully',
+      data: {
+        suggestedFriends: paginatedSuggestions,
+        pagination: { hasNextPage, nextCursor },
+      },
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
 export {
   changePassword,
   deleteUser,
   getFriends,
   getFriendRequests,
+  getSuggestedFriends,
   getUsers,
   getUserChats,
   getUser,

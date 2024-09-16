@@ -5,6 +5,7 @@ import {
   deleteUser,
   getFriendRequests,
   getFriends,
+  getSuggestedFriends,
   getUser,
   getUserChats,
   getUsers,
@@ -46,5 +47,7 @@ userRouter.get('/:id/friends', verifyToken('accessToken'), getFriends);
 userRouter.get('/:id/friend-requests', verifyToken('accessToken'), getFriendRequests);
 
 userRouter.post('/:id/unfriend/:friendId', verifyToken('accessToken'), unfriendUser);
+
+userRouter.get('/:id/suggested-friends', verifyToken('accessToken'), getSuggestedFriends);
 
 export default userRouter;
