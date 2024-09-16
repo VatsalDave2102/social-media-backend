@@ -3,6 +3,7 @@ import { Router } from 'express';
 import {
   changePassword,
   deleteUser,
+  getFriends,
   getUser,
   getUserChats,
   getUsers,
@@ -37,4 +38,7 @@ userRouter.put(
   validateRequest(changePasswordSchema),
   changePassword,
 );
+
+userRouter.get('/:id/friends', verifyToken('accessToken'), getFriends);
+
 export default userRouter;

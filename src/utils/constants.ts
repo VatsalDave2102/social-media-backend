@@ -1,3 +1,4 @@
 const USERS_BATCH = 15;
+const FRIENDS_BATCH = 20;
 
-export { USERS_BATCH };
+export { FRIENDS_BATCH, USERS_BATCH };
