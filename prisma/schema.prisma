@@ -14,9 +14,9 @@ model User {
   name           String
   bio            String?
   profilePicture String?
-  isDeleted      Boolean  @default(false)
-  deletedAt      DateTime 
   createdAt      DateTime @default(now())
+  isDeleted      Boolean  @default(false)
+  deletedAt      DateTime?
   updatedAt      DateTime @updatedAt
 
   sentFriendRequests     FriendRequest[] @relation("SentFriendRequests")
