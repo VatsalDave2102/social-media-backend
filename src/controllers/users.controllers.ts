@@ -383,9 +383,9 @@ const changePassword = async (req: Request, res: Response, next: NextFunction) =
     const { oldPassword, newPassword } = req.body;
     const { userId } = req.user;
 
-    // Check if the user is trying to delete their own profile
+    // Check if the user is trying to change their own password
     if (id !== userId) {
-      throw new AppError('You can only delete your own profile', StatusCodes.FORBIDDEN);
+      throw new AppError('You can only change your own password', StatusCodes.FORBIDDEN);
     }
 
     // Fetch the user from the database
@@ -654,7 +654,7 @@ const getSuggestedFriends = async (req: Request, res: Response, next: NextFuncti
 
     const { userId } = req.user;
 
-    // Ensure the user is requesting their own friend requests
+    // Ensure the user is requesting their own suggested friends
     if (id !== userId) {
       throw new AppError('You can only fetch your suggested friends', StatusCodes.FORBIDDEN);
     }
