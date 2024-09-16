@@ -717,11 +717,98 @@ const getSuggestedFriends = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
+/**
+ * Retrieves a paginated list of mutual friends between the current user and another user.
+ * Mutual friends are users who are friends with both the current user and the specified other user.
+ * @param {Request} req - Express request object containing user IDs in params and pagination details in query
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
+const getMutualFriends = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id, otherUserId } = req.params;
+
+    // Extract pagination parameters from query string
+    const cursor = req.query.cursor as string;
+    const take = Number(req.query.take) || FRIENDS_BATCH;
+
+    const { userId } = req.user;
+
+    // Ensure the user is requesting their own mutual friends
+    if (id !== userId) {
+      throw new AppError('You can only fetch your mutual friends', StatusCodes.FORBIDDEN);
+    }
+
+    // Validate that both user IDs are provided
+    if (!id || !otherUserId) {
+      throw new AppError('Both IDs are required', StatusCodes.BAD_REQUEST);
+    }
+
+    // Fetch both users simultaneously
+    const [user1, user2] = await Promise.all([
+      prisma.user.findUnique({ where: { id, isDeleted: false } }),
+      prisma.user.findUnique({ where: { id: otherUserId, isDeleted: false } }),
+    ]);
+
+    // Verify both users exist
+    if (!user1 || !user2) {
+      throw new AppError('One or both users not found', StatusCodes.NOT_FOUND);
+    }
+
+    // Fetch mutual friends with pagination
+    const mutualFriends = await prisma.user.findMany({
+      where: {
+        AND: [
+          // Friends of the current user
+          { OR: [{ friendIds: { has: id } }, { friendOfIds: { has: id } }] },
+          // Friends of the other user
+          {
+            OR: [{ friendIds: { has: otherUserId } }, { friendOfIds: { has: otherUserId } }],
+          },
+        ],
+        isDeleted: false,
+      },
+      take: take + 1, // Fetch one extra to determine if there's a next page
+      ...(cursor && {
+        skip: 1,
+        cursor: { id: cursor },
+      }),
+      orderBy: { id: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profilePicture: true,
+      },
+    });
+
+    // Determine if there's a next page and prepare pagination info
+    const hasNextPage = mutualFriends.length > take;
+    const nextCursor = hasNextPage ? mutualFriends[take - 1].id : null;
+    const paginatedMutualFriends = mutualFriends.slice(0, take);
+
+    // Send response with mutual friends data and pagination info
+    res.json({
+      success: true,
+      message: 'Mutual friends fetched successfully',
+      data: {
+        mutualFriends: paginatedMutualFriends,
+        pagination: { hasNextPage, nextCursor },
+      },
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
 export {
   changePassword,
   deleteUser,
   getFriends,
   getFriendRequests,
+  getMutualFriends,
   getSuggestedFriends,
   getUsers,
   getUserChats,
