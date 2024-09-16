@@ -3,6 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 
 import { AppError } from '../middlewares/errorHandler';
 import { MESSAGES_BATCH } from '../utils/constants';
+import { OneOnOneChatSettings } from '../types/one-on-one-chats.types';
 import prisma from '../config/db';
 
 /**
@@ -143,7 +144,7 @@ const updateOneOnOneChatSettings = async (req: Request, res: Response, next: Nex
     if (!chatId) throw new AppError('Chat ID is missing!', StatusCodes.NOT_FOUND);
 
     // Extract the requested settings update from the request body
-    const { vanishMode } = req.body.settings;
+    const { vanishMode }: OneOnOneChatSettings = req.body.settings;
 
     // Check if the chat exists in the database
     const existingChat = await prisma.oneOnOneChat.findUnique({
