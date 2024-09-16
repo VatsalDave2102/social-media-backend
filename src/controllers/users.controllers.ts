@@ -487,4 +487,86 @@ const getFriends = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { changePassword, deleteUser, getFriends, getUsers, getUserChats, getUser, updateUser };
+/**
+ * Retrieves a paginated list of pending friend requests for a specific user.
+ * @param {Request} req - Express request object containing user ID in params and pagination details in query
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
+const getFriendRequests = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+
+    // Extract pagination parameters from query string
+    const cursor = req.query.cursor as string;
+    const take = Number(req.query.take) || FRIENDS_BATCH;
+
+    const { userId } = req.user;
+
+    // Ensure the user is requesting their own friend requests
+    if (id !== userId) {
+      throw new AppError('You can only fetch your own friend requests', StatusCodes.FORBIDDEN);
+    }
+
+    // Verify the user exists
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
+    if (!user) {
+      throw new AppError('User not found', StatusCodes.NOT_FOUND);
+    }
+
+    // Fetch friend requests with pagination
+    const friendRequests = await prisma.friendRequest.findMany({
+      where: {
+        receiverId: id,
+        status: 'PENDING',
+        sender: { isDeleted: false },
+      },
+      take: take + 1, // Fetch one extra to determine if there's a next page
+      ...(cursor && {
+        skip: 1,
+        cursor: { id: cursor },
+      }),
+      orderBy: { createdAt: 'desc' },
+      include: {
+        sender: {
+          select: { id: true, name: true, email: true, profilePicture: true },
+        },
+      },
+    });
+
+    // Determine if there's a next page and prepare pagination info
+    const hasNextPage = friendRequests.length > take;
+    const nextCursor = hasNextPage ? friendRequests[take - 1].id : null;
+    const paginatedFriendRequests = friendRequests.slice(0, take);
+
+    // Send response with friend requests data and pagination info
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Friend Request fetched successfully',
+      data: {
+        friendRequests: paginatedFriendRequests,
+        pagination: {
+          hasNextPage,
+          nextCursor,
+        },
+      },
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export {
+  changePassword,
+  deleteUser,
+  getFriends,
+  getFriendRequests,
+  getUsers,
+  getUserChats,
+  getUser,
+  updateUser,
+};
