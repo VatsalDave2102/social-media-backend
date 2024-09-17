@@ -622,6 +622,14 @@ const unfriendUser = async (req: Request, res: Response, next: NextFunction) => 
           },
         },
       }),
+      prisma.friendRequest.deleteMany({
+        where: {
+          OR: [
+            { senderId: userId, receiverId: friendId },
+            { senderId: friendId, receiverId: userId },
+          ],
+        },
+      }),
     ]);
 
     // Send successful response
