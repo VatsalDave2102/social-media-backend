@@ -5,6 +5,7 @@ import {
   deleteUser,
   getFriendRequests,
   getFriends,
+  getFriendshipStatus,
   getMutualFriends,
   getSuggestedFriends,
   getUser,
@@ -51,6 +52,12 @@ userRouter.post('/:id/unfriend/:friendId', verifyToken('accessToken'), unfriendU
 
 userRouter.get('/:id/suggested-friends', verifyToken('accessToken'), getSuggestedFriends);
 
-userRouter.get('/:id/mutual-friends/:otherUserId', getMutualFriends);
+userRouter.get('/:id/mutual-friends/:otherUserId', verifyToken('accessToken'), getMutualFriends);
+
+userRouter.get(
+  '/:id/friendship-status/:otherUserId',
+  verifyToken('accessToken'),
+  getFriendshipStatus,
+);
 
 export default userRouter;

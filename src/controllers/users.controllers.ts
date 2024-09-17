@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 import { FRIENDS_BATCH, USERS_BATCH } from '../utils/constants';
 import { AppError } from '../middlewares/errorHandler';
 import { ChatCursor } from '../types/chat.types';
+import { FriendShipStatus } from '../types/friends.types';
 import cloudinary from '../config/cloudinary';
 import prisma from '../config/db';
 
@@ -811,11 +812,89 @@ const getMutualFriends = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+/**
+ * Retrieves the friendship status between the current user and another user.
+ * @param {Request} req - Express request object containing user IDs in params
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ */
+const getFriendshipStatus = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id, otherUserId } = req.params;
+    const { userId } = req.user;
+
+    // Ensure the user is requesting their own friendship status
+    if (id !== userId) {
+      throw new AppError('You can only check your own friendship status', StatusCodes.FORBIDDEN);
+    }
+
+    // Fetch both users
+    const [currentUser, otherUser] = await Promise.all([
+      prisma.user.findUnique({ where: { id, isDeleted: false } }),
+      prisma.user.findUnique({ where: { id: otherUserId, isDeleted: false } }),
+    ]);
+
+    // Verify both users exist
+    if (!currentUser || !otherUser) {
+      throw new AppError('One or both users not found', StatusCodes.NOT_FOUND);
+    }
+
+    // Check it they are firends
+    const areFriends =
+      currentUser.friendIds.includes(otherUserId) || currentUser.friendOfIds.includes(otherUserId);
+
+    if (areFriends) {
+      return res.status(StatusCodes.OK).json({
+        success: true,
+        message: 'Friendship status fetched successfully',
+        data: { status: FriendShipStatus.FRIENDS },
+      });
+    }
+
+    // Check for pending friend requests
+    const friendRequest = await prisma.friendRequest.findFirst({
+      where: {
+        OR: [
+          { senderId: id, receiverId: otherUserId },
+          { senderId: otherUserId, receiverId: id },
+        ],
+        status: 'PENDING',
+      },
+    });
+
+    if (friendRequest) {
+      // Determine if the current user sent or received the request
+      const status =
+        friendRequest.senderId === id
+          ? FriendShipStatus.REQUEST_SENT
+          : FriendShipStatus.REQUEST_RECEIVED;
+
+      return res.status(StatusCodes.OK).json({
+        success: true,
+        message: 'Friendship status fetched successfully',
+        data: { status },
+      });
+    }
+
+    // If no friend request exists
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Friendship status fetched successfully',
+      data: { status: FriendShipStatus.NOT_FRIENDS },
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
 export {
   changePassword,
   deleteUser,
   getFriends,
   getFriendRequests,
+  getFriendshipStatus,
   getMutualFriends,
   getSuggestedFriends,
   getUsers,
