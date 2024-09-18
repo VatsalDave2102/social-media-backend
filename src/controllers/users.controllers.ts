@@ -72,7 +72,8 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
     // Extract pagination parameters from query string
     const take = Number(req.query.take) || USERS_BATCH;
     const cursorString = req.query.cursor as string;
-    const currentUser = req.user;
+    const searchQuery = req.query.query as string;
+    const { userId } = req.user;
 
     // Parse the cursor if provided
     let cursor: ChatCursor | undefined;
@@ -82,7 +83,7 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
 
     // Verify the current user exists
     const user = await prisma.user.findUnique({
-      where: { id: currentUser.userId, isDeleted: false },
+      where: { id: userId, isDeleted: false },
     });
 
     if (!user) {
@@ -92,8 +93,25 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
     // Fetch one-on-one chats
     const oneOnOneChats = await prisma.oneOnOneChat.findMany({
       where: {
-        OR: [{ initiatorId: currentUser.userId }, { participantId: currentUser.userId }],
         lastMessageAt: cursor ? { lt: cursor.lastMessageAt } : undefined,
+        OR: [
+          {
+            initiatorId: userId,
+            ...(searchQuery && {
+              participant: {
+                name: { contains: searchQuery, mode: 'insensitive' },
+              },
+            }),
+          },
+          {
+            participantId: userId,
+            ...(searchQuery && {
+              initiator: {
+                name: { contains: searchQuery, mode: 'insensitive' },
+              },
+            }),
+          },
+        ],
       },
       take: take + 1,
       orderBy: { lastMessageAt: 'desc' },
@@ -112,7 +130,6 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
               select: {
                 id: true,
                 name: true,
-                profilePicture: true,
                 isDeleted: true,
               },
             },
@@ -124,16 +141,16 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
     // Fetch group chats
     const groupChats = await prisma.groupChat.findMany({
       where: {
-        OR: [{ memberIds: { has: currentUser.userId } }, { ownerId: currentUser.userId }],
+        memberIds: { has: userId },
         updatedAt: cursor ? { lt: cursor.lastMessageAt } : undefined,
+        ...(searchQuery && {
+          OR: [{ name: { contains: searchQuery, mode: 'insensitive' } }],
+        }),
       },
       take: take + 1,
 
       orderBy: { updatedAt: 'desc' },
       include: {
-        owner: {
-          select: { id: true, name: true, profilePicture: true },
-        },
         messages: {
           take: 1,
           orderBy: { createdAt: 'desc' },
@@ -142,7 +159,6 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
               select: {
                 id: true,
                 name: true,
-                profilePicture: true,
               },
             },
           },
@@ -155,11 +171,34 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
       ...oneOnOneChats.map((chat) => ({
         ...chat,
         type: 'ONE_ON_ONE',
-        name: currentUser.userId === chat.initiatorId ? chat.participant.name : chat.initiator.name,
+        name: userId === chat.initiatorId ? chat.participant.name : chat.initiator.name,
         lastMessageAt: chat.lastMessageAt,
       })),
       ...groupChats.map((chat) => ({ ...chat, type: 'GROUP', lastMessageAt: chat.updatedAt })),
     ].sort((a, b) => b.lastMessageAt.getTime() - a.lastMessageAt.getTime());
+
+    // Fetch friends with no chats if search query is present
+    let friendsWithNoChats: Pick<User, 'id' | 'name' | 'profilePicture'>[] = [];
+    if (searchQuery) {
+      friendsWithNoChats = await prisma.user.findMany({
+        where: {
+          id: { in: [...user.friendIds, ...user.friendOfIds] },
+          name: { contains: searchQuery, mode: 'insensitive' },
+          isDeleted: false,
+          NOT: {
+            OR: [
+              { initiatedChats: { some: { participantId: userId } } },
+              { participatedChats: { some: { initiatorId: userId } } },
+            ],
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+          profilePicture: true,
+        },
+      });
+    }
 
     // Determine if there's a next page and paginate the results
     const hasNextPage = allChats.length > take;
@@ -180,6 +219,7 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
       message: 'User chats fetched successfully',
       data: {
         chats: paginatedChats,
+        friendsWithNoChats: searchQuery ? friendsWithNoChats : [],
         pagination: { hasNextPage, nextCursor },
       },
     });
