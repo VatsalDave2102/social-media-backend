@@ -22,10 +22,21 @@ const getUsers = async (req: Request, res: Response, next: NextFunction) => {
     // Extract pagination parameters from query string
     const cursor = req.query.cursor as string;
     const take = Number(req.query.take) || USERS_BATCH;
+    const searchQuery = req.query.query as string;
 
     // Fetch users with pagination
     const users = await prisma.user.findMany({
-      where: { isDeleted: false },
+      where: {
+        isDeleted: false,
+        ...(searchQuery && { name: { contains: searchQuery, mode: 'insensitive' } }),
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        profilePicture: true,
+        bio: true,
+      },
       take: take + 1, // Fetch one extra to determine if there's a next page
       ...(cursor && {
         skip: 1,
