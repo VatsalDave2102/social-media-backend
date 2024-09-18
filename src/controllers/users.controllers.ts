@@ -553,6 +553,7 @@ const getFriendRequests = async (req: Request, res: Response, next: NextFunction
     // Extract pagination parameters from query string
     const cursor = req.query.cursor as string;
     const take = Number(req.query.take) || FRIENDS_BATCH;
+    const searchQuery = req.query.query as string;
 
     const { userId } = req.user;
 
@@ -574,7 +575,10 @@ const getFriendRequests = async (req: Request, res: Response, next: NextFunction
       where: {
         receiverId: id,
         status: 'PENDING',
-        sender: { isDeleted: false },
+        sender: {
+          ...(searchQuery && { name: { contains: searchQuery, mode: 'insensitive' } }),
+          isDeleted: false,
+        },
       },
       take: take + 1, // Fetch one extra to determine if there's a next page
       ...(cursor && {
