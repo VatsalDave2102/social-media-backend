@@ -485,6 +485,7 @@ const getFriends = async (req: Request, res: Response, next: NextFunction) => {
     // Extract pagination parameters from query string
     const cursor = req.query.cursor as string;
     const take = Number(req.query.take) || FRIENDS_BATCH;
+    const searchQuery = req.query.query as string;
 
     // Verify the user exists
     const user = await prisma.user.findUnique({
@@ -497,10 +498,9 @@ const getFriends = async (req: Request, res: Response, next: NextFunction) => {
     // Fetch friends with pagination
     const friends = await prisma.user.findMany({
       where: {
-        OR: [
-          { friendIds: { has: id }, isDeleted: false },
-          { friendOfIds: { has: id }, isDeleted: false },
-        ],
+        ...(searchQuery && { name: { contains: searchQuery, mode: 'insensitive' } }),
+        OR: [{ friendIds: { has: id } }, { friendOfIds: { has: id } }],
+        isDeleted: false,
       },
       take: take + 1, // Fetch one extra to determine if there's a next page
       ...(cursor && {
