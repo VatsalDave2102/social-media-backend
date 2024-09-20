@@ -38,12 +38,18 @@ const createOneOnOneChat = async (req: Request, res: Response, next: NextFunctio
       throw new AppError(`You're not allowed to create this chat!`, StatusCodes.BAD_REQUEST);
 
     // Check if the chat already exists
-    const existingChat = await prisma.oneOnOneChat.findUnique({
+    const existingChat = await prisma.oneOnOneChat.findFirst({
       where: {
-        initiatorId_participantId: {
-          initiatorId,
-          participantId,
-        },
+        OR: [
+          {
+            initiatorId,
+            participantId,
+          },
+          {
+            initiatorId: participantId,
+            participantId: initiatorId,
+          },
+        ],
       },
     });
     if (existingChat) throw new AppError('Chat already exists!', StatusCodes.CONFLICT);
@@ -73,7 +79,7 @@ const createOneOnOneChat = async (req: Request, res: Response, next: NextFunctio
     res.status(StatusCodes.CREATED).json({
       success: true,
       message: 'Chat created successfully!',
-      data: { chat_id: newChat.id },
+      data: { chat: newChat },
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -143,8 +149,13 @@ const updateOneOnOneChatSettings = async (req: Request, res: Response, next: Nex
     const { chatId } = req.params;
     if (!chatId) throw new AppError('Chat ID is missing!', StatusCodes.NOT_FOUND);
 
-    // Extract the requested settings update from the request body
-    const { vanishMode }: OneOnOneChatSettings = req.body.settings;
+    // Check if the settings are provided in the request body
+    if (!req.body.settings || typeof req.body.settings !== 'object') {
+      throw new AppError('Missing or invalid settings!', StatusCodes.BAD_REQUEST);
+    }
+
+    // Extract the settings from the request body
+    const settings: OneOnOneChatSettings = req.body.settings;
 
     // Check if the chat exists in the database
     const existingChat = await prisma.oneOnOneChat.findUnique({
@@ -163,7 +174,7 @@ const updateOneOnOneChatSettings = async (req: Request, res: Response, next: Nex
     // Update the chat settings
     await prisma.oneOnOneChat.update({
       where: { id: chatId },
-      data: { vanishMode: vanishMode },
+      data: settings,
     });
 
     // Respond with success message and data
