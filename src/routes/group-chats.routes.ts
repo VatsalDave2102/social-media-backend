@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { createGroupChat } from '../controllers/group-chats.controllers';
+import { createGroupChat, getGroupChatDetails } from '../controllers/group-chats.controllers';
 import { createGroupChatSchema } from '../schemas/group-chats.schemas';
 import validateRequest from '../middlewares/validateRequest';
 import verifyToken from '../middlewares/verifyToken';
@@ -13,5 +13,7 @@ groupChatRouter.post(
   verifyToken('accessToken'),
   createGroupChat,
 );
+
+groupChatRouter.get('/:chatId', verifyToken('accessToken'), getGroupChatDetails);
 
 export default groupChatRouter;
