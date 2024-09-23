@@ -1,6 +1,10 @@
 import express from 'express';
-import { sendFriendRequest } from '../controllers/friend-requests.controllers';
-import { sendFriendRequestSchema } from '../schemas/friend-requests.schemas';
+
+import { sendFriendRequest, updateFriendRequest } from '../controllers/friend-requests.controllers';
+import {
+  sendFriendRequestSchema,
+  updateFriendRequestSchema,
+} from '../schemas/friend-requests.schemas';
 import validateRequest from '../middlewares/validateRequest';
 import verifyToken from '../middlewares/verifyToken';
 
@@ -13,4 +17,10 @@ friendRequestsRouter.post(
   sendFriendRequest,
 );
 
+friendRequestsRouter.put(
+  '/:id',
+  verifyToken('accessToken'),
+  validateRequest(updateFriendRequestSchema),
+  updateFriendRequest,
+);
 export default friendRequestsRouter;

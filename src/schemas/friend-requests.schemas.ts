@@ -19,3 +19,7 @@ export const sendFriendRequestSchema = friendRequestSchema
     message: 'Cannot send a friend request to yourself',
     path: ['senderId'],
   });
+
+export const updateFriendRequestSchema = z.object({
+  status: z.enum(['ACCEPTED', 'REJECTED']),
+});

@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import { AppError } from '../middlewares/errorHandler';
+import { FriendRequestStatus } from '@prisma/client';
 import prisma from '../config/db';
 
 /**
@@ -48,23 +49,20 @@ const sendFriendRequest = async (req: Request, res: Response, next: NextFunction
           { senderId, receiverId },
           { senderId: receiverId, receiverId: senderId },
         ],
-        status: 'PENDING',
+        status: FriendRequestStatus.PENDING,
       },
     });
 
     // Create a new friend request
     if (existingFriendRequest) {
-      throw new AppError(
-        'You have already sent a friend request to this user',
-        StatusCodes.BAD_REQUEST,
-      );
+      throw new AppError('You have a friend request with this user', StatusCodes.BAD_REQUEST);
     }
 
     const friendRequest = await prisma.friendRequest.create({
       data: {
         senderId,
         receiverId,
-        status: 'PENDING',
+        status: FriendRequestStatus.PENDING,
       },
     });
 
@@ -79,4 +77,80 @@ const sendFriendRequest = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-export { sendFriendRequest };
+/**
+ * Updates the status of a friend request.
+ *
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ * @throws {AppError} If friend request not found, already processed, or user is not the receiver
+ */
+const updateFriendRequest = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const { userId } = req.user;
+
+    // Find the friend request
+    const friendRequest = await prisma.friendRequest.findUnique({
+      where: { id },
+    });
+
+    // Check if the friend request exists
+    if (!friendRequest) {
+      throw new AppError('Friend request not found', StatusCodes.NOT_FOUND);
+    }
+
+    // Check if the friend request is still pending
+    if (friendRequest.status !== FriendRequestStatus.PENDING) {
+      throw new AppError('Friend request has already been processed', StatusCodes.BAD_REQUEST);
+    }
+
+    // Ensure the current user is the receiver of the friend request
+    if (friendRequest.receiverId !== userId) {
+      throw new AppError('You are not the receiver of this friend request', StatusCodes.FORBIDDEN);
+    }
+
+    if (status === FriendRequestStatus.ACCEPTED) {
+      // Accept the friend request
+      await prisma.$transaction([
+        // Update sender's friendIds
+        prisma.user.update({
+          where: { id: friendRequest.senderId },
+          data: { friendIds: { push: friendRequest.receiverId } },
+        }),
+        // Update receiver's friendOfIds
+        prisma.user.update({
+          where: { id: friendRequest.receiverId },
+          data: {
+            friendOfIds: { push: friendRequest.senderId },
+          },
+        }),
+        // Update friend request status
+        prisma.friendRequest.update({
+          where: { id: friendRequest.id },
+          data: { status: FriendRequestStatus.ACCEPTED },
+        }),
+      ]);
+
+      return res.status(StatusCodes.OK).json({
+        success: true,
+        message: 'Friend request accepted successfully',
+        data: null,
+      });
+    } else if (status === FriendRequestStatus.REJECTED) {
+      // Reject the friend request by deleting it
+      await prisma.friendRequest.delete({ where: { id } });
+      return res.status(200).json({
+        success: true,
+        message: 'Friend request rejected successfully',
+        data: null,
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { sendFriendRequest, updateFriendRequest };
