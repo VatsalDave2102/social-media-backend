@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
 import { AppError } from '../middlewares/errorHandler';
+import cloudinary from '../config/cloudinary';
 import prisma from '../config/db';
 
 const createGroupChat = async (req: Request, res: Response, next: NextFunction) => {
@@ -11,7 +12,11 @@ const createGroupChat = async (req: Request, res: Response, next: NextFunction) 
     if (!user) throw new AppError('User not found!', StatusCodes.NOT_FOUND);
 
     // Extract the ownerId, memberIds and name from the request body
-    const { ownerId, memberIds, name } = req.body;
+    const { ownerId, memberIds, name, groupDescription } = req.body;
+
+    // Extract file (groupIcon) from request
+    const groupIcon = req.file;
+    if (!groupIcon) throw new AppError('Group icon is required', StatusCodes.BAD_REQUEST);
 
     // Check if the ownerId and memberIds exist in the database
     const [owner, members] = await Promise.all([
@@ -19,18 +24,6 @@ const createGroupChat = async (req: Request, res: Response, next: NextFunction) 
       prisma.user.findMany({ where: { id: { in: memberIds } } }),
     ]);
     if (!owner || !members) throw new AppError('Admin or Member not found!', StatusCodes.NOT_FOUND);
-
-    // Check if the chat already exists
-    const existingChat = await prisma.groupChat.findFirst({
-      where: {
-        name,
-        ownerId,
-        memberIds: {
-          equals: [...memberIds, ownerId],
-        },
-      },
-    });
-    if (existingChat) throw new AppError('Group Chat already exists!', StatusCodes.CONFLICT);
 
     // Check if the members are friends of the owner
     const existingFriendship = await prisma.user.findFirst({
@@ -47,6 +40,13 @@ const createGroupChat = async (req: Request, res: Response, next: NextFunction) 
         StatusCodes.BAD_REQUEST,
       );
 
+    // Upload the group icon to Cloudinary
+    const uploadedGroupIcon = await cloudinary.uploader.upload(groupIcon.path, {
+      folder: 'group_icons',
+    });
+    if (!uploadedGroupIcon)
+      throw new AppError('Error uploading group icon', StatusCodes.INTERNAL_SERVER_ERROR);
+
     // Create a new group chat
     const newChat = await prisma.groupChat.create({
       data: {
@@ -57,6 +57,8 @@ const createGroupChat = async (req: Request, res: Response, next: NextFunction) 
         members: {
           connect: [{ id: ownerId }, ...memberIds.map((id: string) => ({ id }))],
         },
+        groupDescription,
+        groupIcon: uploadedGroupIcon.secure_url,
       },
     });
 
