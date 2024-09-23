@@ -115,6 +115,5 @@ export {
   generateAccessToken,
   generateRefreshToken,
   generateResetPasswordToken,
-  verifyResetPasswordToken
+  verifyResetPasswordToken,
 };
-
