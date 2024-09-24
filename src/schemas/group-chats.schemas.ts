@@ -25,3 +25,11 @@ export const createGroupChatSchema = groupChatSchema.pick({
   memberIds: true,
   groupDescription: true,
 });
+
+export const updateGroupChatSettingsSchema = groupChatSchema
+  .pick({
+    name: true,
+    groupDescription: true,
+  })
+  .partial()
+  .transform((data) => ({ settings: data }));
