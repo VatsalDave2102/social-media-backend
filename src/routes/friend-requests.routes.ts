@@ -1,6 +1,10 @@
 import express from 'express';
 
-import { sendFriendRequest, updateFriendRequest } from '../controllers/friend-requests.controllers';
+import {
+  cancelFriendRequest,
+  sendFriendRequest,
+  updateFriendRequest,
+} from '../controllers/friend-requests.controllers';
 import {
   sendFriendRequestSchema,
   updateFriendRequestSchema,
@@ -23,4 +27,7 @@ friendRequestsRouter.put(
   validateRequest(updateFriendRequestSchema),
   updateFriendRequest,
 );
+
+friendRequestsRouter.delete('/:id', verifyToken('accessToken'), cancelFriendRequest);
+
 export default friendRequestsRouter;

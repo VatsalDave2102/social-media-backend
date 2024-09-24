@@ -16,7 +16,7 @@ import prisma from '../config/db';
  */
 const sendFriendRequest = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Extracting sender and receiver IDs
+    // Extracting sender and receiver IDsad
     const { senderId, receiverId } = req.body;
 
     // Find both sender and receiver users
@@ -153,4 +153,55 @@ const updateFriendRequest = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
-export { sendFriendRequest, updateFriendRequest };
+/**
+ * Cancels a pending friend request sent by the current user.
+ *
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>}
+ * @throws {AppError} If friend request not found, already processed, or user is not the sender
+ */
+const cancelFriendRequest = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.user;
+
+    // Find the friend request
+    const friendRequest = await prisma.friendRequest.findUnique({
+      where: { id },
+    });
+
+    // Check if the friend request exists
+    if (!friendRequest) {
+      throw new AppError('Friend request not found', StatusCodes.NOT_FOUND);
+    }
+
+    // Ensure the current user is the sender of the friend request
+    if (friendRequest.senderId !== userId) {
+      throw new AppError('You are not the sender of this friend request', StatusCodes.FORBIDDEN);
+    }
+
+    // Check if the friend request is still pending
+    if (friendRequest.status !== 'PENDING') {
+      throw new AppError('Friend request has already been processed', StatusCodes.BAD_REQUEST);
+    }
+
+    // Delete the friend request
+    await prisma.friendRequest.delete({
+      where: { id },
+    });
+
+    // Send successful response
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Friend request cancelled successfully',
+      data: null,
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export { cancelFriendRequest, sendFriendRequest, updateFriendRequest };
