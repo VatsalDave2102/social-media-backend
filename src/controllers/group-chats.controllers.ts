@@ -5,6 +5,7 @@ import { AppError } from '../middlewares/errorHandler';
 import { GroupChatSettings } from '../types/group-chats.types';
 import cloudinary from '../config/cloudinary';
 import prisma from '../config/db';
+import { MESSAGES_BATCH } from '../utils/constants';
 
 const createGroupChat = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -173,4 +174,70 @@ const updateGroupChatSettings = async (req: Request, res: Response, next: NextFu
   }
 };
 
-export { createGroupChat, getGroupChatDetails, updateGroupChatSettings };
+const getGroupChatMessages = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract the user from the request
+    const { user } = req;
+
+    // Extract the chatId from the request params
+    const { chatId } = req.params;
+
+    // Extract the cursor from the query parameters
+    const cursor = req.query.cursor as string;
+
+    // Extract the searcch query from the query parameters
+    const search = req.query.search as string;
+
+    // Set the take value
+    const take = Number(req.query.take) || MESSAGES_BATCH;
+
+    // Check if the chat exists in the database
+    const existingChat = await prisma.groupChat.findUnique({
+      where: { id: chatId },
+    });
+    if (!existingChat) throw new AppError('Group chat not found!', StatusCodes.NOT_FOUND);
+
+    // Check if the user is either the owner or a member of the chat
+    if (
+      existingChat.ownerId !== user.userId &&
+      !existingChat.memberIds.some((memberId) => memberId === user.userId)
+    )
+      throw new AppError('You are not allowed to view this chat!', StatusCodes.FORBIDDEN);
+
+    // Get the chat messages
+    const chatMessages = await prisma.message.findMany({
+      where: {
+        ...(search && { content: { contains: search, mode: 'insensitive' } }),
+        groupChatId: chatId,
+      },
+      take: take + 1, // Fetch one extra to determine if there are more messages
+      skip: cursor ? 1 : undefined,
+      cursor: cursor ? { id: cursor } : undefined,
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const totalCount = await prisma.message.count({
+      where: {
+        ...(search && { content: { contains: search, mode: 'insensitive' } }),
+        groupChatId: chatId,
+      },
+    });
+    const hasNextPage = chatMessages.length > take;
+    const nextCursor = hasNextPage ? chatMessages[take - 1].id : null;
+
+    // Respond with success message and data
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Chat messages retrieved successfully!',
+      data: {
+        messages: chatMessages.slice(0, take),
+        pagination: { totalCount, hasNextPage, nextCursor },
+      },
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export { createGroupChat, getGroupChatDetails, updateGroupChatSettings, getGroupChatMessages };

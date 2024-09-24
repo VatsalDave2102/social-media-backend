@@ -3,6 +3,7 @@ import express from 'express';
 import {
   createGroupChat,
   getGroupChatDetails,
+  getGroupChatMessages,
   updateGroupChatSettings,
 } from '../controllers/group-chats.controllers';
 import {
@@ -32,5 +33,7 @@ groupChatRouter.patch(
   validateRequest(updateGroupChatSettingsSchema),
   updateGroupChatSettings,
 );
+
+groupChatRouter.get('/:chatId/messages', verifyToken('accessToken'), getGroupChatMessages);
 
 export default groupChatRouter;
