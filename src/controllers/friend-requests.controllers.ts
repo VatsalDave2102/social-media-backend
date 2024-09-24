@@ -16,7 +16,7 @@ import prisma from '../config/db';
  */
 const sendFriendRequest = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Extracting sender and receiver IDsad
+    // Extracting sender and receiver IDs
     const { senderId, receiverId } = req.body;
 
     // Find both sender and receiver users
