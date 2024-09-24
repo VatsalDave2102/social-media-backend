@@ -7,7 +7,7 @@ import {
   NODE_ENV,
   REFRESH_TOKEN_SECRET_KEY,
 } from '../utils/env-variables';
-import { JwtVerifyCallbackDecoded, JwtVerifyCallbackError, TokenType } from '../types/auth.types';
+import { JwtVerifyCallbackError, TokenType, isCustomJwtPayload } from '../types/auth.types';
 import { AppError } from './errorHandler';
 
 /**
@@ -36,17 +36,15 @@ const verifyToken = (tokenType: TokenType) => {
       }
 
       // Decode the token to get the payload
-      jwt.verify(
-        token,
-        SECRET_KEY,
-        (err: JwtVerifyCallbackError, decoded: JwtVerifyCallbackDecoded) => {
-          if (err) throw new AppError('Invalid token', StatusCodes.UNAUTHORIZED);
+      jwt.verify(token, SECRET_KEY, (err: JwtVerifyCallbackError, decoded: unknown) => {
+        if (err) throw new AppError('Invalid token', StatusCodes.UNAUTHORIZED);
 
+        // Verify if the decoded token matches with Custom JWT payload
+        if (isCustomJwtPayload(decoded)) {
           // Attach the decoded user information to the object
-          const decodedToken = decoded as CustomJwtPayload;
-          req.user = { userId: decodedToken.id, email: decodedToken.email };
-        },
-      );
+          req.user = { userId: decoded.id, email: decoded.email };
+        } else throw new AppError('Invalid token', StatusCodes.UNAUTHORIZED);
+      });
       return next();
     } catch (error) {
       // Pass any errors to the error handling middleware

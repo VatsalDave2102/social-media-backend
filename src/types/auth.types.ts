@@ -8,7 +8,8 @@ export type JwtUserPayload = {
 
 export type TokenType = 'accessToken' | 'refreshToken';
 
-// Types for the JWT verify callback function(declared based on the jwt.VerifyCallback type)
-export type JwtVerifyCallbackDecoded = jwt.Jwt | jwt.JwtPayload | string | undefined;
-
 export type JwtVerifyCallbackError = jwt.VerifyErrors | null;
+
+export const isCustomJwtPayload = (data: any): data is CustomJwtPayload => {
+  return 'id' in data && 'email' in data;
+};
