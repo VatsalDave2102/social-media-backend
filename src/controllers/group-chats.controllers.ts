@@ -240,4 +240,92 @@ const getGroupChatMessages = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export { createGroupChat, getGroupChatDetails, updateGroupChatSettings, getGroupChatMessages };
+const addMembersToGroupChat = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract the user from the request
+    const { user } = req;
+
+    // Extract the chatId from the request params
+    const { chatId } = req.params;
+
+    // Extract the ownerId and memberId from the request body
+    const { ownerId, memberIds } = req.body;
+
+    // Check if the chat exists in the database
+    const existingChat = await prisma.groupChat.findUnique({
+      where: { id: chatId },
+    });
+    if (!existingChat) throw new AppError('Group chat not found!', StatusCodes.NOT_FOUND);
+
+    // Check if the owner and members exist in the database
+    const existingUsers = await prisma.user.findMany({
+      where: { id: { in: [ownerId, ...memberIds] }, isDeleted: false },
+    });
+
+    // Owner is also a member of the chat
+    if (existingUsers.length !== memberIds.length + 1)
+      throw new AppError('One or more members not found!', StatusCodes.NOT_FOUND);
+
+    // Check if the owner has permission to add members to the chat
+    if (ownerId !== user.userId && ownerId !== existingChat.ownerId)
+      throw new AppError(
+        `You don't have permission to add members to this chat!`,
+        StatusCodes.FORBIDDEN,
+      );
+
+    // Filter out existing members
+    const existingUserIds = existingUsers.map((user) => user.id);
+    const existingMemberIds = existingChat.memberIds;
+    const newMemberIds = existingUserIds.filter((id) => !existingMemberIds.includes(id));
+
+    // Check if the members are friends of the owner
+    const existingFriendship = await prisma.user.findFirst({
+      where: {
+        id: ownerId,
+        AND: newMemberIds.map((memberId: string) => ({
+          OR: [{ friendIds: { has: memberId } }, { friendOfIds: { has: memberId } }],
+        })),
+      },
+    });
+    if (!existingFriendship)
+      throw new AppError(
+        `You can't add members who aren't your friends in groups!`,
+        StatusCodes.BAD_REQUEST,
+      );
+
+    // Add the members to the chat
+    await prisma.groupChat.update({
+      where: { id: chatId },
+      data: {
+        members: {
+          connect: newMemberIds.map((id: string) => ({ id })),
+        },
+      },
+    });
+
+    const responseMessage =
+      newMemberIds.length === 0
+        ? `No new members added, all members already exist`
+        : newMemberIds.length > 1
+          ? `${newMemberIds.length} Members added successfully!`
+          : `Member added successfully!`;
+
+    // Respond with success message and data
+    res.status(StatusCodes.CREATED).json({
+      success: true,
+      message: responseMessage,
+      data: null,
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export {
+  createGroupChat,
+  getGroupChatDetails,
+  updateGroupChatSettings,
+  getGroupChatMessages,
+  addMembersToGroupChat,
+};

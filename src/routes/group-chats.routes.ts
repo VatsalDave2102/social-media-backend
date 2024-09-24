@@ -1,6 +1,7 @@
 import express from 'express';
 
 import {
+  addMembersToGroupChat,
   createGroupChat,
   getGroupChatDetails,
   getGroupChatMessages,
@@ -35,5 +36,7 @@ groupChatRouter.patch(
 );
 
 groupChatRouter.get('/:chatId/messages', verifyToken('accessToken'), getGroupChatMessages);
+
+groupChatRouter.patch('/:chatId/add-members', verifyToken('accessToken'), addMembersToGroupChat);
 
 export default groupChatRouter;

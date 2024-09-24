@@ -33,3 +33,8 @@ export const updateGroupChatSettingsSchema = groupChatSchema
   })
   .partial()
   .transform((data) => ({ settings: data }));
+
+export const addMembersToGroupChatSchema = groupChatSchema.pick({
+  ownerId: true,
+  memberIds: true,
+});
