@@ -322,10 +322,80 @@ const addMembersToGroupChat = async (req: Request, res: Response, next: NextFunc
   }
 };
 
+const removeMemberFromGroupChat = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract the user from the request
+    const { user } = req;
+
+    // Extract the chatId from the request params
+    const { chatId } = req.params;
+
+    // Extract the ownerId and memberId from the request body
+    const { ownerId, memberId } = req.body;
+
+    // Check if the chat exists in the database
+    const existingChat = await prisma.groupChat.findUnique({
+      where: { id: chatId },
+    });
+    if (!existingChat) throw new AppError('Group chat not found!', StatusCodes.NOT_FOUND);
+
+    // Check if the member is not the owner
+    if (memberId === existingChat.ownerId)
+      throw new AppError('You cannot delete the owner of the chat!', StatusCodes.FORBIDDEN);
+    
+    // Check if the owner and member exist in the database
+    const existingUsers = await prisma.user.findMany({
+      where: { id: { in: [ownerId, memberId] }, isDeleted: false },
+    });
+    if (existingUsers.length !== 2)
+      throw new AppError('Admin or member not found!', StatusCodes.NOT_FOUND);
+
+    // Check if the owner has permission to delete members from the chat
+    if (ownerId !== user.userId && ownerId !== existingChat.ownerId)
+      throw new AppError(
+        `You don't have permission to delete members from this chat!`,
+        StatusCodes.FORBIDDEN,
+      );
+
+    // Check if the member is already not in the chat
+    const existingMembersInChat = await prisma.groupChat.findFirst({
+      where: {
+        id: chatId,
+        memberIds: {
+          has: memberId,
+        },
+      },
+    });
+    if (!existingMembersInChat)
+      throw new AppError('The member is not in the chat!', StatusCodes.CONFLICT);
+
+    // Delete the member from the chat
+    await prisma.groupChat.update({
+      where: { id: chatId },
+      data: {
+        members: {
+          disconnect: { id: memberId },
+        },
+      },
+    });
+
+    // Respond with success message and data
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Member deleted successfully!',
+      data: null,
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
 export {
   createGroupChat,
   getGroupChatDetails,
   updateGroupChatSettings,
   getGroupChatMessages,
   addMembersToGroupChat,
+  removeMemberFromGroupChat,
 };

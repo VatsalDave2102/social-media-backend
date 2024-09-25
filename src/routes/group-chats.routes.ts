@@ -5,10 +5,12 @@ import {
   createGroupChat,
   getGroupChatDetails,
   getGroupChatMessages,
+  removeMemberFromGroupChat,
   updateGroupChatSettings,
 } from '../controllers/group-chats.controllers';
 import {
   createGroupChatSchema,
+  removeMemberFromGroupChatSchema,
   updateGroupChatSettingsSchema,
 } from '../schemas/group-chats.schemas';
 import upload from '../middlewares/multer';
@@ -38,5 +40,12 @@ groupChatRouter.patch(
 groupChatRouter.get('/:chatId/messages', verifyToken('accessToken'), getGroupChatMessages);
 
 groupChatRouter.patch('/:chatId/add-members', verifyToken('accessToken'), addMembersToGroupChat);
+
+groupChatRouter.patch(
+  '/:chatId/remove-member',
+  verifyToken('accessToken'),
+  validateRequest(removeMemberFromGroupChatSchema),
+  removeMemberFromGroupChat,
+);
 
 export default groupChatRouter;

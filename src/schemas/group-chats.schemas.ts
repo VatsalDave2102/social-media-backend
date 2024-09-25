@@ -38,3 +38,11 @@ export const addMembersToGroupChatSchema = groupChatSchema.pick({
   ownerId: true,
   memberIds: true,
 });
+
+export const removeMemberFromGroupChatSchema = groupChatSchema
+  .pick({
+    ownerId: true,
+  })
+  .extend({
+    memberId: objectIdSchema,
+  });
