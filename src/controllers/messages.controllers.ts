@@ -91,4 +91,82 @@ const sendMessage = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export { sendMessage };
+/**
+ * Deletes a message from a chat (one-on-one or group).
+ *
+ * @async
+ * @function deleteMessage
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @throws {AppError} Throws an error if the message is not found, user is not authorized, or if the group chat doesn't exist
+ * @returns {Promise<void>}
+ *
+ * @description
+ * The function implements a soft delete approach, preserving the message structure but removing its content.
+ * In any chat, senders of the message can delete the message and for group chats, even the owner of the group chat can delete the message.
+ */
+const deleteMessage = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    let groupChatOwnerId;
+
+    // Extract the user from the request
+    const { user } = req;
+
+    // Extract the message id from the request params
+    const { messageId } = req.params;
+
+    // Check if the message exists in the database
+    const existingMessage = await prisma.message.findUnique({
+      where: { id: messageId, isDeleted: false },
+    });
+    if (!existingMessage) throw new AppError('Message not found!', StatusCodes.NOT_FOUND);
+
+    // Check if the message if from a group chat
+    if (existingMessage.groupChatId) {
+      const existingGroupChat = await prisma.groupChat.findUnique({
+        where: { id: existingMessage.groupChatId },
+      });
+      if (!existingGroupChat) throw new AppError('Group chat not found!', StatusCodes.NOT_FOUND);
+
+      groupChatOwnerId = existingGroupChat.ownerId;
+    }
+
+    if (existingMessage.oneOnOneChatId) {
+      const existingOneOnOneChat = await prisma.oneOnOneChat.findUnique({
+        where: { id: existingMessage.oneOnOneChatId },
+      });
+      if (!existingOneOnOneChat)
+        throw new AppError('One-On-One chat not found!', StatusCodes.NOT_FOUND);
+    }
+
+    // Check if the user is the sender of the message or the owner of group chat
+    if (
+      existingMessage.senderId !== user.userId &&
+      (!groupChatOwnerId || groupChatOwnerId !== user.userId)
+    ) {
+      throw new AppError('You are not allowed to delete this message!', StatusCodes.FORBIDDEN);
+    }
+
+    // Soft delete the message
+    await prisma.message.update({
+      where: { id: messageId },
+      data: {
+        content: '',
+        isDeleted: true,
+      },
+    });
+
+    // Respond with success message
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Message deleted successfully!',
+      data: null,
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
+export { sendMessage, deleteMessage };

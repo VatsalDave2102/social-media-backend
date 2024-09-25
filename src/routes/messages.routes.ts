@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { sendMessage } from '../controllers/messages.controllers';
+import { deleteMessage, sendMessage } from '../controllers/messages.controllers';
 import { sendMessageSchema } from '../schemas/messages.schemas';
 import validateRequest from '../middlewares/validateRequest';
 import verifyToken from '../middlewares/verifyToken';
@@ -13,5 +13,7 @@ messagesRouter.post(
   verifyToken('accessToken'),
   sendMessage,
 );
+
+messagesRouter.patch('/delete/:messageId', verifyToken('accessToken'), deleteMessage);
 
 export default messagesRouter;
