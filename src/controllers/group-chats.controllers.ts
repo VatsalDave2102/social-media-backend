@@ -3,15 +3,25 @@ import { StatusCodes } from 'http-status-codes';
 
 import { AppError } from '../middlewares/errorHandler';
 import { GroupChatSettings } from '../types/group-chats.types';
+import { MESSAGES_BATCH } from '../utils/constants';
 import cloudinary from '../config/cloudinary';
 import prisma from '../config/db';
-import { MESSAGES_BATCH } from '../utils/constants';
 
+/**
+ * Creates a new group chat with specified members, name, description, and icon.
+ *
+ * @async
+ * @function createGroupChat
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @throws {AppError} - Throws an error if user lacks permission, members aren't friends with owner or creation process encounters issues
+ * @returns {Promise<void>}
+ */
 const createGroupChat = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Extract the user from the request
     const { user } = req;
-    if (!user) throw new AppError('User not found!', StatusCodes.NOT_FOUND);
 
     // Extract the ownerId, memberIds and name from the request body
     const { ownerId, memberIds, name, groupDescription } = req.body;
@@ -22,10 +32,17 @@ const createGroupChat = async (req: Request, res: Response, next: NextFunction) 
 
     // Check if the ownerId and memberIds exist in the database
     const [owner, members] = await Promise.all([
-      prisma.user.findUnique({ where: { id: ownerId } }),
-      prisma.user.findMany({ where: { id: { in: memberIds } } }),
+      prisma.user.findUnique({ where: { id: ownerId, isDeleted: false } }),
+      prisma.user.findMany({ where: { id: { in: memberIds }, isDeleted: false } }),
     ]);
     if (!owner || !members) throw new AppError('Admin or Member not found!', StatusCodes.NOT_FOUND);
+
+    // Check if the user is the owner of the chat
+    if (user.userId !== ownerId)
+      throw new AppError(
+        `You don't have permission to create a group chat!`,
+        StatusCodes.FORBIDDEN,
+      );
 
     // Check if the members are friends of the owner
     const existingFriendship = await prisma.user.findFirst({
@@ -76,11 +93,21 @@ const createGroupChat = async (req: Request, res: Response, next: NextFunction) 
   }
 };
 
+/**
+ * Retrieves details of a specific group chat.
+ *
+ * @async
+ * @function getGroupChatDetails
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @throws {AppError} - Throws an error if the chat doesn't exist or user lacks permission
+ * @returns {Promise<void>}
+ */
 const getGroupChatDetails = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Extract the user from the request
     const { user } = req;
-    if (!user) throw new AppError('User not found!', StatusCodes.NOT_FOUND);
 
     // Extract the chatId from the request params
     const { chatId } = req.params;
@@ -110,13 +137,23 @@ const getGroupChatDetails = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
+/**
+ * Updates the settings of a group chat.
+ *
+ * @async
+ * @function updateGroupChatSettings
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @throws {AppError} - Throws an error if the chat doesn't exist, user lacks permission or update process fails
+ * @returns {Promise<void>}
+ */
 const updateGroupChatSettings = async (req: Request, res: Response, next: NextFunction) => {
   try {
     let uploadedUpdatedGroupIcon, updatedSettings: GroupChatSettings;
 
     // Extract the user from the request
     const { user } = req;
-    if (!user) throw new AppError('User not found!', StatusCodes.NOT_FOUND);
 
     // Extract the chatId from the request params
     const { chatId } = req.params;
@@ -174,6 +211,17 @@ const updateGroupChatSettings = async (req: Request, res: Response, next: NextFu
   }
 };
 
+/**
+ * Retrieves messages from a group chat with pagination and search functionality.
+ *
+ * @async
+ * @function getGroupChatMessages
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @throws {AppError} - Throws an error if chat doesn't exist or user lacks permission
+ * @returns {Promise<void>}
+ */
 const getGroupChatMessages = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Extract the user from the request
@@ -240,6 +288,17 @@ const getGroupChatMessages = async (req: Request, res: Response, next: NextFunct
   }
 };
 
+/**
+ * Adds new members to an existing group chat.
+ *
+ * @async
+ * @function addMembersToGroupChat
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @throws {AppError} - Throws an error if chat doesn't exist, members not found, user lacks permission or members aren't friends with the owner
+ * @returns {Promise<void>}
+ */
 const addMembersToGroupChat = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Extract the user from the request
@@ -322,6 +381,17 @@ const addMembersToGroupChat = async (req: Request, res: Response, next: NextFunc
   }
 };
 
+/**
+ * Removes a member from an existing group chat.
+ *
+ * @async
+ * @function removeMemberFromGroupChat
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @throws {AppError} - Throws an error if chat doesn't exist, member not found, user lacks permission or member is the owner
+ * @returns {Promise<void>}
+ */
 const removeMemberFromGroupChat = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Extract the user from the request
@@ -342,7 +412,7 @@ const removeMemberFromGroupChat = async (req: Request, res: Response, next: Next
     // Check if the member is not the owner
     if (memberId === existingChat.ownerId)
       throw new AppError('You cannot delete the owner of the chat!', StatusCodes.FORBIDDEN);
-    
+
     // Check if the owner and member exist in the database
     const existingUsers = await prisma.user.findMany({
       where: { id: { in: [ownerId, memberId] }, isDeleted: false },

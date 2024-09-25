@@ -9,6 +9,7 @@ import {
   updateGroupChatSettings,
 } from '../controllers/group-chats.controllers';
 import {
+  addMembersToGroupChatSchema,
   createGroupChatSchema,
   removeMemberFromGroupChatSchema,
   updateGroupChatSettingsSchema,
@@ -39,7 +40,12 @@ groupChatRouter.patch(
 
 groupChatRouter.get('/:chatId/messages', verifyToken('accessToken'), getGroupChatMessages);
 
-groupChatRouter.patch('/:chatId/add-members', verifyToken('accessToken'), addMembersToGroupChat);
+groupChatRouter.patch(
+  '/:chatId/add-members',
+  verifyToken('accessToken'),
+  validateRequest(addMembersToGroupChatSchema),
+  addMembersToGroupChat,
+);
 
 groupChatRouter.patch(
   '/:chatId/remove-member',
