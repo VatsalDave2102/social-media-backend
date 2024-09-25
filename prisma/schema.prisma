@@ -98,6 +98,7 @@ model Message {
   groupChatId    String?  @db.ObjectId
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  isDeleted      Boolean  @default(false)
 
   sender       User          @relation("SentMessages", fields: [senderId], references: [id])
   oneOnOneChat OneOnOneChat? @relation(fields: [oneOnOneChatId], references: [id])
