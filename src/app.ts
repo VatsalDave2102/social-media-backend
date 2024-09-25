@@ -7,6 +7,7 @@ import rateLimit from 'express-rate-limit';
 import authRouter from './routes/auth.routes';
 import { errorConverter } from './middlewares/errorConverter';
 import { errorHandler } from './middlewares/errorHandler';
+import groupChatRouter from './routes/group-chats.routes';
 import logger from './utils/logger';
 
 const app = express();
@@ -33,6 +34,9 @@ app.get('/', (req, res) => {
 
 // Auth Routes
 app.use('/api/v1/auth', authRouter);
+
+// Group Chat Routes
+app.use('/api/v1/chats/group', groupChatRouter);
 
 app.use(errorConverter);
 app.use(errorHandler);
