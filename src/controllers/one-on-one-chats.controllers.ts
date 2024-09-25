@@ -21,7 +21,6 @@ const createOneOnOneChat = async (req: Request, res: Response, next: NextFunctio
   try {
     // Extract the user from the request
     const { user } = req;
-    if (!user) throw new AppError('User not found!', StatusCodes.NOT_FOUND);
 
     // Extract the initiator and participant ids from the request body
     const { initiatorId, participantId } = req.body;
@@ -102,7 +101,6 @@ const getOneOnOneChatDetails = async (req: Request, res: Response, next: NextFun
   try {
     // Extract the user from the request
     const { user } = req;
-    if (!user) throw new AppError('User not found!', StatusCodes.NOT_FOUND);
 
     // Extract the chat id from the url
     const { chatId } = req.params;
@@ -143,7 +141,6 @@ const updateOneOnOneChatSettings = async (req: Request, res: Response, next: Nex
   try {
     // Extract the user from the request
     const { user } = req;
-    if (!user) throw new AppError('User not found!', StatusCodes.NOT_FOUND);
 
     // Extract the chat id from the url
     const { chatId } = req.params;
@@ -190,7 +187,7 @@ const updateOneOnOneChatSettings = async (req: Request, res: Response, next: Nex
 };
 
 /**
- * Retrieves messages for a one-on-one chat.
+ * Retrieves messages for a one-on-one chat with pagination support and search functionality.
  *
  * @param req - Express Request object
  * @param res - Express Response object
@@ -202,14 +199,16 @@ const getOneOnOneChatMessages = async (req: Request, res: Response, next: NextFu
   try {
     // Extract the user from the request
     const { user } = req;
-    if (!user) throw new AppError('User not found!', StatusCodes.NOT_FOUND);
 
     // Extract the chat id from the url
     const { chatId } = req.params;
     if (!chatId) throw new AppError('Chat ID is missing!', StatusCodes.NOT_FOUND);
 
     // Extract the cursor from the query parameters
-    const { cursor } = req.query;
+    const cursor = req.query.cursor as string;
+
+    // Extract the search query from the query parameters
+    const search = req.query.search as string;
 
     // Set the take value
     const take = Number(req.query.take) || MESSAGES_BATCH;
@@ -229,15 +228,23 @@ const getOneOnOneChatMessages = async (req: Request, res: Response, next: NextFu
 
     // Get the chat messages
     const chatMessages = await prisma.message.findMany({
-      where: { oneOnOneChatId: chatId },
+      where: {
+        ...(search && { content: { contains: search, mode: 'insensitive' } }),
+        oneOnOneChatId: chatId,
+      },
       take: take + 1, // Fetch one extra to determine if there are more messages
       skip: cursor ? 1 : undefined,
-      cursor: cursor ? { id: cursor as string } : undefined,
+      cursor: cursor ? { id: cursor } : undefined,
       orderBy: { createdAt: 'desc' },
     });
 
     // Determine if there are more messages and get the next cursor
-    const totalCount = await prisma.message.count({ where: { oneOnOneChatId: chatId } });
+    const totalCount = await prisma.message.count({
+      where: {
+        ...(search && { content: { contains: search, mode: 'insensitive' } }),
+        oneOnOneChatId: chatId,
+      },
+    });
     const hasNextPage = chatMessages.length > take;
     const nextCursor = hasNextPage ? chatMessages[take - 1].id : null;
 
