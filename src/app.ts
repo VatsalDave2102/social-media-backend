@@ -8,6 +8,7 @@ import authRouter from './routes/auth.routes';
 import { errorConverter } from './middlewares/errorConverter';
 import { errorHandler } from './middlewares/errorHandler';
 import logger from './utils/logger';
+import messagesRouter from './routes/messages.routes';
 
 const app = express();
 
@@ -33,6 +34,9 @@ app.get('/', (req, res) => {
 
 // Auth Routes
 app.use('/api/v1/auth', authRouter);
+
+// Message Routes 
+app.use('/api/v1/messages', messagesRouter);
 
 app.use(errorConverter);
 app.use(errorHandler);
