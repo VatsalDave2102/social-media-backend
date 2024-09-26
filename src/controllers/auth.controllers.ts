@@ -61,11 +61,11 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
 
     // Create a payload for the access token and refresh token
     const userPayload = { id: newUser.id, email: newUser.email };
-    const { access_token, expires_in } = generateAccessToken(userPayload);
-    const { refresh_token, refreshTokenExpiryDuration } = generateRefreshToken(userPayload);
+    const { accessToken, expiresIn } = generateAccessToken(userPayload);
+    const { refreshToken, refreshTokenExpiryDuration } = generateRefreshToken(userPayload);
 
     // Set the refresh token as an HTTP-only cookie
-    res.cookie('refresh_token', refresh_token, {
+    res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: NODE_ENV === 'production', // Use secure cookies in production
       sameSite: 'strict',
@@ -76,7 +76,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
     res.status(StatusCodes.CREATED).json({
       success: true,
       message: 'Registration successful!',
-      data: { user: newUser, access_token, expires_in },
+      data: { user: newUser, accessToken, expiresIn },
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -97,7 +97,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
 
     // Check if the user exists in the database
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findUnique({ where: { email, isDeleted: false } });
     if (!existingUser) throw new AppError('User does not exist!', StatusCodes.BAD_REQUEST);
 
     // Check if the password is correct
@@ -106,11 +106,11 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 
     // Create a payload for the access token and refresh token
     const userPayload = { id: existingUser.id, email: existingUser.email };
-    const { access_token, expires_in } = generateAccessToken(userPayload);
-    const { refresh_token, refreshTokenExpiryDuration } = generateRefreshToken(userPayload);
+    const { accessToken, expiresIn } = generateAccessToken(userPayload);
+    const { refreshToken, refreshTokenExpiryDuration } = generateRefreshToken(userPayload);
 
     // Set the refresh token as an HTTP-only cookie
-    res.cookie('refresh_token', refresh_token, {
+    res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: NODE_ENV === 'production', // Use secure cookies in production
       sameSite: 'strict',
@@ -121,7 +121,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Login successful!',
-      data: { user: existingUser, access_token, expires_in },
+      data: { user: existingUser, accessToken, expiresIn },
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -139,7 +139,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
 const logout = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Delete the refresh token cookie
-    res.clearCookie('refresh_token');
+    res.clearCookie('refreshToken');
 
     // Respond with success message
     res.status(StatusCodes.OK).json({
@@ -167,13 +167,13 @@ const refreshToken = async (req: Request, res: Response, next: NextFunction) => 
 
     // Create a payload for the access token
     const userPayload = { id: userId, email: email };
-    const { access_token, expires_in } = generateAccessToken(userPayload);
+    const { accessToken, expiresIn } = generateAccessToken(userPayload);
 
     // Respond with success message and data
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Access token refreshed successfully!',
-      data: { access_token, expires_in },
+      data: { accessToken, expiresIn },
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -194,15 +194,15 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
     const { email } = req.body;
 
     // Check if the user exists in the database
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findUnique({ where: { email, isDeleted: false } });
     if (!existingUser) throw new AppError('User does not exist!', StatusCodes.BAD_REQUEST);
 
     // Create a payload for the reset password token
     const userPayload = { id: existingUser.id, email: existingUser.email };
-    const { reset_password_token } = generateResetPasswordToken(userPayload);
+    const { resetPasswordToken } = generateResetPasswordToken(userPayload);
 
     // Create a reset password URL with the reset password token
-    const resetPasswordUrl = `${FRONTEND_URL}/reset-password?token=${reset_password_token}`;
+    const resetPasswordUrl = `${FRONTEND_URL}/reset-password?token=${resetPasswordToken}`;
 
     // Construct the email Subject and Body
     const emailSubject = 'Reset your password';
@@ -252,7 +252,7 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
     const { id, email } = decodedToken;
 
     // Check if the user exists in the database
-    const existingUser = await prisma.user.findUnique({ where: { id, email } });
+    const existingUser = await prisma.user.findUnique({ where: { id, email, isDeleted: false } });
     if (!existingUser) throw new AppError('User does not exist!', StatusCodes.BAD_REQUEST);
 
     // Hash the user's new password
