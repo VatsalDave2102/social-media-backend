@@ -54,6 +54,15 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
         bio,
         profilePicture: uploadedProfilePicture.secure_url,
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        bio: true,
+        profilePicture: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
     // If the user was not created, throw an error
@@ -76,7 +85,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
     res.status(StatusCodes.CREATED).json({
       success: true,
       message: 'Registration successful!',
-      data: { user: newUser, accessToken, expiresIn },
+      data: { ...newUser, accessToken, expiresIn },
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -97,7 +106,20 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
 
     // Check if the user exists in the database
-    const existingUser = await prisma.user.findUnique({ where: { email, isDeleted: false } });
+    const existingUser = await prisma.user.findUnique({
+      where: { email, isDeleted: false },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        bio: true,
+        profilePicture: true,
+        createdAt: true,
+        updatedAt: true,
+        password: true,
+      },
+    });
+
     if (!existingUser) throw new AppError('User does not exist!', StatusCodes.BAD_REQUEST);
 
     // Check if the password is correct
@@ -117,11 +139,14 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       maxAge: refreshTokenExpiryDuration,
     });
 
+    // Exclude the password from the user object
+    const { password: _, ...userWithoutPassword } = existingUser;
+
     // Respond with success message and data
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Login successful!',
-      data: { user: existingUser, accessToken, expiresIn },
+      data: { ...userWithoutPassword, accessToken, expiresIn },
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
