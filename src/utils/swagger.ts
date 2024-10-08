@@ -1,7 +1,11 @@
+import dotenv from 'dotenv';
+import path from 'path';
 import swaggerAutogen from 'swagger-autogen';
 
-import { NODE_ENV } from './env-variables';
+import { BACKEND_SERVER_URL, NODE_ENV } from './env-variables';
 import { version } from '../../package.json';
+
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const doc = {
   info: {
@@ -9,7 +13,7 @@ const doc = {
     title: 'Social Media App',
     description: 'A social media app built with Node.js, Express, MongoDB, and TypeScript',
   },
-  host: NODE_ENV === 'production' ? 'social-media-backend-j5dj.onrender.com' : 'localhost:3000',
+  host: NODE_ENV === 'production' ? BACKEND_SERVER_URL : 'localhost:3000',
   basePath: '',
   schemes: NODE_ENV === 'production' ? ['https'] : ['http'],
   consumes: ['application/json', 'multipart/form-data'],
@@ -309,9 +313,15 @@ const doc = {
       bearerAuth: [],
     },
   ],
+  servers: [
+    {
+      url: BACKEND_SERVER_URL,
+      description: NODE_ENV === 'production' ? 'Render server' : 'Local server',
+    },
+  ],
 };
 
-const outputFile = '../../swagger-output.json';
+const outputFile = './../../src/swagger-output.json';
 const routes = ['../../src/app.ts'];
 
 swaggerAutogen({ openapi: '3.0.0' })(outputFile, routes, doc);
