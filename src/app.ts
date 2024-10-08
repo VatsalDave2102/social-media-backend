@@ -3,11 +3,13 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import swaggerUI from 'swagger-ui-express';
 
 import authRouter from './routes/auth.routes';
 import { errorConverter } from './middlewares/errorConverter';
 import { errorHandler } from './middlewares/errorHandler';
 import logger from './utils/logger';
+import swaggerDocument from '../swagger-output.json';
 import userRouter from './routes/users.routes';
 
 const app = express();
@@ -31,6 +33,9 @@ app.get('/', (req, res) => {
   logger.info('Home route accessed');
   res.json({ message: 'Welcome to the API' });
 });
+
+// Swagger
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
 // Auth Routes
 app.use('/api/v1/auth', authRouter);
