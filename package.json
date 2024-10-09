@@ -4,7 +4,7 @@
   "description": "Backend for Social media app",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/server.js",
+    "start": "npm run swagger && node dist/server.js",
     "dev": "npm run swagger && nodemon src/server.ts",
     "build": "tsc",
     "lint": "eslint .",
@@ -12,8 +12,7 @@
     "release": "semantic-release",
     "seed": "node dist/utils/seed.js",
     "prepare": "if [ \"$NODE_ENV\" != \"production\" ]; then husky install; fi",
-    "swagger": "if [ \"$NODE_ENV\" = \"production\" ]; then node dist/utils/swagger.js; else ts-node src/utils/swagger.ts; fi",
-    "prebuild": "npm run swagger"
+    "swagger": "if [ \"$NODE_ENV\" = \"production\" ]; then node dist/utils/swagger.js; else ts-node src/utils/swagger.ts; fi"
   },
   "repository": {
     "type": "git",
