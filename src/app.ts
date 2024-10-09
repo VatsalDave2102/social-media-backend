@@ -9,7 +9,7 @@ import authRouter from './routes/auth.routes';
 import { errorConverter } from './middlewares/errorConverter';
 import { errorHandler } from './middlewares/errorHandler';
 import logger from './utils/logger';
-import swaggerDocument from '../src/swagger-output.json';
+import swaggerDocument from '../swagger-output.json';
 import userRouter from './routes/users.routes';
 
 const app = express();

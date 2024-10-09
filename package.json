@@ -4,7 +4,7 @@
   "description": "Backend for Social media app",
   "main": "index.js",
   "scripts": {
-    "start": "npm run swagger && node dist/server.js",
+    "start": "node dist/server.js",
     "dev": "npm run swagger && nodemon src/server.ts",
     "build": "tsc",
     "lint": "eslint .",
@@ -12,7 +12,8 @@
     "release": "semantic-release",
     "seed": "ts-node src/utils/seed.ts",
     "prepare": "husky",
-    "swagger": "ts-node src/utils/swagger.ts"
+    "swagger": "ts-node src/utils/swagger.ts",
+    "prebuild": "npm run swagger"
   },
   "repository": {
     "type": "git",

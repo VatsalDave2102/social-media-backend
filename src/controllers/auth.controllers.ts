@@ -140,6 +140,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     });
 
     // Exclude the password from the user object
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...userWithoutPassword } = existingUser;
 
     // Respond with success message and data

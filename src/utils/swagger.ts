@@ -1,11 +1,10 @@
 import dotenv from 'dotenv';
-import path from 'path';
+dotenv.config();
+
 import swaggerAutogen from 'swagger-autogen';
 
 import { BACKEND_SERVER_URL, NODE_ENV } from './env-variables';
 import { version } from '../../package.json';
-
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const doc = {
   info: {
@@ -321,7 +320,7 @@ const doc = {
   ],
 };
 
-const outputFile = './../../src/swagger-output.json';
+const outputFile = '../../swagger-output.json';
 const routes = ['../../src/app.ts'];
 
 swaggerAutogen({ openapi: '3.0.0' })(outputFile, routes, doc);
