@@ -10,9 +10,9 @@
     "lint": "eslint .",
     "format": "prettier --write 'src/**/*.ts'",
     "release": "semantic-release",
-    "seed": "ts-node src/utils/seed.ts",
-    "prepare": "husky",
-    "swagger": "ts-node src/utils/swagger.ts",
+    "seed": "node dist/utils/seed.js",
+    "prepare": "if [ \"$NODE_ENV\" != \"production\" ]; then husky install; fi",
+    "swagger": "if [ \"$NODE_ENV\" = \"production\" ]; then node dist/utils/swagger.js; else ts-node src/utils/swagger.ts; fi",
     "prebuild": "npm run swagger"
   },
   "repository": {
