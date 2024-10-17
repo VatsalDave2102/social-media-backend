@@ -14,6 +14,8 @@ import userRouter from './routes/users.routes';
 
 const app = express();
 
+app.set('trust proxy', 1 /* number of proxies between user and server */);
+
 // Middleware
 app.use(cors());
 app.use(helmet());
@@ -33,6 +35,8 @@ app.get('/', (req, res) => {
   logger.info('Home route accessed');
   res.json({ message: 'Welcome to the API' });
 });
+
+app.get('/ip', (request, response) => response.send(request.ip));
 
 // Swagger
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
