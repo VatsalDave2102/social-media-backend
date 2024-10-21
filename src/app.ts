@@ -3,14 +3,19 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import swaggerUI from 'swagger-ui-express';
 
 import authRouter from './routes/auth.routes';
 import { errorConverter } from './middlewares/errorConverter';
 import { errorHandler } from './middlewares/errorHandler';
 import friendRequestsRouter from './routes/friend-requests.routes';
 import logger from './utils/logger';
+import swaggerDocument from '../swagger-output.json';
+import userRouter from './routes/users.routes';
 
 const app = express();
+
+app.set('trust proxy', 1 /* number of proxies between user and server */);
 
 // Middleware
 app.use(cors());
@@ -32,8 +37,16 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to the API' });
 });
 
+app.get('/ip', (request, response) => response.send(request.ip));
+
+// Swagger
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
+
 // Auth Routes
 app.use('/api/v1/auth', authRouter);
+
+// User Routes
+app.use('/api/v1/users', userRouter);
 
 // Friend Requests Routes
 app.use('/api/v1/friend-requests', friendRequestsRouter);
