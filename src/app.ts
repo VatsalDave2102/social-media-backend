@@ -10,6 +10,7 @@ import { errorConverter } from './middlewares/errorConverter';
 import { errorHandler } from './middlewares/errorHandler';
 import friendRequestsRouter from './routes/friend-requests.routes';
 import logger from './utils/logger';
+import oneOnOneChatRouter from './routes/one-on-one-chats.routes';
 import swaggerDocument from '../swagger-output.json';
 import userRouter from './routes/users.routes';
 
@@ -50,6 +51,9 @@ app.use('/api/v1/users', userRouter);
 
 // Friend Requests Routes
 app.use('/api/v1/friend-requests', friendRequestsRouter);
+
+// One on one chat routes 
+app.use('/api/v1/chats/one-on-one', oneOnOneChatRouter);
 
 app.use(errorConverter);
 app.use(errorHandler);
