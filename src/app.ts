@@ -11,6 +11,7 @@ import { errorHandler } from './middlewares/errorHandler';
 import friendRequestsRouter from './routes/friend-requests.routes';
 import groupChatRouter from './routes/group-chats.routes';
 import logger from './utils/logger';
+import messagesRouter from './routes/messages.routes';
 import oneOnOneChatRouter from './routes/one-on-one-chats.routes';
 import swaggerDocument from '../swagger-output.json';
 import userRouter from './routes/users.routes';
@@ -58,6 +59,9 @@ app.use('/api/v1/chats/one-on-one', oneOnOneChatRouter);
 
 // Group Chat Routes
 app.use('/api/v1/chats/group', groupChatRouter);
+
+// Message Routes 
+app.use('/api/v1/messages', messagesRouter);
 
 app.use(errorConverter);
 app.use(errorHandler);
