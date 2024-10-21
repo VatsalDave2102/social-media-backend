@@ -162,8 +162,13 @@ const doc = {
             description: "User's email address",
             example: '',
           },
+          redirectUrl: {
+            type: 'url',
+            description: 'Redirect URL for password reset',
+            example: '',
+          },
         },
-        required: ['email'],
+        required: ['email', 'redirectUrl'],
       },
       ForgotPasswordResponse: {
         type: 'object',
@@ -182,8 +187,14 @@ const doc = {
             description: "User's new password",
             example: '',
           },
+          confirmPassword: {
+            type: 'string',
+            format: 'password',
+            description: 'Confirm new password',
+            example: '',
+          },
         },
-        required: ['password'],
+        required: ['password', 'confirmPassword'],
       },
       ResetPasswordResponse: {
         type: 'object',
