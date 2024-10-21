@@ -16,6 +16,8 @@ const FRONTEND_URL = process.env.FRONTEND_URL;
 const EMAIL_USERNAME = process.env.EMAIL_USERNAME;
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
 
+const BACKEND_SERVER_URL = process.env.BACKEND_SERVER_URL;
+
 export {
   DATABASEURL,
   PORT,
@@ -29,4 +31,5 @@ export {
   FRONTEND_URL,
   EMAIL_USERNAME,
   EMAIL_PASSWORD,
+  BACKEND_SERVER_URL,
 };

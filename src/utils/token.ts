@@ -27,13 +27,13 @@ const generateAccessToken = (user: JwtUserPayload) => {
     throw new AppError(errorMessage, StatusCodes.INTERNAL_SERVER_ERROR);
   }
 
-  const access_token = jwt.sign(
+  const accessToken = jwt.sign(
     user,
     accessTokenSecretKey,
     { expiresIn: accessTokenExpiryDuration }, // Access token expires in 1 hour
   );
 
-  return { access_token, expires_in: accessTokenExpiryDuration };
+  return { accessToken, expiresIn: accessTokenExpiryDuration };
 };
 
 /**
@@ -53,13 +53,13 @@ const generateRefreshToken = (user: JwtUserPayload) => {
     throw new AppError(errorMessage, StatusCodes.INTERNAL_SERVER_ERROR);
   }
 
-  const refresh_token = jwt.sign(
+  const refreshToken = jwt.sign(
     user,
     refreshTokenSecretKey,
     { expiresIn: refreshTokenExpiryDuration }, // Refresh token expires in 7 days
   );
 
-  return { refresh_token, refreshTokenExpiryDuration };
+  return { refreshToken, refreshTokenExpiryDuration };
 };
 
 /**
@@ -79,13 +79,13 @@ const generateResetPasswordToken = (user: JwtUserPayload) => {
     throw new AppError(errorMessage, StatusCodes.INTERNAL_SERVER_ERROR);
   }
 
-  const reset_password_token = jwt.sign(
+  const resetPasswordToken = jwt.sign(
     user,
     resetPasswordSecretKey,
     { expiresIn: resetPasswordExpiryDuration }, // Reset password token expires in 15 minutes
   );
 
-  return { reset_password_token };
+  return { resetPasswordToken };
 };
 
 const verifyResetPasswordToken = (token: string) => {
@@ -115,6 +115,5 @@ export {
   generateAccessToken,
   generateRefreshToken,
   generateResetPasswordToken,
-  verifyResetPasswordToken
+  verifyResetPasswordToken,
 };
-

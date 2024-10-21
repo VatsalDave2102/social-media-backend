@@ -4,13 +4,15 @@
   "description": "Backend for Social media app",
   "main": "index.js",
   "scripts": {
-    "start": "node dist/server.js",
-    "dev": "nodemon src/server.ts",
+    "start": "npm run swagger && node dist/server.js",
+    "dev": "npm run swagger && nodemon src/server.ts",
     "build": "tsc",
     "lint": "eslint .",
     "format": "prettier --write 'src/**/*.ts'",
     "release": "semantic-release",
-    "seed": "ts-node src/utils/seed.ts"
+    "seed": "node dist/utils/seed.js",
+    "prepare": "if [ \"$NODE_ENV\" != \"production\" ]; then husky install; fi",
+    "swagger": "if [ \"$NODE_ENV\" = \"production\" ]; then node dist/utils/swagger.js; else ts-node src/utils/swagger.ts; fi"
   },
   "repository": {
     "type": "git",
@@ -54,6 +56,7 @@
     "@types/multer": "^1.4.11",
     "@types/node": "^20.14.12",
     "@types/nodemailer": "^6.4.15",
+    "@types/swagger-ui-express": "^4.1.6",
     "@typescript-eslint/eslint-plugin": "^7.17.0",
     "@typescript-eslint/parser": "^7.17.0",
     "eslint": "^8.57.0",
@@ -61,12 +64,14 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "globals": "^15.8.0",
-    "husky": "^8.0.0",
+    "husky": "^9.1.6",
     "lint-staged": "^15.2.7",
     "nodemon": "^3.1.4",
     "prettier": "^3.3.3",
     "prisma": "^5.17.0",
     "semantic-release": "^24.0.0",
+    "swagger-autogen": "^2.23.7",
+    "swagger-ui-express": "^5.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4",
     "typescript-eslint": "^7.17.0"
