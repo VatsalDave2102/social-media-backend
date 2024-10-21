@@ -7,6 +7,7 @@ import {
   NODE_ENV,
   REFRESH_TOKEN_SECRET_KEY,
 } from '../utils/env-variables';
+import { JwtVerifyCallbackError, TokenType, isCustomJwtPayload } from '../types/auth.types';
 import { AppError } from './errorHandler';
 
 /**
@@ -14,16 +15,16 @@ import { AppError } from './errorHandler';
  * @param {string} tokenType - Type of token to verify ('accessToken' or 'refreshToken')
  * @returns {Function} Express middleware function
  */
-const verifyToken = (tokenType: string) => {
+const verifyToken = (tokenType: TokenType) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    // Extract the token from the request headers/cookies
-    const token =
-      tokenType === 'accessToken'
-        ? req.headers.authorization?.split(' ')[1]
-        : req.cookies.refresh_token;
-    if (!token) throw new AppError('Token is missing', StatusCodes.UNAUTHORIZED);
-
     try {
+      // Extract the token from the request headers/cookies
+      const token =
+        tokenType === 'accessToken'
+          ? req.headers.authorization?.split(' ')[1]
+          : req.cookies.refreshToken;
+      if (!token) throw new AppError('Token is missing', StatusCodes.UNAUTHORIZED);
+
       // Verify the token using the secret key
       const SECRET_KEY =
         tokenType === 'accessToken' ? ACCESS_TOKEN_SECRET_KEY : REFRESH_TOKEN_SECRET_KEY;
@@ -35,11 +36,15 @@ const verifyToken = (tokenType: string) => {
       }
 
       // Decode the token to get the payload
-      const decodedToken = jwt.verify(token, SECRET_KEY) as CustomJwtPayload;
-      if (!decodedToken) throw new AppError('Invalid token', StatusCodes.UNAUTHORIZED);
+      jwt.verify(token, SECRET_KEY, (err: JwtVerifyCallbackError, decoded: unknown) => {
+        if (err) throw new AppError('Invalid token', StatusCodes.UNAUTHORIZED);
 
-      // Attach the decoded user information to the request object
-      req.user = { userId: decodedToken.id, email: decodedToken.email };
+        // Verify if the decoded token matches with Custom JWT payload
+        if (isCustomJwtPayload(decoded)) {
+          // Attach the decoded user information to the object
+          req.user = { userId: decoded.id, email: decoded.email };
+        } else throw new AppError('Invalid token', StatusCodes.UNAUTHORIZED);
+      });
       return next();
     } catch (error) {
       // Pass any errors to the error handling middleware
