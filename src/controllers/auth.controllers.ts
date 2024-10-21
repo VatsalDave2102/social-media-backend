@@ -219,6 +219,9 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
     // Extract user email from request body
     const { email } = req.body;
 
+    // Extract the redirectUrl from the request body
+    const { redirectUrl } = req.body;
+
     // Check if the user exists in the database
     const existingUser = await prisma.user.findUnique({ where: { email, isDeleted: false } });
     if (!existingUser) throw new AppError('User does not exist!', StatusCodes.BAD_REQUEST);
@@ -228,7 +231,7 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
     const { resetPasswordToken } = generateResetPasswordToken(userPayload);
 
     // Create a reset password URL with the reset password token
-    const resetPasswordUrl = `${FRONTEND_URL}/reset-password?token=${resetPasswordToken}`;
+    const resetPasswordUrl = `${redirectUrl}?token=${resetPasswordToken}`;
 
     // Construct the email Subject and Body
     const emailSubject = 'Reset your password';
