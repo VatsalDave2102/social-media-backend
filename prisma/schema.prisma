@@ -74,11 +74,14 @@ model OneOnOneChat {
 }
 
 model GroupChat {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  ownerId   String   @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  ownerId          String   @db.ObjectId
+  groupDescription String?
+  groupIcon        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  lastMessageAt    DateTime @default(now())
 
   owner    User      @relation("GroupOwner", fields: [ownerId], references: [id])
   members  User[]    @relation("GroupMembers", fields: [memberIds], references: [id])
@@ -95,6 +98,7 @@ model Message {
   groupChatId    String?  @db.ObjectId
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  isDeleted      Boolean  @default(false)
 
   sender       User          @relation("SentMessages", fields: [senderId], references: [id])
   oneOnOneChat OneOnOneChat? @relation(fields: [oneOnOneChatId], references: [id])
