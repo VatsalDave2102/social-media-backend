@@ -8,6 +8,7 @@ import swaggerUI from 'swagger-ui-express';
 import authRouter from './routes/auth.routes';
 import { errorConverter } from './middlewares/errorConverter';
 import { errorHandler } from './middlewares/errorHandler';
+import friendRequestsRouter from './routes/friend-requests.routes';
 import logger from './utils/logger';
 import swaggerDocument from '../swagger-output.json';
 import userRouter from './routes/users.routes';
@@ -46,6 +47,9 @@ app.use('/api/v1/auth', authRouter);
 
 // User Routes
 app.use('/api/v1/users', userRouter);
+
+// Friend Requests Routes
+app.use('/api/v1/friend-requests', friendRequestsRouter);
 
 app.use(errorConverter);
 app.use(errorHandler);
