@@ -19,5 +19,26 @@ export const errorExamples = {
       message: 'Unauthorized access',
       data: null
     }
+  },
+  NotFoundResponse: {
+    value: {
+      success: false,
+      message: 'Not Found',
+      data: null
+    }
+  },
+  ForbiddenResponse: {
+    value: {
+      success: false,
+      message: 'Forbidden',
+      data: null
+    }
+  },
+  ConflictResponse: {
+    value: {
+      success: false,
+      message: 'Conflict',
+      data: null
+    }
   }
 };

@@ -55,7 +55,49 @@ app.use('/api/v1/users', userRouter);
 app.use('/api/v1/friend-requests', friendRequestsRouter);
 
 // One on one chat routes
-app.use('/api/v1/chats/one-on-one', oneOnOneChatRouter);
+app.use(
+  '/api/v1/chats/one-on-one',
+  oneOnOneChatRouter
+  /* 
+  #swagger.tags = ['One-On-One Chats']
+
+  #swagger.security = [{
+   "bearerAuth": []
+  }] 
+
+  #swagger.responses[401] = {
+    description: "Unauthorized Access",
+    content: {
+      'application/json': {
+        schema:{
+          $ref: "#/components/schemas/UnauthorizedAccessResponse"
+        },
+        examples: {
+          unauthorizedAccessResponse: {
+            $ref: "#/components/examples/UnauthorizedAccessResponse"
+          }
+        }
+      }           
+    }
+  }   
+
+  #swagger.responses[500] = {
+    description: 'Internal server error',
+    content: {
+      'application/json': {
+        schema:{
+          $ref: "#/components/schemas/InternalServerErrorResponse"
+        },
+        examples: {
+          internalServerErrorResponse: {
+            $ref: "#/components/examples/InternalServerErrorResponse"
+          }
+        }
+      }           
+    }
+  } 
+*/
+);
 
 // Group Chat Routes
 app.use('/api/v1/chats/group', groupChatRouter);
