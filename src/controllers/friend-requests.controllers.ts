@@ -22,7 +22,7 @@ const sendFriendRequest = async (req: Request, res: Response, next: NextFunction
     // Find both sender and receiver users
     const [sender, receiver] = await Promise.all([
       prisma.user.findUnique({ where: { id: senderId, isDeleted: false } }),
-      prisma.user.findUnique({ where: { id: receiverId, isDeleted: false } }),
+      prisma.user.findUnique({ where: { id: receiverId, isDeleted: false } })
     ]);
 
     // Check if both users exist
@@ -34,8 +34,8 @@ const sendFriendRequest = async (req: Request, res: Response, next: NextFunction
     const existingFriendship = await prisma.user.findUnique({
       where: {
         id: senderId,
-        OR: [{ friendIds: { has: receiverId } }, { friendOfIds: { has: receiverId } }],
-      },
+        OR: [{ friendIds: { has: receiverId } }, { friendOfIds: { has: receiverId } }]
+      }
     });
 
     if (existingFriendship) {
@@ -47,10 +47,10 @@ const sendFriendRequest = async (req: Request, res: Response, next: NextFunction
       where: {
         OR: [
           { senderId, receiverId },
-          { senderId: receiverId, receiverId: senderId },
+          { senderId: receiverId, receiverId: senderId }
         ],
-        status: FriendRequestStatus.PENDING,
-      },
+        status: FriendRequestStatus.PENDING
+      }
     });
 
     // Create a new friend request
@@ -62,14 +62,14 @@ const sendFriendRequest = async (req: Request, res: Response, next: NextFunction
       data: {
         senderId,
         receiverId,
-        status: FriendRequestStatus.PENDING,
-      },
+        status: FriendRequestStatus.PENDING
+      }
     });
 
     // Send successful response
     res.status(StatusCodes.CREATED).json({
       message: 'Friend request sent successfully',
-      data: { friendRequest },
+      data: { friendRequest }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -94,7 +94,7 @@ const updateFriendRequest = async (req: Request, res: Response, next: NextFuncti
 
     // Find the friend request
     const friendRequest = await prisma.friendRequest.findUnique({
-      where: { id },
+      where: { id }
     });
 
     // Check if the friend request exists
@@ -118,26 +118,26 @@ const updateFriendRequest = async (req: Request, res: Response, next: NextFuncti
         // Update sender's friendIds
         prisma.user.update({
           where: { id: friendRequest.senderId },
-          data: { friendIds: { push: friendRequest.receiverId } },
+          data: { friendIds: { push: friendRequest.receiverId } }
         }),
         // Update receiver's friendOfIds
         prisma.user.update({
           where: { id: friendRequest.receiverId },
           data: {
-            friendOfIds: { push: friendRequest.senderId },
-          },
+            friendOfIds: { push: friendRequest.senderId }
+          }
         }),
         // Update friend request status
         prisma.friendRequest.update({
           where: { id: friendRequest.id },
-          data: { status: FriendRequestStatus.ACCEPTED },
-        }),
+          data: { status: FriendRequestStatus.ACCEPTED }
+        })
       ]);
 
       return res.status(StatusCodes.OK).json({
         success: true,
         message: 'Friend request accepted successfully',
-        data: null,
+        data: null
       });
     } else if (status === FriendRequestStatus.REJECTED) {
       // Reject the friend request by deleting it
@@ -145,7 +145,7 @@ const updateFriendRequest = async (req: Request, res: Response, next: NextFuncti
       return res.status(200).json({
         success: true,
         message: 'Friend request rejected successfully',
-        data: null,
+        data: null
       });
     }
   } catch (error) {
@@ -169,7 +169,7 @@ const cancelFriendRequest = async (req: Request, res: Response, next: NextFuncti
 
     // Find the friend request
     const friendRequest = await prisma.friendRequest.findUnique({
-      where: { id },
+      where: { id }
     });
 
     // Check if the friend request exists
@@ -189,14 +189,14 @@ const cancelFriendRequest = async (req: Request, res: Response, next: NextFuncti
 
     // Delete the friend request
     await prisma.friendRequest.delete({
-      where: { id },
+      where: { id }
     });
 
     // Send successful response
     return res.status(StatusCodes.OK).json({
       success: true,
       message: 'Friend request cancelled successfully',
-      data: null,
+      data: null
     });
   } catch (error) {
     // Pass any errors to the error handling middleware

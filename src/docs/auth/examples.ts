@@ -12,9 +12,9 @@ export const authExamples = {
         createdAt: '2023-06-22T10:00:00Z',
         updatedAt: '2023-06-22T10:00:00Z',
         accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        expiresIn: 3600,
-      },
-    },
+        expiresIn: 3600
+      }
+    }
   },
   LoginResponse: {
     value: {
@@ -29,16 +29,16 @@ export const authExamples = {
         createdAt: '2023-06-22T10:00:00Z',
         updatedAt: '2023-06-22T10:00:00Z',
         accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        expiresIn: 3600,
-      },
-    },
+        expiresIn: 3600
+      }
+    }
   },
   LogoutResponse: {
     value: {
       success: true,
       message: 'Logout successful!',
-      data: null,
-    },
+      data: null
+    }
   },
   RefreshTokenResponse: {
     value: {
@@ -46,22 +46,22 @@ export const authExamples = {
       message: 'Access token refreshed successfully!',
       data: {
         accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        expiresIn: 3600,
-      },
-    },
+        expiresIn: 3600
+      }
+    }
   },
   ForgotPasswordResponse: {
     value: {
       success: true,
       message: 'Password reset email sent!',
-      data: null,
-    },
+      data: null
+    }
   },
   ResetPasswordResponse: {
     value: {
       success: true,
       message: 'Password reset successfully!',
-      data: null,
-    },
-  },
+      data: null
+    }
+  }
 };

@@ -9,8 +9,8 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: EMAIL_USERNAME,
-    pass: EMAIL_PASSWORD,
-  },
+    pass: EMAIL_PASSWORD
+  }
 });
 
 export const sendEmail = async (to: string, subject: string, html: string) => {
@@ -19,7 +19,7 @@ export const sendEmail = async (to: string, subject: string, html: string) => {
       from: 'SocioPedia',
       to,
       subject,
-      html,
+      html
     };
     await transporter.sendMail(mailOptions);
   } catch (error) {

@@ -5,7 +5,7 @@ import {
   ACCESS_TOKEN_SECRET_KEY,
   NODE_ENV,
   REFRESH_TOKEN_SECRET_KEY,
-  RESET_PASSWORD_SECRET_KEY,
+  RESET_PASSWORD_SECRET_KEY
 } from './env-variables';
 import { AppError } from '../middlewares/errorHandler';
 import { JwtUserPayload } from '../types/auth.types';
@@ -30,7 +30,7 @@ const generateAccessToken = (user: JwtUserPayload) => {
   const accessToken = jwt.sign(
     user,
     accessTokenSecretKey,
-    { expiresIn: accessTokenExpiryDuration }, // Access token expires in 1 hour
+    { expiresIn: accessTokenExpiryDuration } // Access token expires in 1 hour
   );
 
   return { accessToken, expiresIn: accessTokenExpiryDuration };
@@ -56,7 +56,7 @@ const generateRefreshToken = (user: JwtUserPayload) => {
   const refreshToken = jwt.sign(
     user,
     refreshTokenSecretKey,
-    { expiresIn: refreshTokenExpiryDuration }, // Refresh token expires in 7 days
+    { expiresIn: refreshTokenExpiryDuration } // Refresh token expires in 7 days
   );
 
   return { refreshToken, refreshTokenExpiryDuration };
@@ -82,7 +82,7 @@ const generateResetPasswordToken = (user: JwtUserPayload) => {
   const resetPasswordToken = jwt.sign(
     user,
     resetPasswordSecretKey,
-    { expiresIn: resetPasswordExpiryDuration }, // Reset password token expires in 15 minutes
+    { expiresIn: resetPasswordExpiryDuration } // Reset password token expires in 15 minutes
   );
 
   return { resetPasswordToken };
@@ -115,5 +115,5 @@ export {
   generateAccessToken,
   generateRefreshToken,
   generateResetPasswordToken,
-  verifyResetPasswordToken,
+  verifyResetPasswordToken
 };

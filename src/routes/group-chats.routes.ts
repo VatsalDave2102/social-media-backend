@@ -6,13 +6,13 @@ import {
   getGroupChatDetails,
   getGroupChatMessages,
   removeMemberFromGroupChat,
-  updateGroupChatSettings,
+  updateGroupChatSettings
 } from '../controllers/group-chats.controllers';
 import {
   addMembersToGroupChatSchema,
   createGroupChatSchema,
   removeMemberFromGroupChatSchema,
-  updateGroupChatSettingsSchema,
+  updateGroupChatSettingsSchema
 } from '../schemas/group-chats.schemas';
 import upload from '../middlewares/multer';
 import validateRequest from '../middlewares/validateRequest';
@@ -25,7 +25,7 @@ groupChatRouter.post(
   verifyToken('accessToken'),
   upload.single('groupIcon'),
   validateRequest(createGroupChatSchema),
-  createGroupChat,
+  createGroupChat
 );
 
 groupChatRouter.get('/:chatId', verifyToken('accessToken'), getGroupChatDetails);
@@ -35,7 +35,7 @@ groupChatRouter.patch(
   verifyToken('accessToken'),
   upload.single('groupIcon'),
   validateRequest(updateGroupChatSettingsSchema),
-  updateGroupChatSettings,
+  updateGroupChatSettings
 );
 
 groupChatRouter.get('/:chatId/messages', verifyToken('accessToken'), getGroupChatMessages);
@@ -44,14 +44,14 @@ groupChatRouter.patch(
   '/:chatId/add-members',
   verifyToken('accessToken'),
   validateRequest(addMembersToGroupChatSchema),
-  addMembersToGroupChat,
+  addMembersToGroupChat
 );
 
 groupChatRouter.patch(
   '/:chatId/remove-member',
   verifyToken('accessToken'),
   validateRequest(removeMemberFromGroupChatSchema),
-  removeMemberFromGroupChat,
+  removeMemberFromGroupChat
 );
 
 export default groupChatRouter;

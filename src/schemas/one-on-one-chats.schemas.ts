@@ -13,21 +13,21 @@ export const oneOnOneChatSchema = z.object({
   lastMessageAt: z.date().optional(),
   deletedForInitiator: z.date().nullable().optional(),
   deletedForParticipant: z.date().nullable().optional(),
-  messages: z.array(objectIdSchema).optional(),
+  messages: z.array(objectIdSchema).optional()
 });
 
 export const createOneOnOneChatSchema = oneOnOneChatSchema
   .pick({
     initiatorId: true,
-    participantId: true,
+    participantId: true
   })
   .refine((data) => data.initiatorId !== data.participantId, {
     message: 'Initiator and participant cannot be the same user',
-    path: ['initiatorId'],
+    path: ['initiatorId']
   });
 
 export const updateOneOnOneChatSettingsSchema = oneOnOneChatSchema
   .pick({
-    vanishMode: true,
+    vanishMode: true
   })
   .transform((data) => ({ settings: data }));

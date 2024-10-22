@@ -9,10 +9,10 @@ const storage = multer.diskStorage({
   filename: (
     req: Request,
     file: Express.Multer.File,
-    cb: (error: Error | null, filename: string) => void,
+    cb: (error: Error | null, filename: string) => void
   ) => {
     cb(null, file.originalname);
-  },
+  }
 });
 
 const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
@@ -30,8 +30,8 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallb
     cb(
       new AppError(
         'Invalid file type. Only jpg, jpeg & png files are allowed.',
-        StatusCodes.BAD_REQUEST,
-      ),
+        StatusCodes.BAD_REQUEST
+      )
     );
   }
 };
@@ -40,8 +40,8 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 2 * 1024 * 1024, // 2MB file size limit
-  },
+    fileSize: 2 * 1024 * 1024 // 2MB file size limit
+  }
 });
 
 export default upload;

@@ -30,7 +30,7 @@ app.use(cookieParser());
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 100 // limit each IP to 100 requests per windowMs
 });
 app.use(limiter);
 
@@ -54,13 +54,13 @@ app.use('/api/v1/users', userRouter);
 // Friend Requests Routes
 app.use('/api/v1/friend-requests', friendRequestsRouter);
 
-// One on one chat routes 
+// One on one chat routes
 app.use('/api/v1/chats/one-on-one', oneOnOneChatRouter);
 
 // Group Chat Routes
 app.use('/api/v1/chats/group', groupChatRouter);
 
-// Message Routes 
+// Message Routes
 app.use('/api/v1/messages', messagesRouter);
 
 app.use(errorConverter);

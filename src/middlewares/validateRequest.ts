@@ -12,13 +12,13 @@ const validateRequest = (schema: AnyZodObject | ZodEffects<AnyZodObject>) => {
         return res.status(StatusCodes.BAD_REQUEST).json({
           success: false,
           message: error.errors[0].message,
-          data: null,
+          data: null
         });
       }
       return res.status(StatusCodes.BAD_REQUEST).json({
         success: false,
         message: 'Validation failed',
-        data: null,
+        data: null
       });
     }
   };

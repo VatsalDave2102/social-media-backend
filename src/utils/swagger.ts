@@ -11,7 +11,7 @@ const doc = {
   info: {
     version,
     title: 'Social Media App',
-    description: 'A social media app built with Node.js, Express, MongoDB, and TypeScript',
+    description: 'A social media app built with Node.js, Express, MongoDB, and TypeScript'
   },
   host: NODE_ENV === 'production' ? BACKEND_SERVER_URL : 'localhost:3000',
   basePath: '',
@@ -21,31 +21,31 @@ const doc = {
   tags: [
     {
       name: 'Auth',
-      description: 'Authentication routes',
-    },
+      description: 'Authentication routes'
+    }
   ],
   components: {
     securitySchemes: {
       bearerAuth: {
         type: 'http',
         scheme: 'bearer',
-        bearerFormat: 'JWT',
-      },
+        bearerFormat: 'JWT'
+      }
     },
     '@schemas': swaggerSchemas,
-    examples: swaggerExamples,
+    examples: swaggerExamples
   },
   security: [
     {
-      bearerAuth: [],
-    },
+      bearerAuth: []
+    }
   ],
   servers: [
     {
       url: BACKEND_SERVER_URL,
-      description: NODE_ENV === 'production' ? 'Render server' : 'Local server',
-    },
-  ],
+      description: NODE_ENV === 'production' ? 'Render server' : 'Local server'
+    }
+  ]
 };
 
 const outputFile = '../../swagger-output.json';

@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import {
   ACCESS_TOKEN_SECRET_KEY,
   NODE_ENV,
-  REFRESH_TOKEN_SECRET_KEY,
+  REFRESH_TOKEN_SECRET_KEY
 } from '../utils/env-variables';
 import { JwtVerifyCallbackError, TokenType, isCustomJwtPayload } from '../types/auth.types';
 import { AppError } from './errorHandler';

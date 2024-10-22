@@ -6,7 +6,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
   generateResetPasswordToken,
-  verifyResetPasswordToken,
+  verifyResetPasswordToken
 } from '../utils/token';
 import { AppError } from '../middlewares/errorHandler';
 import { NODE_ENV } from '../utils/env-variables';
@@ -39,7 +39,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
 
     // Upload the user's profile picture to Cloudinary
     const uploadedProfilePicture = await cloudinary.uploader.upload(profilePicture.path, {
-      folder: 'profile_images',
+      folder: 'profile_images'
     });
     if (!uploadedProfilePicture) {
       throw new AppError('Error uploading profile picture', StatusCodes.INTERNAL_SERVER_ERROR);
@@ -52,7 +52,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
         email,
         password: hashedPassword,
         bio,
-        profilePicture: uploadedProfilePicture.secure_url,
+        profilePicture: uploadedProfilePicture.secure_url
       },
       select: {
         id: true,
@@ -61,8 +61,8 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
         bio: true,
         profilePicture: true,
         createdAt: true,
-        updatedAt: true,
-      },
+        updatedAt: true
+      }
     });
 
     // If the user was not created, throw an error
@@ -78,14 +78,14 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
       httpOnly: true,
       secure: NODE_ENV === 'production', // Use secure cookies in production
       sameSite: 'strict',
-      maxAge: refreshTokenExpiryDuration,
+      maxAge: refreshTokenExpiryDuration
     });
 
     // Respond with success message and data
     res.status(StatusCodes.CREATED).json({
       success: true,
       message: 'Registration successful!',
-      data: { ...newUser, accessToken, expiresIn },
+      data: { ...newUser, accessToken, expiresIn }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -116,8 +116,8 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         profilePicture: true,
         createdAt: true,
         updatedAt: true,
-        password: true,
-      },
+        password: true
+      }
     });
 
     if (!existingUser) throw new AppError('User does not exist!', StatusCodes.BAD_REQUEST);
@@ -136,7 +136,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
       httpOnly: true,
       secure: NODE_ENV === 'production', // Use secure cookies in production
       sameSite: 'strict',
-      maxAge: refreshTokenExpiryDuration,
+      maxAge: refreshTokenExpiryDuration
     });
 
     // Exclude the password from the user object
@@ -147,7 +147,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Login successful!',
-      data: { ...userWithoutPassword, accessToken, expiresIn },
+      data: { ...userWithoutPassword, accessToken, expiresIn }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -171,7 +171,7 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Logout successful!',
-      data: null,
+      data: null
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -199,7 +199,7 @@ const refreshToken = async (req: Request, res: Response, next: NextFunction) => 
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Access token refreshed successfully!',
-      data: { accessToken, expiresIn },
+      data: { accessToken, expiresIn }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -248,7 +248,7 @@ const forgotPassword = async (req: Request, res: Response, next: NextFunction) =
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Password reset email sent!',
-      data: null,
+      data: null
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -290,14 +290,14 @@ const resetPassword = async (req: Request, res: Response, next: NextFunction) =>
     // Update the user's password in the database
     await prisma.user.update({
       where: { id },
-      data: { password: hashedPassword },
+      data: { password: hashedPassword }
     });
 
     // Respond with success message
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Password reset successfully!',
-      data: null,
+      data: null
     });
   } catch (error) {
     // Pass any errors to the error handling middleware

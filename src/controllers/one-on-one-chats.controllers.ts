@@ -28,7 +28,7 @@ const createOneOnOneChat = async (req: Request, res: Response, next: NextFunctio
     // Check if the initiator and participant exist in the database
     const [initiator, participant] = await Promise.all([
       prisma.user.findUnique({ where: { id: initiatorId } }),
-      prisma.user.findUnique({ where: { id: participantId } }),
+      prisma.user.findUnique({ where: { id: participantId } })
     ]);
     if (!initiator || !participant) throw new AppError('User not found!', StatusCodes.NOT_FOUND);
 
@@ -42,14 +42,14 @@ const createOneOnOneChat = async (req: Request, res: Response, next: NextFunctio
         OR: [
           {
             initiatorId,
-            participantId,
+            participantId
           },
           {
             initiatorId: participantId,
-            participantId: initiatorId,
-          },
-        ],
-      },
+            participantId: initiatorId
+          }
+        ]
+      }
     });
     if (existingChat) throw new AppError('Chat already exists!', StatusCodes.CONFLICT);
 
@@ -57,28 +57,28 @@ const createOneOnOneChat = async (req: Request, res: Response, next: NextFunctio
     const existingFriendship = await prisma.user.findFirst({
       where: {
         id: initiatorId,
-        OR: [{ friendIds: { has: participantId } }, { friendOfIds: { has: participantId } }],
-      },
+        OR: [{ friendIds: { has: participantId } }, { friendOfIds: { has: participantId } }]
+      }
     });
     if (!existingFriendship)
       throw new AppError(
         `You can't initiate chats with users who are not your friends!`,
-        StatusCodes.BAD_REQUEST,
+        StatusCodes.BAD_REQUEST
       );
 
     // Create a new one-on-one chat
     const newChat = await prisma.oneOnOneChat.create({
       data: {
         initiatorId,
-        participantId,
-      },
+        participantId
+      }
     });
 
     // Respond with success message and data
     res.status(StatusCodes.CREATED).json({
       success: true,
       message: 'Chat created successfully!',
-      data: { chat: newChat },
+      data: { chat: newChat }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -108,7 +108,7 @@ const getOneOnOneChatDetails = async (req: Request, res: Response, next: NextFun
 
     // Check if the chat exists in the database
     const existingChat = await prisma.oneOnOneChat.findUnique({
-      where: { id: chatId },
+      where: { id: chatId }
     });
     if (!existingChat) throw new AppError('Chat not found!', StatusCodes.NOT_FOUND);
 
@@ -120,7 +120,7 @@ const getOneOnOneChatDetails = async (req: Request, res: Response, next: NextFun
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Chat details retrieved successfully!',
-      data: { chat: existingChat },
+      data: { chat: existingChat }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -156,7 +156,7 @@ const updateOneOnOneChatSettings = async (req: Request, res: Response, next: Nex
 
     // Check if the chat exists in the database
     const existingChat = await prisma.oneOnOneChat.findUnique({
-      where: { id: chatId },
+      where: { id: chatId }
     });
     if (!existingChat) throw new AppError('Chat not found!', StatusCodes.NOT_FOUND);
 
@@ -164,21 +164,21 @@ const updateOneOnOneChatSettings = async (req: Request, res: Response, next: Nex
     if (user.userId !== existingChat.initiatorId && user.userId !== existingChat.participantId) {
       throw new AppError(
         `You are not allowed to update this chat's settings!`,
-        StatusCodes.FORBIDDEN,
+        StatusCodes.FORBIDDEN
       );
     }
 
     // Update the chat settings
     await prisma.oneOnOneChat.update({
       where: { id: chatId },
-      data: settings,
+      data: settings
     });
 
     // Respond with success message and data
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Chat settings updated successfully!',
-      data: null,
+      data: null
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -215,7 +215,7 @@ const getOneOnOneChatMessages = async (req: Request, res: Response, next: NextFu
 
     // Check if the chat exists in the database
     const existingChat = await prisma.oneOnOneChat.findUnique({
-      where: { id: chatId },
+      where: { id: chatId }
     });
     if (!existingChat) throw new AppError('Chat not found!', StatusCodes.NOT_FOUND);
 
@@ -223,27 +223,27 @@ const getOneOnOneChatMessages = async (req: Request, res: Response, next: NextFu
     if (existingChat.initiatorId !== user.userId && existingChat.participantId !== user.userId)
       throw new AppError(
         'You are not allowed to view the messages of this chat!',
-        StatusCodes.FORBIDDEN,
+        StatusCodes.FORBIDDEN
       );
 
     // Get the chat messages
     const chatMessages = await prisma.message.findMany({
       where: {
         ...(search && { content: { contains: search, mode: 'insensitive' } }),
-        oneOnOneChatId: chatId,
+        oneOnOneChatId: chatId
       },
       take: take + 1, // Fetch one extra to determine if there are more messages
       skip: cursor ? 1 : undefined,
       cursor: cursor ? { id: cursor } : undefined,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: 'desc' }
     });
 
     // Determine if there are more messages and get the next cursor
     const totalCount = await prisma.message.count({
       where: {
         ...(search && { content: { contains: search, mode: 'insensitive' } }),
-        oneOnOneChatId: chatId,
-      },
+        oneOnOneChatId: chatId
+      }
     });
     const hasNextPage = chatMessages.length > take;
     const nextCursor = hasNextPage ? chatMessages[take - 1].id : null;
@@ -254,8 +254,8 @@ const getOneOnOneChatMessages = async (req: Request, res: Response, next: NextFu
       message: 'Chat messages retrieved successfully!',
       data: {
         messages: chatMessages.slice(0, take),
-        pagination: { totalCount, hasNextPage, nextCursor },
-      },
+        pagination: { totalCount, hasNextPage, nextCursor }
+      }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -267,5 +267,5 @@ export {
   createOneOnOneChat,
   getOneOnOneChatDetails,
   updateOneOnOneChatSettings,
-  getOneOnOneChatMessages,
+  getOneOnOneChatMessages
 };

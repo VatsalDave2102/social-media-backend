@@ -11,7 +11,7 @@ export const messageSchema = z.object({
   oneOnOneChatId: objectIdSchema.optional(),
   groupChatId: objectIdSchema.optional(),
   createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
+  updatedAt: z.date().optional()
 });
 
 export const sendMessageSchema = z
@@ -19,13 +19,13 @@ export const sendMessageSchema = z
     content: z.string().min(1, 'Message content is required'),
     senderId: objectIdSchema,
     oneOnOneChatId: objectIdSchema.optional(),
-    groupChatId: objectIdSchema.optional(),
+    groupChatId: objectIdSchema.optional()
   })
   .refine(
     (data) =>
       (data.oneOnOneChatId && !data.groupChatId) || (!data.oneOnOneChatId && data.groupChatId),
     {
       message: 'Exactly one of oneOnOneChatId or groupChatId must be provided',
-      path: ['oneOnOneChatId', 'groupChatId'],
-    },
+      path: ['oneOnOneChatId', 'groupChatId']
+    }
   );

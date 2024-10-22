@@ -12,7 +12,7 @@ import {
   getUserChats,
   getUsers,
   unfriendUser,
-  updateUser,
+  updateUser
 } from '../controllers/users.controllers';
 import { changePasswordSchema, updateUserSchema } from '../schemas/auth.schemas';
 import upload from '../middlewares/multer';
@@ -32,7 +32,7 @@ userRouter.put(
   verifyToken('accessToken'),
   upload.single('profilePicture'),
   validateRequest(updateUserSchema),
-  updateUser,
+  updateUser
 );
 
 userRouter.delete('/:id', verifyToken('accessToken'), deleteUser);
@@ -41,7 +41,7 @@ userRouter.put(
   '/:id/change-password',
   verifyToken('accessToken'),
   validateRequest(changePasswordSchema),
-  changePassword,
+  changePassword
 );
 
 userRouter.get('/:id/friends', verifyToken('accessToken'), getFriends);
@@ -57,7 +57,7 @@ userRouter.get('/:id/mutual-friends/:otherUserId', verifyToken('accessToken'), g
 userRouter.get(
   '/:id/friendship-status/:otherUserId',
   verifyToken('accessToken'),
-  getFriendshipStatus,
+  getFriendshipStatus
 );
 
 export default userRouter;

@@ -5,38 +5,38 @@ export const authSchemas = {
       name: {
         type: 'string',
         description: "User's full name",
-        example: '',
+        example: ''
       },
       email: {
         type: 'string',
         format: 'email',
         description: "User's email address",
-        example: '',
+        example: ''
       },
       password: {
         type: 'string',
         format: 'password',
         description: "User's password",
-        example: '',
+        example: ''
       },
       confirmPassword: {
         type: 'string',
         format: 'password',
         description: 'Confirm password',
-        example: '',
+        example: ''
       },
       bio: {
         type: 'string',
         description: "User's bio",
-        example: '',
+        example: ''
       },
       profilePicture: {
         type: 'string',
         format: 'binary',
-        description: '',
-      },
+        description: ''
+      }
     },
-    required: ['name', 'email', 'password', 'confirmPassword', 'profilePicture'],
+    required: ['name', 'email', 'password', 'confirmPassword', 'profilePicture']
   },
   RegistrationResponse: {
     type: 'object',
@@ -54,10 +54,10 @@ export const authSchemas = {
           createdAt: { type: 'string', format: 'date-time' },
           updatedAt: { type: 'string', format: 'date-time' },
           accessToken: { type: 'string' },
-          expiresIn: { type: 'number' },
-        },
-      },
-    },
+          expiresIn: { type: 'number' }
+        }
+      }
+    }
   },
   LoginRequest: {
     type: 'object',
@@ -66,16 +66,16 @@ export const authSchemas = {
         type: 'string',
         format: 'email',
         description: "User's email address",
-        example: '',
+        example: ''
       },
       password: {
         type: 'string',
         format: 'password',
         description: "User's password",
-        example: '',
-      },
+        example: ''
+      }
     },
-    required: ['email', 'password'],
+    required: ['email', 'password']
   },
   LoginResponse: {
     type: 'object',
@@ -93,18 +93,18 @@ export const authSchemas = {
           createdAt: { type: 'string', format: 'date-time' },
           updatedAt: { type: 'string', format: 'date-time' },
           accessToken: { type: 'string' },
-          expiresIn: { type: 'number' },
-        },
-      },
-    },
+          expiresIn: { type: 'number' }
+        }
+      }
+    }
   },
   LogoutResponse: {
     type: 'object',
     properties: {
       success: { type: 'boolean' },
       message: { type: 'string' },
-      data: { type: 'object', nullable: true },
-    },
+      data: { type: 'object', nullable: true }
+    }
   },
   RefreshTokenResponse: {
     type: 'object',
@@ -115,10 +115,10 @@ export const authSchemas = {
         type: 'object',
         properties: {
           accessToken: { type: 'string' },
-          expiresIn: { type: 'number' },
-        },
-      },
-    },
+          expiresIn: { type: 'number' }
+        }
+      }
+    }
   },
   ForgotPasswordRequest: {
     type: 'object',
@@ -127,23 +127,23 @@ export const authSchemas = {
         type: 'string',
         format: 'email',
         description: "User's email address",
-        example: '',
+        example: ''
       },
       redirectUrl: {
         type: 'url',
         description: 'Redirect URL for password reset',
-        example: '',
-      },
+        example: ''
+      }
     },
-    required: ['email', 'redirectUrl'],
+    required: ['email', 'redirectUrl']
   },
   ForgotPasswordResponse: {
     type: 'object',
     properties: {
       success: { type: 'boolean' },
       message: { type: 'string' },
-      data: { type: 'object', nullable: true },
-    },
+      data: { type: 'object', nullable: true }
+    }
   },
   ResetPasswordRequest: {
     type: 'object',
@@ -152,23 +152,23 @@ export const authSchemas = {
         type: 'string',
         format: 'password',
         description: "User's new password",
-        example: '',
+        example: ''
       },
       confirmPassword: {
         type: 'string',
         format: 'password',
         description: 'Confirm new password',
-        example: '',
-      },
+        example: ''
+      }
     },
-    required: ['password', 'confirmPassword'],
+    required: ['password', 'confirmPassword']
   },
   ResetPasswordResponse: {
     type: 'object',
     properties: {
       success: { type: 'boolean' },
       message: { type: 'string' },
-      data: { type: 'object', nullable: true },
-    },
-  },
+      data: { type: 'object', nullable: true }
+    }
+  }
 };
