@@ -78,7 +78,7 @@ const createOneOnOneChat = async (req: Request, res: Response, next: NextFunctio
     res.status(StatusCodes.CREATED).json({
       success: true,
       message: 'Chat created successfully!',
-      data: { chat: newChat }
+      data: newChat
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -120,7 +120,7 @@ const getOneOnOneChatDetails = async (req: Request, res: Response, next: NextFun
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Chat details retrieved successfully!',
-      data: { chat: existingChat }
+      data: existingChat
     });
   } catch (error) {
     // Pass any errors to the error handling middleware

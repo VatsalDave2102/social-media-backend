@@ -85,7 +85,7 @@ const createGroupChat = async (req: Request, res: Response, next: NextFunction) 
     res.status(StatusCodes.CREATED).json({
       success: true,
       message: 'Group chat created successfully!',
-      data: { chat: newChat }
+      data: newChat
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -129,7 +129,7 @@ const getGroupChatDetails = async (req: Request, res: Response, next: NextFuncti
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Chat details retrieved successfully!',
-      data: { chat: existingChat }
+      data: existingChat
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
