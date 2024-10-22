@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import bcrypt from 'bcryptjs';
 
-import { FRONTEND_URL, NODE_ENV } from '../utils/env-variables';
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -10,6 +9,7 @@ import {
   verifyResetPasswordToken,
 } from '../utils/token';
 import { AppError } from '../middlewares/errorHandler';
+import { NODE_ENV } from '../utils/env-variables';
 import cloudinary from '../config/cloudinary';
 import prisma from '../config/db';
 import { sendEmail } from '../utils/email';
