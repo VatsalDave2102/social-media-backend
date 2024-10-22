@@ -33,7 +33,7 @@ const createGroupChat = async (req: Request, res: Response, next: NextFunction) 
     // Check if the ownerId and memberIds exist in the database
     const [owner, members] = await Promise.all([
       prisma.user.findUnique({ where: { id: ownerId, isDeleted: false } }),
-      prisma.user.findMany({ where: { id: { in: memberIds }, isDeleted: false } }),
+      prisma.user.findMany({ where: { id: { in: memberIds }, isDeleted: false } })
     ]);
     if (!owner || !members) throw new AppError('Admin or Member not found!', StatusCodes.NOT_FOUND);
 
@@ -41,7 +41,7 @@ const createGroupChat = async (req: Request, res: Response, next: NextFunction) 
     if (user.userId !== ownerId)
       throw new AppError(
         `You don't have permission to create a group chat!`,
-        StatusCodes.FORBIDDEN,
+        StatusCodes.FORBIDDEN
       );
 
     // Check if the members are friends of the owner
@@ -49,19 +49,19 @@ const createGroupChat = async (req: Request, res: Response, next: NextFunction) 
       where: {
         id: ownerId,
         AND: memberIds.map((memberId: string) => ({
-          OR: [{ friendIds: { has: memberId } }, { friendOfIds: { has: memberId } }],
-        })),
-      },
+          OR: [{ friendIds: { has: memberId } }, { friendOfIds: { has: memberId } }]
+        }))
+      }
     });
     if (!existingFriendship)
       throw new AppError(
         `You can't add members who aren't your friends in groups!`,
-        StatusCodes.BAD_REQUEST,
+        StatusCodes.BAD_REQUEST
       );
 
     // Upload the group icon to Cloudinary
     const uploadedGroupIcon = await cloudinary.uploader.upload(groupIcon.path, {
-      folder: 'group_icons',
+      folder: 'group_icons'
     });
     if (!uploadedGroupIcon)
       throw new AppError('Error uploading group icon', StatusCodes.INTERNAL_SERVER_ERROR);
@@ -71,21 +71,21 @@ const createGroupChat = async (req: Request, res: Response, next: NextFunction) 
       data: {
         name,
         owner: {
-          connect: { id: ownerId },
+          connect: { id: ownerId }
         },
         members: {
-          connect: [{ id: ownerId }, ...memberIds.map((id: string) => ({ id }))],
+          connect: [{ id: ownerId }, ...memberIds.map((id: string) => ({ id }))]
         },
         groupDescription,
-        groupIcon: uploadedGroupIcon.secure_url,
-      },
+        groupIcon: uploadedGroupIcon.secure_url
+      }
     });
 
     // Respond with success message and data
     res.status(StatusCodes.CREATED).json({
       success: true,
       message: 'Group chat created successfully!',
-      data: { chat: newChat },
+      data: { chat: newChat }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -114,7 +114,7 @@ const getGroupChatDetails = async (req: Request, res: Response, next: NextFuncti
 
     // Check if the chat exists in the database
     const existingChat = await prisma.groupChat.findUnique({
-      where: { id: chatId },
+      where: { id: chatId }
     });
     if (!existingChat) throw new AppError('Group chat not found!', StatusCodes.NOT_FOUND);
 
@@ -129,7 +129,7 @@ const getGroupChatDetails = async (req: Request, res: Response, next: NextFuncti
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Chat details retrieved successfully!',
-      data: { chat: existingChat },
+      data: { chat: existingChat }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -174,7 +174,7 @@ const updateGroupChatSettings = async (req: Request, res: Response, next: NextFu
     if (groupIcon) {
       // Upload the group icon to Cloudinary
       uploadedUpdatedGroupIcon = await cloudinary.uploader.upload(groupIcon.path, {
-        folder: 'group_icons',
+        folder: 'group_icons'
       });
       if (!uploadedUpdatedGroupIcon)
         throw new AppError('Error uploading group icon', StatusCodes.INTERNAL_SERVER_ERROR);
@@ -182,7 +182,7 @@ const updateGroupChatSettings = async (req: Request, res: Response, next: NextFu
 
     // Check if the chat exists in the database
     const existingChat = await prisma.groupChat.findUnique({
-      where: { id: chatId },
+      where: { id: chatId }
     });
     if (!existingChat) throw new AppError('Group chat not found!', StatusCodes.NOT_FOUND);
 
@@ -190,20 +190,20 @@ const updateGroupChatSettings = async (req: Request, res: Response, next: NextFu
     if (user.userId !== existingChat.ownerId)
       throw new AppError(
         `You don't have permission to update this chat's settings!`,
-        StatusCodes.FORBIDDEN,
+        StatusCodes.FORBIDDEN
       );
 
     // Update the chat settings
     await prisma.groupChat.update({
       where: { id: chatId },
-      data: { ...updatedSettings, groupIcon: uploadedUpdatedGroupIcon?.secure_url },
+      data: { ...updatedSettings, groupIcon: uploadedUpdatedGroupIcon?.secure_url }
     });
 
     // Respond with success message and data
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Chat settings updated successfully!',
-      data: null,
+      data: null
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -241,7 +241,7 @@ const getGroupChatMessages = async (req: Request, res: Response, next: NextFunct
 
     // Check if the chat exists in the database
     const existingChat = await prisma.groupChat.findUnique({
-      where: { id: chatId },
+      where: { id: chatId }
     });
     if (!existingChat) throw new AppError('Group chat not found!', StatusCodes.NOT_FOUND);
 
@@ -256,19 +256,19 @@ const getGroupChatMessages = async (req: Request, res: Response, next: NextFunct
     const chatMessages = await prisma.message.findMany({
       where: {
         ...(search && { content: { contains: search, mode: 'insensitive' } }),
-        groupChatId: chatId,
+        groupChatId: chatId
       },
       take: take + 1, // Fetch one extra to determine if there are more messages
       skip: cursor ? 1 : undefined,
       cursor: cursor ? { id: cursor } : undefined,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: 'desc' }
     });
 
     const totalCount = await prisma.message.count({
       where: {
         ...(search && { content: { contains: search, mode: 'insensitive' } }),
-        groupChatId: chatId,
-      },
+        groupChatId: chatId
+      }
     });
     const hasNextPage = chatMessages.length > take;
     const nextCursor = hasNextPage ? chatMessages[take - 1].id : null;
@@ -279,8 +279,8 @@ const getGroupChatMessages = async (req: Request, res: Response, next: NextFunct
       message: 'Chat messages retrieved successfully!',
       data: {
         messages: chatMessages.slice(0, take),
-        pagination: { totalCount, hasNextPage, nextCursor },
-      },
+        pagination: { totalCount, hasNextPage, nextCursor }
+      }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -312,13 +312,13 @@ const addMembersToGroupChat = async (req: Request, res: Response, next: NextFunc
 
     // Check if the chat exists in the database
     const existingChat = await prisma.groupChat.findUnique({
-      where: { id: chatId },
+      where: { id: chatId }
     });
     if (!existingChat) throw new AppError('Group chat not found!', StatusCodes.NOT_FOUND);
 
     // Check if the owner and members exist in the database
     const existingUsers = await prisma.user.findMany({
-      where: { id: { in: [ownerId, ...memberIds] }, isDeleted: false },
+      where: { id: { in: [ownerId, ...memberIds] }, isDeleted: false }
     });
 
     // Owner is also a member of the chat
@@ -329,7 +329,7 @@ const addMembersToGroupChat = async (req: Request, res: Response, next: NextFunc
     if (ownerId !== user.userId && ownerId !== existingChat.ownerId)
       throw new AppError(
         `You don't have permission to add members to this chat!`,
-        StatusCodes.FORBIDDEN,
+        StatusCodes.FORBIDDEN
       );
 
     // Filter out existing members
@@ -342,14 +342,14 @@ const addMembersToGroupChat = async (req: Request, res: Response, next: NextFunc
       where: {
         id: ownerId,
         AND: newMemberIds.map((memberId: string) => ({
-          OR: [{ friendIds: { has: memberId } }, { friendOfIds: { has: memberId } }],
-        })),
-      },
+          OR: [{ friendIds: { has: memberId } }, { friendOfIds: { has: memberId } }]
+        }))
+      }
     });
     if (!existingFriendship)
       throw new AppError(
         `You can't add members who aren't your friends in groups!`,
-        StatusCodes.BAD_REQUEST,
+        StatusCodes.BAD_REQUEST
       );
 
     // Add the members to the chat
@@ -357,9 +357,9 @@ const addMembersToGroupChat = async (req: Request, res: Response, next: NextFunc
       where: { id: chatId },
       data: {
         members: {
-          connect: newMemberIds.map((id: string) => ({ id })),
-        },
-      },
+          connect: newMemberIds.map((id: string) => ({ id }))
+        }
+      }
     });
 
     const responseMessage =
@@ -373,7 +373,7 @@ const addMembersToGroupChat = async (req: Request, res: Response, next: NextFunc
     res.status(StatusCodes.CREATED).json({
       success: true,
       message: responseMessage,
-      data: null,
+      data: null
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -405,7 +405,7 @@ const removeMemberFromGroupChat = async (req: Request, res: Response, next: Next
 
     // Check if the chat exists in the database
     const existingChat = await prisma.groupChat.findUnique({
-      where: { id: chatId },
+      where: { id: chatId }
     });
     if (!existingChat) throw new AppError('Group chat not found!', StatusCodes.NOT_FOUND);
 
@@ -415,7 +415,7 @@ const removeMemberFromGroupChat = async (req: Request, res: Response, next: Next
 
     // Check if the owner and member exist in the database
     const existingUsers = await prisma.user.findMany({
-      where: { id: { in: [ownerId, memberId] }, isDeleted: false },
+      where: { id: { in: [ownerId, memberId] }, isDeleted: false }
     });
     if (existingUsers.length !== 2)
       throw new AppError('Admin or member not found!', StatusCodes.NOT_FOUND);
@@ -424,7 +424,7 @@ const removeMemberFromGroupChat = async (req: Request, res: Response, next: Next
     if (ownerId !== user.userId && ownerId !== existingChat.ownerId)
       throw new AppError(
         `You don't have permission to delete members from this chat!`,
-        StatusCodes.FORBIDDEN,
+        StatusCodes.FORBIDDEN
       );
 
     // Check if the member is already not in the chat
@@ -432,9 +432,9 @@ const removeMemberFromGroupChat = async (req: Request, res: Response, next: Next
       where: {
         id: chatId,
         memberIds: {
-          has: memberId,
-        },
-      },
+          has: memberId
+        }
+      }
     });
     if (!existingMembersInChat)
       throw new AppError('The member is not in the chat!', StatusCodes.CONFLICT);
@@ -444,16 +444,16 @@ const removeMemberFromGroupChat = async (req: Request, res: Response, next: Next
       where: { id: chatId },
       data: {
         members: {
-          disconnect: { id: memberId },
-        },
-      },
+          disconnect: { id: memberId }
+        }
+      }
     });
 
     // Respond with success message and data
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Member deleted successfully!',
-      data: null,
+      data: null
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -467,5 +467,5 @@ export {
   updateGroupChatSettings,
   getGroupChatMessages,
   addMembersToGroupChat,
-  removeMemberFromGroupChat,
+  removeMemberFromGroupChat
 };

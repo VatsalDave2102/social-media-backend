@@ -18,16 +18,16 @@ async function main() {
       password: faker.internet.password(),
       name: faker.person.fullName(),
       bio: faker.lorem.sentence(),
-      profilePicture: faker.image.avatar(),
+      profilePicture: faker.image.avatar()
     });
   }
 
   await prisma.user.createMany({
-    data: users,
+    data: users
   });
 
   const userIds = await prisma.user.findMany({
-    select: { id: true },
+    select: { id: true }
   });
 
   // Generate Friend Requests
@@ -36,14 +36,14 @@ async function main() {
       const friendRequest = {
         senderId: user.id,
         receiverId: userIds[(i + 1) % userIds.length].id,
-        status: FriendRequestStatus.PENDING,
+        status: FriendRequestStatus.PENDING
       };
       friendRequests.push(friendRequest);
     }
   }
 
   await prisma.friendRequest.createMany({
-    data: friendRequests,
+    data: friendRequests
   });
 
   // Generate One-On-One Chats
@@ -51,18 +51,18 @@ async function main() {
     for (let i = 0; i < 2; i++) {
       const oneOnOneChat = {
         initiatorId: user.id,
-        participantId: userIds[(i + 1) % userIds.length].id,
+        participantId: userIds[(i + 1) % userIds.length].id
       };
       oneOnOneChats.push(oneOnOneChat);
     }
   }
 
   await prisma.oneOnOneChat.createMany({
-    data: oneOnOneChats,
+    data: oneOnOneChats
   });
 
   const oneOnOneChatIds = await prisma.oneOnOneChat.findMany({
-    select: { id: true },
+    select: { id: true }
   });
 
   // Generate Group Chats
@@ -70,17 +70,17 @@ async function main() {
     const groupChat = {
       name: faker.lorem.words(),
       ownerId: userIds[i].id,
-      memberIds: userIds.map((user) => user.id),
+      memberIds: userIds.map((user) => user.id)
     };
     groupChats.push(groupChat);
   }
 
   await prisma.groupChat.createMany({
-    data: groupChats,
+    data: groupChats
   });
 
   const groupChatIds = await prisma.groupChat.findMany({
-    select: { id: true },
+    select: { id: true }
   });
 
   // Generate Messages
@@ -89,19 +89,19 @@ async function main() {
       const oneOnOneChatMessage = {
         content: faker.lorem.sentence(),
         senderId: user.id,
-        oneOnOneChatId: oneOnOneChatIds[i % oneOnOneChatIds.length].id,
+        oneOnOneChatId: oneOnOneChatIds[i % oneOnOneChatIds.length].id
       };
       const groupChatMessage = {
         content: faker.lorem.sentence(),
         senderId: user.id,
-        groupChatId: groupChatIds[i % groupChatIds.length].id,
+        groupChatId: groupChatIds[i % groupChatIds.length].id
       };
       messages.push(oneOnOneChatMessage, groupChatMessage);
     }
   }
 
   await prisma.message.createMany({
-    data: messages,
+    data: messages
   });
 
   console.log('Data seeded successfully');

@@ -25,7 +25,7 @@ const sendMessage = async (req: Request, res: Response, next: NextFunction) => {
 
     // Check if the sender is an existing user in the database
     const existingUser = await prisma.user.findUnique({
-      where: { id: senderId, isDeleted: false },
+      where: { id: senderId, isDeleted: false }
     });
     if (!existingUser) throw new AppError('Sender not found!', StatusCodes.NOT_FOUND);
 
@@ -33,7 +33,7 @@ const sendMessage = async (req: Request, res: Response, next: NextFunction) => {
     if (senderId !== user.userId)
       throw new AppError(
         'You are not allowed to send messages in this chat!',
-        StatusCodes.FORBIDDEN,
+        StatusCodes.FORBIDDEN
       );
 
     // Check if the chat exists in the database and the user is a member of the chat
@@ -41,15 +41,15 @@ const sendMessage = async (req: Request, res: Response, next: NextFunction) => {
       const existingChat = await prisma.oneOnOneChat.findUnique({
         where: {
           id: oneOnOneChatId,
-          OR: [{ initiatorId: user.userId }, { participantId: user.userId }],
-        },
+          OR: [{ initiatorId: user.userId }, { participantId: user.userId }]
+        }
       });
       if (!existingChat) throw new AppError('Chat not found!', StatusCodes.NOT_FOUND);
     }
 
     if (groupChatId) {
       const existingChat = await prisma.groupChat.findUnique({
-        where: { id: groupChatId, memberIds: { has: user.userId } },
+        where: { id: groupChatId, memberIds: { has: user.userId } }
       });
       if (!existingChat) throw new AppError('Chat not found!', StatusCodes.NOT_FOUND);
     }
@@ -60,19 +60,19 @@ const sendMessage = async (req: Request, res: Response, next: NextFunction) => {
         data: {
           content,
           senderId,
-          ...(oneOnOneChatId ? { oneOnOneChatId } : { groupChatId }),
-        },
+          ...(oneOnOneChatId ? { oneOnOneChatId } : { groupChatId })
+        }
       });
 
       if (oneOnOneChatId) {
         await prisma.oneOnOneChat.update({
           where: { id: oneOnOneChatId },
-          data: { lastMessageAt: message.createdAt },
+          data: { lastMessageAt: message.createdAt }
         });
       } else if (groupChatId) {
         await prisma.groupChat.update({
           where: { id: groupChatId },
-          data: { lastMessageAt: message.createdAt },
+          data: { lastMessageAt: message.createdAt }
         });
       }
 
@@ -83,7 +83,7 @@ const sendMessage = async (req: Request, res: Response, next: NextFunction) => {
     res.status(StatusCodes.CREATED).json({
       success: true,
       message: 'Message sent successfully!',
-      data: newMessage,
+      data: newMessage
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -118,14 +118,14 @@ const deleteMessage = async (req: Request, res: Response, next: NextFunction) =>
 
     // Check if the message exists in the database
     const existingMessage = await prisma.message.findUnique({
-      where: { id: messageId, isDeleted: false },
+      where: { id: messageId, isDeleted: false }
     });
     if (!existingMessage) throw new AppError('Message not found!', StatusCodes.NOT_FOUND);
 
     // Check if the message if from a group chat
     if (existingMessage.groupChatId) {
       const existingGroupChat = await prisma.groupChat.findUnique({
-        where: { id: existingMessage.groupChatId },
+        where: { id: existingMessage.groupChatId }
       });
       if (!existingGroupChat) throw new AppError('Group chat not found!', StatusCodes.NOT_FOUND);
 
@@ -134,7 +134,7 @@ const deleteMessage = async (req: Request, res: Response, next: NextFunction) =>
 
     if (existingMessage.oneOnOneChatId) {
       const existingOneOnOneChat = await prisma.oneOnOneChat.findUnique({
-        where: { id: existingMessage.oneOnOneChatId },
+        where: { id: existingMessage.oneOnOneChatId }
       });
       if (!existingOneOnOneChat)
         throw new AppError('One-On-One chat not found!', StatusCodes.NOT_FOUND);
@@ -153,15 +153,15 @@ const deleteMessage = async (req: Request, res: Response, next: NextFunction) =>
       where: { id: messageId },
       data: {
         content: '',
-        isDeleted: true,
-      },
+        isDeleted: true
+      }
     });
 
     // Respond with success message
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Message deleted successfully!',
-      data: null,
+      data: null
     });
   } catch (error) {
     // Pass any errors to the error handling middleware

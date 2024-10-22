@@ -6,13 +6,13 @@ import {
   logout,
   refreshToken,
   register,
-  resetPassword,
+  resetPassword
 } from '../controllers/auth.controllers';
 import {
   forgotPasswordSchema,
   resetPasswordSchema,
   userLoginSchema,
-  userRegistrationSchema,
+  userRegistrationSchema
 } from '../schemas/auth.schemas';
 import upload from '../middlewares/multer';
 import validateRequest from '../middlewares/validateRequest';
@@ -94,7 +94,7 @@ authRouter.post(
   '/register',
   upload.single('profilePicture'),
   validateRequest(userRegistrationSchema),
-  register,
+  register
 );
 
 authRouter.post(
@@ -168,7 +168,7 @@ authRouter.post(
 */
   '/login',
   validateRequest(userLoginSchema),
-  login,
+  login
 );
 
 authRouter.post(
@@ -235,7 +235,7 @@ authRouter.post(
 */
   '/logout',
   verifyToken('accessToken'),
-  logout,
+  logout
 );
 
 authRouter.post(
@@ -301,7 +301,7 @@ authRouter.post(
 */
   '/refresh-token',
   verifyToken('refreshToken'),
-  refreshToken,
+  refreshToken
 );
 
 authRouter.post(
@@ -376,7 +376,7 @@ authRouter.post(
 */
   '/forgot-password',
   validateRequest(forgotPasswordSchema),
-  forgotPassword,
+  forgotPassword
 );
 
 authRouter.post(
@@ -465,7 +465,7 @@ authRouter.post(
 */
   '/reset-password',
   validateRequest(resetPasswordSchema),
-  resetPassword,
+  resetPassword
 );
 
 export default authRouter;

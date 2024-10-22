@@ -3,11 +3,11 @@ import express from 'express';
 import {
   cancelFriendRequest,
   sendFriendRequest,
-  updateFriendRequest,
+  updateFriendRequest
 } from '../controllers/friend-requests.controllers';
 import {
   sendFriendRequestSchema,
-  updateFriendRequestSchema,
+  updateFriendRequestSchema
 } from '../schemas/friend-requests.schemas';
 import validateRequest from '../middlewares/validateRequest';
 import verifyToken from '../middlewares/verifyToken';
@@ -18,14 +18,14 @@ friendRequestsRouter.post(
   '/',
   verifyToken('accessToken'),
   validateRequest(sendFriendRequestSchema),
-  sendFriendRequest,
+  sendFriendRequest
 );
 
 friendRequestsRouter.put(
   '/:id',
   verifyToken('accessToken'),
   validateRequest(updateFriendRequestSchema),
-  updateFriendRequest,
+  updateFriendRequest
 );
 
 friendRequestsRouter.delete('/:id', verifyToken('accessToken'), cancelFriendRequest);

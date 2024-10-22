@@ -11,7 +11,7 @@ messagesRouter.post(
   '/send',
   validateRequest(sendMessageSchema),
   verifyToken('accessToken'),
-  sendMessage,
+  sendMessage
 );
 
 messagesRouter.patch('/delete/:messageId', verifyToken('accessToken'), deleteMessage);

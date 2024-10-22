@@ -28,21 +28,21 @@ const getUsers = async (req: Request, res: Response, next: NextFunction) => {
     const users = await prisma.user.findMany({
       where: {
         isDeleted: false,
-        ...(searchQuery && { name: { contains: searchQuery, mode: 'insensitive' } }),
+        ...(searchQuery && { name: { contains: searchQuery, mode: 'insensitive' } })
       },
       select: {
         id: true,
         email: true,
         name: true,
         profilePicture: true,
-        bio: true,
+        bio: true
       },
       take: take + 1, // Fetch one extra to determine if there's a next page
       ...(cursor && {
         skip: 1,
-        cursor: { id: cursor },
+        cursor: { id: cursor }
       }),
-      orderBy: { id: 'asc' },
+      orderBy: { id: 'asc' }
     });
 
     // Check if users were found
@@ -62,8 +62,8 @@ const getUsers = async (req: Request, res: Response, next: NextFunction) => {
       message: 'Users fetched successfully',
       data: {
         users: paginatedUsers,
-        pagination: { totalCount, hasNextPage, nextCursor },
-      },
+        pagination: { totalCount, hasNextPage, nextCursor }
+      }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -94,7 +94,7 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
 
     // Verify the current user exists
     const user = await prisma.user.findUnique({
-      where: { id: userId, isDeleted: false },
+      where: { id: userId, isDeleted: false }
     });
 
     if (!user) {
@@ -110,28 +110,28 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
             initiatorId: userId,
             ...(searchQuery && {
               participant: {
-                name: { contains: searchQuery, mode: 'insensitive' },
-              },
-            }),
+                name: { contains: searchQuery, mode: 'insensitive' }
+              }
+            })
           },
           {
             participantId: userId,
             ...(searchQuery && {
               initiator: {
-                name: { contains: searchQuery, mode: 'insensitive' },
-              },
-            }),
-          },
-        ],
+                name: { contains: searchQuery, mode: 'insensitive' }
+              }
+            })
+          }
+        ]
       },
       take: take + 1,
       orderBy: { lastMessageAt: 'desc' },
       include: {
         initiator: {
-          select: { id: true, name: true, profilePicture: true, isDeleted: true },
+          select: { id: true, name: true, profilePicture: true, isDeleted: true }
         },
         participant: {
-          select: { id: true, name: true, profilePicture: true, isDeleted: true },
+          select: { id: true, name: true, profilePicture: true, isDeleted: true }
         },
         messages: {
           take: 1,
@@ -141,12 +141,12 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
               select: {
                 id: true,
                 name: true,
-                isDeleted: true,
-              },
-            },
-          },
-        },
-      },
+                isDeleted: true
+              }
+            }
+          }
+        }
+      }
     });
 
     // Fetch group chats
@@ -155,8 +155,8 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
         memberIds: { has: userId },
         updatedAt: cursor ? { lt: cursor.lastMessageAt } : undefined,
         ...(searchQuery && {
-          OR: [{ name: { contains: searchQuery, mode: 'insensitive' } }],
-        }),
+          OR: [{ name: { contains: searchQuery, mode: 'insensitive' } }]
+        })
       },
       take: take + 1,
 
@@ -169,12 +169,12 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
             sender: {
               select: {
                 id: true,
-                name: true,
-              },
-            },
-          },
-        },
-      },
+                name: true
+              }
+            }
+          }
+        }
+      }
     });
 
     // Combine and sort all chats
@@ -183,9 +183,9 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
         ...chat,
         type: 'ONE_ON_ONE',
         name: userId === chat.initiatorId ? chat.participant.name : chat.initiator.name,
-        lastMessageAt: chat.lastMessageAt,
+        lastMessageAt: chat.lastMessageAt
       })),
-      ...groupChats.map((chat) => ({ ...chat, type: 'GROUP', lastMessageAt: chat.updatedAt })),
+      ...groupChats.map((chat) => ({ ...chat, type: 'GROUP', lastMessageAt: chat.updatedAt }))
     ].sort((a, b) => b.lastMessageAt.getTime() - a.lastMessageAt.getTime());
 
     // Fetch friends with no chats if search query is present
@@ -199,15 +199,15 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
           NOT: {
             OR: [
               { initiatedChats: { some: { participantId: userId } } },
-              { participatedChats: { some: { initiatorId: userId } } },
-            ],
-          },
+              { participatedChats: { some: { initiatorId: userId } } }
+            ]
+          }
         },
         select: {
           id: true,
           name: true,
-          profilePicture: true,
-        },
+          profilePicture: true
+        }
       });
     }
 
@@ -220,7 +220,7 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
     if (hasNextPage) {
       const lastChat = paginatedChats[paginatedChats.length - 1];
       nextCursor = Buffer.from(
-        JSON.stringify({ lastMessageAt: lastChat.lastMessageAt, id: lastChat.id }),
+        JSON.stringify({ lastMessageAt: lastChat.lastMessageAt, id: lastChat.id })
       ).toString('base64');
     }
 
@@ -231,8 +231,8 @@ const getUserChats = async (req: Request, res: Response, next: NextFunction) => 
       data: {
         chats: paginatedChats,
         friendsWithNoChats: searchQuery ? friendsWithNoChats : [],
-        pagination: { hasNextPage, nextCursor },
-      },
+        pagination: { hasNextPage, nextCursor }
+      }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -265,8 +265,8 @@ const getUser = async (req: Request, res: Response, next: NextFunction) => {
         friendOfIds: true,
         memberOfGroupIds: true,
         updatedAt: true,
-        createdAt: true,
-      },
+        createdAt: true
+      }
     });
 
     // If the user is not found, throw a custom error
@@ -278,7 +278,7 @@ const getUser = async (req: Request, res: Response, next: NextFunction) => {
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'User fetched successfully',
-      data: user,
+      data: user
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -322,7 +322,7 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
     if (profilePicture) {
       // Upload the new profile picture to Cloudinary
       const updatedProfilePicture = await cloudinary.uploader.upload(profilePicture.path, {
-        folder: 'profile_image',
+        folder: 'profile_image'
       });
 
       if (!updatedProfilePicture) {
@@ -344,14 +344,14 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
     // Update the user in the database
     const updatedUser = await prisma.user.update({
       where: { id },
-      data: updateData,
+      data: updateData
     });
 
     // Send the response with the updated user data
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'User updated successfully',
-      data: updatedUser,
+      data: updatedUser
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -401,20 +401,20 @@ const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
         profilePicture: null,
         bio: null,
         isDeleted: true,
-        deletedAt: new Date(),
-      },
+        deletedAt: new Date()
+      }
     });
 
     // Remove all the sent and received friend requests of user
     await prisma.friendRequest.deleteMany({
-      where: { OR: [{ senderId: id }, { receiverId: id }] },
+      where: { OR: [{ senderId: id }, { receiverId: id }] }
     });
 
     // Send the response indicating successful deletion
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'User deleted successfully',
-      data: null,
+      data: null
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -456,14 +456,14 @@ const changePassword = async (req: Request, res: Response, next: NextFunction) =
     // Update the user's password in the database
     await prisma.user.update({
       where: { id: userId },
-      data: { password: hashedPassword },
+      data: { password: hashedPassword }
     });
 
     // Send success response
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Password changed successfully',
-      data: null,
+      data: null
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -489,7 +489,7 @@ const getFriends = async (req: Request, res: Response, next: NextFunction) => {
 
     // Verify the user exists
     const user = await prisma.user.findUnique({
-      where: { id },
+      where: { id }
     });
     if (!user) {
       throw new AppError('User not found', StatusCodes.NOT_FOUND);
@@ -500,21 +500,21 @@ const getFriends = async (req: Request, res: Response, next: NextFunction) => {
       where: {
         ...(searchQuery && { name: { contains: searchQuery, mode: 'insensitive' } }),
         OR: [{ friendIds: { has: id } }, { friendOfIds: { has: id } }],
-        isDeleted: false,
+        isDeleted: false
       },
       take: take + 1, // Fetch one extra to determine if there's a next page
       ...(cursor && {
         skip: 1,
-        cursor: { id: cursor as string },
+        cursor: { id: cursor as string }
       }),
       orderBy: { id: 'asc' },
       select: {
         id: true,
         name: true,
         email: true,
-        profilePicture: true,
+        profilePicture: true
       },
-      distinct: ['id'],
+      distinct: ['id']
     });
 
     // Determine if there's a next page and prepare pagination info
@@ -529,9 +529,9 @@ const getFriends = async (req: Request, res: Response, next: NextFunction) => {
       data: {
         friends: paginatedFriends,
         pagination: {
-          pagination: { hasNextPage, nextCursor },
-        },
-      },
+          pagination: { hasNextPage, nextCursor }
+        }
+      }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -564,7 +564,7 @@ const getFriendRequests = async (req: Request, res: Response, next: NextFunction
 
     // Verify the user exists
     const user = await prisma.user.findUnique({
-      where: { id },
+      where: { id }
     });
     if (!user) {
       throw new AppError('User not found', StatusCodes.NOT_FOUND);
@@ -577,20 +577,20 @@ const getFriendRequests = async (req: Request, res: Response, next: NextFunction
         status: 'PENDING',
         sender: {
           ...(searchQuery && { name: { contains: searchQuery, mode: 'insensitive' } }),
-          isDeleted: false,
-        },
+          isDeleted: false
+        }
       },
       take: take + 1, // Fetch one extra to determine if there's a next page
       ...(cursor && {
         skip: 1,
-        cursor: { id: cursor },
+        cursor: { id: cursor }
       }),
       orderBy: { createdAt: 'desc' },
       include: {
         sender: {
-          select: { id: true, name: true, email: true, profilePicture: true },
-        },
-      },
+          select: { id: true, name: true, email: true, profilePicture: true }
+        }
+      }
     });
 
     // Determine if there's a next page and prepare pagination info
@@ -606,9 +606,9 @@ const getFriendRequests = async (req: Request, res: Response, next: NextFunction
         friendRequests: paginatedFriendRequests,
         pagination: {
           hasNextPage,
-          nextCursor,
-        },
-      },
+          nextCursor
+        }
+      }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -641,9 +641,9 @@ const unfriendUser = async (req: Request, res: Response, next: NextFunction) => 
     // Fetch both users simultaneously
     const [user, friend] = await Promise.all([
       prisma.user.findUnique({
-        where: { id, isDeleted: false },
+        where: { id, isDeleted: false }
       }),
-      prisma.user.findUnique({ where: { id: friendId, isDeleted: false } }),
+      prisma.user.findUnique({ where: { id: friendId, isDeleted: false } })
     ]);
 
     // Verify both users exist
@@ -665,34 +665,34 @@ const unfriendUser = async (req: Request, res: Response, next: NextFunction) => 
         data: {
           friendIds: { set: user.friendIds.filter((id) => id !== friendId) },
           friendOfIds: {
-            set: user.friendOfIds.filter((id) => id !== friendId),
-          },
-        },
+            set: user.friendOfIds.filter((id) => id !== friendId)
+          }
+        }
       }),
       prisma.user.update({
         where: { id: friendId },
         data: {
           friendIds: { set: friend.friendIds.filter((id) => id !== userId) },
           friendOfIds: {
-            set: friend.friendOfIds.filter((id) => id !== userId),
-          },
-        },
+            set: friend.friendOfIds.filter((id) => id !== userId)
+          }
+        }
       }),
       prisma.friendRequest.deleteMany({
         where: {
           OR: [
             { senderId: userId, receiverId: friendId },
-            { senderId: friendId, receiverId: userId },
-          ],
-        },
-      }),
+            { senderId: friendId, receiverId: userId }
+          ]
+        }
+      })
     ]);
 
     // Send successful response
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Friend removed successfully',
-      data: null,
+      data: null
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -725,7 +725,7 @@ const getSuggestedFriends = async (req: Request, res: Response, next: NextFuncti
 
     // Verify the user exists
     const user = await prisma.user.findUnique({
-      where: { id },
+      where: { id }
     });
     if (!user) {
       throw new AppError('User not found', StatusCodes.NOT_FOUND);
@@ -742,23 +742,23 @@ const getSuggestedFriends = async (req: Request, res: Response, next: NextFuncti
           {
             OR: [
               { friendIds: { hasSome: existingFriendIds } },
-              { friendOfIds: { hasSome: existingFriendIds } },
-            ],
-          },
-        ],
+              { friendOfIds: { hasSome: existingFriendIds } }
+            ]
+          }
+        ]
       },
       take: take + 1, // Fetch one extra to determine if there's a next page
       ...(cursor && {
         skip: 1,
-        cursor: { id: cursor },
+        cursor: { id: cursor }
       }),
       orderBy: { id: 'asc' },
       select: {
         id: true,
         name: true,
         email: true,
-        profilePicture: true,
-      },
+        profilePicture: true
+      }
     });
 
     // Determine if there's a next page and prepare pagination info
@@ -772,8 +772,8 @@ const getSuggestedFriends = async (req: Request, res: Response, next: NextFuncti
       message: 'Suggested friends fetched successfully',
       data: {
         suggestedFriends: paginatedSuggestions,
-        pagination: { hasNextPage, nextCursor },
-      },
+        pagination: { hasNextPage, nextCursor }
+      }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -812,7 +812,7 @@ const getMutualFriends = async (req: Request, res: Response, next: NextFunction)
     // Fetch both users simultaneously
     const [user1, user2] = await Promise.all([
       prisma.user.findUnique({ where: { id, isDeleted: false } }),
-      prisma.user.findUnique({ where: { id: otherUserId, isDeleted: false } }),
+      prisma.user.findUnique({ where: { id: otherUserId, isDeleted: false } })
     ]);
 
     // Verify both users exist
@@ -828,23 +828,23 @@ const getMutualFriends = async (req: Request, res: Response, next: NextFunction)
           { OR: [{ friendIds: { has: id } }, { friendOfIds: { has: id } }] },
           // Friends of the other user
           {
-            OR: [{ friendIds: { has: otherUserId } }, { friendOfIds: { has: otherUserId } }],
-          },
+            OR: [{ friendIds: { has: otherUserId } }, { friendOfIds: { has: otherUserId } }]
+          }
         ],
-        isDeleted: false,
+        isDeleted: false
       },
       take: take + 1, // Fetch one extra to determine if there's a next page
       ...(cursor && {
         skip: 1,
-        cursor: { id: cursor },
+        cursor: { id: cursor }
       }),
       orderBy: { id: 'asc' },
       select: {
         id: true,
         name: true,
         email: true,
-        profilePicture: true,
-      },
+        profilePicture: true
+      }
     });
 
     // Determine if there's a next page and prepare pagination info
@@ -858,8 +858,8 @@ const getMutualFriends = async (req: Request, res: Response, next: NextFunction)
       message: 'Mutual friends fetched successfully',
       data: {
         mutualFriends: paginatedMutualFriends,
-        pagination: { hasNextPage, nextCursor },
-      },
+        pagination: { hasNextPage, nextCursor }
+      }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -887,7 +887,7 @@ const getFriendshipStatus = async (req: Request, res: Response, next: NextFuncti
     // Fetch both users
     const [currentUser, otherUser] = await Promise.all([
       prisma.user.findUnique({ where: { id, isDeleted: false } }),
-      prisma.user.findUnique({ where: { id: otherUserId, isDeleted: false } }),
+      prisma.user.findUnique({ where: { id: otherUserId, isDeleted: false } })
     ]);
 
     // Verify both users exist
@@ -903,7 +903,7 @@ const getFriendshipStatus = async (req: Request, res: Response, next: NextFuncti
       return res.status(StatusCodes.OK).json({
         success: true,
         message: 'Friendship status fetched successfully',
-        data: { status: FriendShipStatus.FRIENDS },
+        data: { status: FriendShipStatus.FRIENDS }
       });
     }
 
@@ -912,10 +912,10 @@ const getFriendshipStatus = async (req: Request, res: Response, next: NextFuncti
       where: {
         OR: [
           { senderId: id, receiverId: otherUserId },
-          { senderId: otherUserId, receiverId: id },
+          { senderId: otherUserId, receiverId: id }
         ],
-        status: 'PENDING',
-      },
+        status: 'PENDING'
+      }
     });
 
     if (friendRequest) {
@@ -928,7 +928,7 @@ const getFriendshipStatus = async (req: Request, res: Response, next: NextFuncti
       return res.status(StatusCodes.OK).json({
         success: true,
         message: 'Friendship status fetched successfully',
-        data: { status },
+        data: { status }
       });
     }
 
@@ -936,7 +936,7 @@ const getFriendshipStatus = async (req: Request, res: Response, next: NextFuncti
     return res.status(StatusCodes.OK).json({
       success: true,
       message: 'Friendship status fetched successfully',
-      data: { status: FriendShipStatus.NOT_FRIENDS },
+      data: { status: FriendShipStatus.NOT_FRIENDS }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -956,5 +956,5 @@ export {
   getUserChats,
   getUser,
   unfriendUser,
-  updateUser,
+  updateUser
 };

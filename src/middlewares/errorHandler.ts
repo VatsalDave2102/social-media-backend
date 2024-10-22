@@ -25,7 +25,7 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     success: false,
     message,
     data: null,
-    ...(NODE_ENV === 'development' && { stack: err.stack }),
+    ...(NODE_ENV === 'development' && { stack: err.stack })
   };
 
   if (NODE_ENV === 'development') {
