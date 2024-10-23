@@ -216,7 +216,49 @@ app.use(
 );
 
 // Group Chat Routes
-app.use('/api/v1/chats/group', groupChatRouter);
+app.use(
+  '/api/v1/chats/group',
+  groupChatRouter
+  /* 
+  #swagger.tags = ['Group Chats']
+
+  #swagger.security = [{
+   "bearerAuth": []
+  }] 
+
+  #swagger.responses[401] = {
+    description: "Unauthorized Access",
+    content: {
+      'application/json': {
+        schema:{
+          $ref: "#/components/schemas/UnauthorizedAccessResponse"
+        },
+        examples: {
+          unauthorizedAccessResponse: {
+            $ref: "#/components/examples/UnauthorizedAccessResponse"
+          }
+        }
+      }           
+    }
+  }   
+
+  #swagger.responses[500] = {
+    description: 'Internal server error',
+    content: {
+      'application/json': {
+        schema:{
+          $ref: "#/components/schemas/InternalServerErrorResponse"
+        },
+        examples: {
+          internalServerErrorResponse: {
+            $ref: "#/components/examples/InternalServerErrorResponse"
+          }
+        }
+      }           
+    }
+  } 
+  */
+);
 
 // Message Routes
 app.use('/api/v1/messages', messagesRouter);
