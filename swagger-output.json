@@ -558,6 +558,82 @@
         ]
       }
     },
+    "/api/v1/users/get-me": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Retrieves a logged in user.",
+        "description": "This endpoint retrieves an authenticated user using JWT token. It returns the user's profile information, including name, email, bio, profile picture, friend lists, group memberships, and timestamps for creation and updates. If the user is not found or has been deleted, a 'User not found' error is returned.",
+        "responses": {
+          "200": {
+            "description": "User fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserResponse"
+                },
+                "examples": {
+                  "getUserResponse": {
+                    "$ref": "#/components/examples/GetUserResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/users/chats": {
       "get": {
         "tags": [

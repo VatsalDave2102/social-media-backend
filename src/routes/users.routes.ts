@@ -3,6 +3,7 @@ import { Router } from 'express';
 import {
   changePassword,
   deleteUser,
+  getAuthenticatedUser,
   getFriendRequests,
   getFriends,
   getFriendshipStatus,
@@ -67,6 +68,33 @@ userRouter.get(
     }
   }
   */
+);
+
+userRouter.get(
+  '/me',
+  verifyToken('accessToken'),
+  getAuthenticatedUser
+  /*
+  #swagger.summary = 'Retrieves an authenticated user.'
+
+  #swagger.description = "This endpoint retrieves an authenticated user using JWT token. It returns the user's profile information, including name, email, bio, profile picture, friend lists, group memberships, and timestamps for creation and updates. If the user is not found or has been deleted, a 'User not found' error is returned."
+
+  #swagger.responses[200] = {
+    description: 'Authenticated user fetched successfully',
+    content: {
+      'application/json': {
+        schema: {
+          $ref: '#/components/schemas/GetUserResponse'
+        },
+        examples: {
+          getUserResponse: {
+            $ref: '#/components/examples/GetUserResponse'
+          }
+        }
+      }
+    }
+  }
+*/
 );
 
 userRouter.get(
