@@ -142,7 +142,7 @@ const updateFriendRequest = async (req: Request, res: Response, next: NextFuncti
     } else if (status === FriendRequestStatus.REJECTED) {
       // Reject the friend request by deleting it
       await prisma.friendRequest.delete({ where: { id } });
-      return res.status(200).json({
+      return res.status(StatusCodes.OK).json({
         success: true,
         message: 'Friend request rejected successfully',
         data: null
