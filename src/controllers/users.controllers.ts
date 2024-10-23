@@ -390,7 +390,19 @@ const updateUser = async (req: Request, res: Response, next: NextFunction) => {
     // Update the user in the database
     const updatedUser = await prisma.user.update({
       where: { id },
-      data: updateData
+      data: updateData,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        bio: true,
+        profilePicture: true,
+        friendIds: true,
+        friendOfIds: true,
+        memberOfGroupIds: true,
+        updatedAt: true,
+        createdAt: true
+      }
     });
 
     // Send the response with the updated user data
@@ -574,9 +586,7 @@ const getFriends = async (req: Request, res: Response, next: NextFunction) => {
       message: 'Friends fetched successfully',
       data: {
         friends: paginatedFriends,
-        pagination: {
-          pagination: { hasNextPage, nextCursor }
-        }
+        pagination: { hasNextPage, nextCursor }
       }
     });
   } catch (error) {

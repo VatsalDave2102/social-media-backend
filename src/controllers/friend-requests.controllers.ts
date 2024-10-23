@@ -68,6 +68,7 @@ const sendFriendRequest = async (req: Request, res: Response, next: NextFunction
 
     // Send successful response
     res.status(StatusCodes.CREATED).json({
+      success: true,
       message: 'Friend request sent successfully',
       data: { friendRequest }
     });
