@@ -261,7 +261,81 @@ app.use(
 );
 
 // Message Routes
-app.use('/api/v1/messages', messagesRouter);
+app.use(
+  '/api/v1/messages',
+  messagesRouter
+  /* 
+  #swagger.tags = ['Messages']
+
+  #swagger.security = [{
+   "bearerAuth": []
+  }] 
+
+  #swagger.responses[401] = {
+    description: "Unauthorized Access",
+    content: {
+      'application/json': {
+        schema:{
+          $ref: "#/components/schemas/UnauthorizedAccessResponse"
+        },
+        examples: {
+          unauthorizedAccessResponse: {
+            $ref: "#/components/examples/UnauthorizedAccessResponse"
+          }
+        }
+      }           
+    }
+  }   
+
+  #swagger.responses[403] = {
+    description: 'Forbidden',
+    content: {
+      'application/json': {
+        schema:{
+          $ref: "#/components/schemas/ForbiddenResponse"
+        },
+        examples: {
+          forbiddenResponse: {
+            $ref: "#/components/examples/ForbiddenResponse"
+          }
+        }
+      }           
+    }
+  }
+
+  #swagger.responses[404] = {
+    description: 'Not found',
+    content: {
+      'application/json': {
+        schema:{
+          $ref: "#/components/schemas/NotFoundResponse"
+        },
+        examples: {
+          notFoundResponse: {
+            $ref: "#/components/examples/NotFoundResponse"
+          }
+        }
+      }           
+    }
+  }
+
+  #swagger.responses[500] = {
+    description: 'Internal server error',
+    content: {
+      'application/json': {
+        schema:{
+          $ref: "#/components/schemas/InternalServerErrorResponse"
+        },
+        examples: {
+          internalServerErrorResponse: {
+            $ref: "#/components/examples/InternalServerErrorResponse"
+          }
+        }
+      }           
+    }
+  } 
+  */
+);
 
 app.use(errorConverter);
 app.use(errorHandler);
