@@ -558,16 +558,16 @@
         ]
       }
     },
-    "/api/v1/users/get-me": {
+    "/api/v1/users/me": {
       "get": {
         "tags": [
           "User"
         ],
-        "summary": "Retrieves a logged in user.",
+        "summary": "Retrieves an authenticated user.",
         "description": "This endpoint retrieves an authenticated user using JWT token. It returns the user's profile information, including name, email, bio, profile picture, friend lists, group memberships, and timestamps for creation and updates. If the user is not found or has been deleted, a 'User not found' error is returned.",
         "responses": {
           "200": {
-            "description": "User fetched successfully",
+            "description": "Authenticated user fetched successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -2663,31 +2663,99 @@
     },
     "/api/v1/chats/group/create": {
       "post": {
-        "description": "",
+        "tags": [
+          "Group Chats"
+        ],
+        "summary": "Create a new group chat",
+        "description": "Creates a group chat with specified members, customizable name, description,   and group icon. The creator must be friends with all added members, and a group icon is mandatory.   The creator automatically becomes the group owner with administrative privileges.",
         "responses": {
-          "default": {
-            "description": ""
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "ownerId": {
-                    "example": "any"
-                  },
-                  "memberIds": {
-                    "example": "any"
-                  },
-                  "name": {
-                    "example": "any"
-                  },
-                  "groupDescription": {
-                    "example": "any"
+          "201": {
+            "description": "Chat created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateGroupChatResponse"
+                },
+                "examples": {
+                  "chatCreationResponse": {
+                    "$ref": "#/components/examples/CreateGroupChatResponse"
                   }
                 }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/BadRequestResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroupChatRequest"
               }
             }
           }
@@ -2696,7 +2764,11 @@
     },
     "/api/v1/chats/group/{chatId}": {
       "get": {
-        "description": "",
+        "tags": [
+          "Group Chats"
+        ],
+        "summary": "Get details of a specific group chat",
+        "description": "Fetches comprehensive details of a specific group chat,   including name, description, icon, owner, and member information.   Only group members and the owner can access these details.   The response includes all current group settings and participant information.",
         "parameters": [
           {
             "name": "chatId",
@@ -2708,15 +2780,96 @@
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Chat details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGroupChatDetailsResponse"
+                },
+                "examples": {
+                  "chatDetailsResponse": {
+                    "$ref": "#/components/examples/GetGroupChatDetailsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/chats/group/{chatId}/settings": {
       "patch": {
-        "description": "",
+        "tags": [
+          "Group Chats"
+        ],
+        "summary": "Update settings of an existing group chat",
+        "description": "Enables group owners to modify chat settings including name, description, and group icon.   The endpoint accepts settings in JSON format and supports image uploads for the group icon.   Only the group owner has permission to update these settings.",
         "parameters": [
           {
             "name": "chatId",
@@ -2724,19 +2877,126 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "group chat ID"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Chat settings updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateGroupChatSettingsResponse"
+                },
+                "examples": {
+                  "chatSettingsUpdationResponse": {
+                    "$ref": "#/components/examples/UpdateGroupChatSettingsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/BadRequestResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGroupChatSettingsRequest"
+              }
+            }
           }
         }
       }
     },
     "/api/v1/chats/group/{chatId}/messages": {
       "get": {
-        "description": "",
+        "tags": [
+          "Group Chats"
+        ],
+        "summary": "Retrieve messages from a specific group chat",
+        "description": "Retrieves messages from a group chat with advanced filtering capabilities.   Features include pagination for efficient message loading, text-based search functionality,   and customizable batch sizes. Messages are returned in descending chronological order,   and only group members or the owner can access the chat history.   The response includes message content, metadata, and pagination details for seamless navigation   through the chat history.",
         "parameters": [
           {
             "name": "chatId",
@@ -2744,11 +3004,14 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "group chat ID"
           },
           {
             "name": "cursor",
             "in": "query",
+            "description": "Pagination cursor for fetching the next set of results",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2756,6 +3019,8 @@
           {
             "name": "search",
             "in": "query",
+            "description": "Search term to filter messages by content",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -2763,21 +3028,104 @@
           {
             "name": "take",
             "in": "query",
+            "description": "Number of messages to retrieve per request",
+            "required": false,
             "schema": {
               "type": "string"
             }
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Chat messages retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGroupChatMessagesResponse"
+                },
+                "examples": {
+                  "getMessagesResponse": {
+                    "$ref": "#/components/examples/GetGroupChatMessagesResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/chats/group/{chatId}/add-members": {
       "patch": {
-        "description": "",
+        "tags": [
+          "Group Chats"
+        ],
+        "summary": "Add members to a specific group chat",
+        "description": "Enables group owners to add new members to an existing group chat.   The endpoint validates friendship status, ensuring new members are friends with the owner.   It handles duplicate member checks, preventing re-adding existing members, and supports adding   multiple members simultaneously.",
         "parameters": [
           {
             "name": "chatId",
@@ -2785,27 +3133,113 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "group chat ID"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "201": {
+            "description": "Members added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddMembersToGroupChatResponse"
+                },
+                "examples": {
+                  "addMembersResponse": {
+                    "$ref": "#/components/examples/AddMembersToGroupChatResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/BadRequestResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "ownerId": {
-                    "example": "any"
-                  },
-                  "memberIds": {
-                    "example": "any"
-                  }
-                }
+                "$ref": "#/components/schemas/AddMembersToGroupChatRequest"
               }
             }
           }
@@ -2814,10 +3248,142 @@
     },
     "/api/v1/chats/group/{chatId}/remove-member": {
       "patch": {
-        "description": "",
+        "tags": [
+          "Group Chats"
+        ],
+        "summary": "Remove a member from a specific group chat",
+        "description": "Enables group owners to remove members from an existing group chat.   The endpoint includes comprehensive validation checks: verifies member existence,   prevents owner removal, confirms removal permissions, and ensures the target member is   currently in the group.   Only group owners have the authority to remove members, and the operation is irreversible.",
+        "parameters": [
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "group chat ID"
+          }
+        ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Member deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemoveMemberFromGroupChatResponse"
+                },
+                "examples": {
+                  "deleteMemberResponse": {
+                    "$ref": "#/components/examples/RemoveMemberFromGroupChatResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/BadRequestResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictResponse"
+                },
+                "examples": {
+                  "conflictResponse": {
+                    "$ref": "#/components/examples/ConflictResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveMemberFromGroupChatRequest"
+              }
+            }
           }
         }
       }
@@ -3427,6 +3993,122 @@
           }
         }
       },
+      "CreateGroupChatResponse": {
+        "value": {
+          "success": true,
+          "message": "Group chat created successfully!",
+          "data": {
+            "id": "671764c1c24a444d00123456",
+            "name": "New Group Chat",
+            "ownerId": "66b33a2d19b3564668356789",
+            "groupDescription": "Welcome to our new group chat!",
+            "groupIcon": "https://res.cloudinary.com/du9x9e2oh/image/upload/v1729586123/group_icons/mkymgovdvgfv8ls2.jpg",
+            "createdAt": "2024-10-22T08:39:29.733Z",
+            "updatedAt": "2024-10-22T08:39:29.733Z",
+            "lastMessageAt": "2024-10-22T08:39:29.733Z",
+            "memberIds": [
+              "66b30bbeaea1612592e7501a",
+              "671764c1c24a444d00123456"
+            ]
+          }
+        }
+      },
+      "GetGroupChatDetailsResponse": {
+        "value": {
+          "success": true,
+          "message": "Chat details retrieved successfully!",
+          "data": {
+            "id": "671764c1c24a444d00123456",
+            "name": "New Group Chat",
+            "ownerId": "66b33a2d19b3564668356789",
+            "groupDescription": "Welcome to our new group chat!",
+            "groupIcon": "https://res.cloudinary.com/du9x9e2oh/image/upload/v1729586123/group_icons/mkymgovdvgfv8ls2.jpg",
+            "createdAt": "2024-10-22T08:39:29.733Z",
+            "updatedAt": "2024-10-22T08:39:29.733Z",
+            "lastMessageAt": "2024-10-22T08:39:29.733Z",
+            "memberIds": [
+              "66b30bbeaea1612592e7501a",
+              "671764c1c24a444d00123456"
+            ]
+          }
+        }
+      },
+      "UpdateGroupChatSettingsResponse": {
+        "value": {
+          "success": true,
+          "message": "Chat settings updated successfully!",
+          "data": null
+        }
+      },
+      "GetGroupChatMessagesResponse": {
+        "value": {
+          "success": true,
+          "message": "Chat messages retrieved successfully!",
+          "data": {
+            "messages": [
+              {
+                "id": "66f3ec5c0390fdcf34ce778d",
+                "content": "New Message 4",
+                "senderId": "66b33a2d19b3564668398765",
+                "oneOnOneChatId": null,
+                "groupChatId": "66f15453eda9647f5be80ab7",
+                "createdAt": "2024-09-25T10:56:28.374Z",
+                "updatedAt": "2024-09-25T10:56:28.374Z",
+                "isDeleted": false
+              },
+              {
+                "id": "66f3e78489bb1b6a4f79cf7c",
+                "content": "New Message 3",
+                "senderId": "66b33a2d19b3564668356789",
+                "oneOnOneChatId": null,
+                "groupChatId": "66f15453eda9647f5be80ab7",
+                "createdAt": "2024-09-25T10:35:48.140Z",
+                "updatedAt": "2024-09-25T10:35:48.140Z",
+                "isDeleted": false
+              },
+              {
+                "id": "66f3e5f689bb1b6a4f79cf7b",
+                "content": "New Message 2",
+                "senderId": "66b33a2d19b3564668398765",
+                "oneOnOneChatId": null,
+                "groupChatId": "66f15453eda9647f5be80ab7",
+                "createdAt": "2024-09-25T10:29:10.240Z",
+                "updatedAt": "2024-09-25T10:29:10.240Z",
+                "isDeleted": false
+              },
+              {
+                "id": "66f3d4aee4e5768ce4fc250a",
+                "content": "New Message 1",
+                "senderId": "66b33a2d19b3564668356789",
+                "oneOnOneChatId": null,
+                "groupChatId": "66f15453eda9647f5be80ab7",
+                "createdAt": "2024-09-25T09:15:26.451Z",
+                "updatedAt": "2024-09-25T09:15:26.451Z",
+                "isDeleted": false
+              }
+            ],
+            "pagination": {
+              "totalCount": 4,
+              "hasNextPage": false,
+              "nextCursor": null
+            }
+          }
+        }
+      },
+      "AddMembersToGroupChatResponse": {
+        "value": {
+          "success": true,
+          "message": "Members added successfully!",
+          "data": null
+        }
+      },
+      "RemoveMemberFromGroupChatResponse": {
+        "value": {
+          "success": true,
+          "message": "Member removed successfully!",
+          "data": null
+        }
+      },
       "GetFriendRequestsResponse": {
         "value": {
           "success": true,
@@ -3940,6 +4622,312 @@
           "data": {
             "type": "object",
             "nullable": true
+          }
+        }
+      },
+      "CreateGroupChatRequest": {
+        "type": "object",
+        "properties": {
+          "ownerId": {
+            "type": "string",
+            "description": "ID of the group chat creator/owner",
+            "example": ""
+          },
+          "memberIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "IDs of the group chat members",
+            "example": [
+              ""
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the group chat",
+            "example": ""
+          },
+          "groupDescription": {
+            "type": "string",
+            "description": "Description of the group chat",
+            "example": ""
+          },
+          "groupIcon": {
+            "type": "string",
+            "description": "Icon of the group chat",
+            "format": "binary"
+          }
+        },
+        "required": [
+          "ownerId",
+          "memberIds",
+          "name",
+          "groupIcon"
+        ]
+      },
+      "CreateGroupChatResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "ownerId": {
+                "type": "string"
+              },
+              "groupDescription": {
+                "type": "string"
+              },
+              "groupIcon": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "lastMessageAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "memberIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetGroupChatDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "ownerId": {
+                "type": "string"
+              },
+              "groupDescription": {
+                "type": "string"
+              },
+              "groupIcon": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "lastMessageAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "memberIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "UpdateGroupChatSettingsRequest": {
+        "type": "object",
+        "properties": {
+          "settings": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "example": ""
+              },
+              "groupDescription": {
+                "type": "string",
+                "example": ""
+              }
+            }
+          },
+          "groupIcon": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "UpdateGroupChatSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "nullable": "true"
+          }
+        }
+      },
+      "GetGroupChatMessagesResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "messages": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "string"
+                    },
+                    "senderId": {
+                      "type": "string"
+                    },
+                    "oneOnOnechatId": {
+                      "type": "string"
+                    },
+                    "groupChatId": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "isDeleted": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalCount": {
+                    "type": "number"
+                  },
+                  "hasNextPage": {
+                    "type": "boolean"
+                  },
+                  "nextCursor": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "AddMembersToGroupChatRequest": {
+        "type": "object",
+        "properties": {
+          "ownerId": {
+            "type": "string",
+            "description": "ID of the group chat creator/owner",
+            "example": ""
+          },
+          "memberIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "IDs of the group chat members",
+            "example": [
+              ""
+            ]
+          }
+        }
+      },
+      "AddMembersToGroupChatResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "nullable": "true"
+          }
+        }
+      },
+      "RemoveMemberFromGroupChatRequest": {
+        "type": "object",
+        "properties": {
+          "ownerId": {
+            "type": "string",
+            "description": "ID of the group chat creator/owner",
+            "example": ""
+          },
+          "memberId": {
+            "type": "string",
+            "description": "ID of the member to be deleted",
+            "example": ""
+          }
+        }
+      },
+      "RemoveMemberFromGroupChatResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "nullable": "true"
           }
         }
       },
