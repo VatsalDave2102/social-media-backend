@@ -16,6 +16,10 @@
     {
       "name": "Auth",
       "description": "Authentication routes"
+    },
+    {
+      "name": "User",
+      "description": "User Management routes"
     }
   ],
   "paths": {
@@ -451,51 +455,26 @@
     },
     "/api/v1/users/": {
       "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "cursor",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "take",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "query",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
+        "tags": [
+          "User"
         ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/v1/users/chats": {
-      "get": {
-        "description": "",
+        "summary": "Fetch all users",
+        "description": "This endpoint retrieves a paginated list of users, with optional search functionality. It supports cursor-based pagination and returns user information along with pagination metadata such as total count, next page cursor, and whether there are more results.",
         "parameters": [
           {
-            "name": "take",
+            "name": "cursor",
             "in": "query",
+            "description": "Cursor for fetching the next page of results (i.e., the ID of the last user from the previous page).",
+            "required": false,
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "cursor",
+            "name": "take",
             "in": "query",
+            "description": "The number of users to fetch in one request. Defaults to a predefined batch size.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -503,6 +482,8 @@
           {
             "name": "query",
             "in": "query",
+            "description": "Optional search query to filter users by their name.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -510,14 +491,185 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Users fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUsersResponse"
+                },
+                "examples": {
+                  "getUsersResponse": {
+                    "$ref": "#/components/examples/GetUsersResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/users/chats": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Fetch all chats of user",
+        "description": "This endpoint fetches a paginated list of chats for the current user, including both one-on-one chats and group chats. It supports optional search by chat participant or group name, as well as cursor-based pagination for efficient scrolling through chat history.",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Cursor for fetching the next page of results (i.e., the ID of the last user from the previous page).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "take",
+            "in": "query",
+            "description": "The number of users to fetch in one request. Defaults to a predefined batch size.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Optional search query to filter users by their name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User chats fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserChatsResponse"
+                },
+                "examples": {
+                  "getUserChatsResponse": {
+                    "$ref": "#/components/examples/GetUserChatsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/users/{id}": {
       "get": {
-        "description": "",
+        "tags": [
+          "User"
+        ],
+        "summary": "Retrieves a single user by their ID.",
+        "description": "This endpoint retrieves a single user by their ID. It returns the user's profile information, including name, email, bio, profile picture, friend lists, group memberships, and timestamps for creation and updates. If the user is not found or has been deleted, a 'User not found' error is returned.",
         "parameters": [
           {
             "name": "id",
@@ -525,52 +677,194 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Unique MongoDB ID"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      },
-      "put": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        },
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "example": "any"
-                  },
-                  "bio": {
-                    "example": "any"
+          "200": {
+            "description": "User fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserResponse"
+                },
+                "examples": {
+                  "getUserResponse": {
+                    "$ref": "#/components/examples/GetUserResponse"
                   }
                 }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Updates a user's profile information including name, bio, and profile picture.",
+        "description": "This endpoint allows a user to update their profile information, including their name, bio, and profile picture. The user must be authenticated and can only update their own profile. The profile picture, if provided, is uploaded to Cloudinary, and the previous one is deleted. It returns the updated user data upon success.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Unique MongoDB ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserResponse"
+                },
+                "examples": {
+                  "updateUserResponse": {
+                    "$ref": "#/components/examples/UpdateUserResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You can only update your own profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
               }
             }
           }
         }
       },
       "delete": {
-        "description": "",
+        "tags": [
+          "User"
+        ],
+        "summary": "Soft deletes a user by setting the isDeleted flag to true.",
+        "description": "Soft deletes a user by setting the isDeleted flag to true. The user can only delete their own profile. This action anonymizes the user's information, removes their profile picture, deletes all sent and received friend requests, and sets the deletedAt timestamp.",
         "parameters": [
           {
             "name": "id",
@@ -578,19 +872,101 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Unique MongoDB ID"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "User deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteUserResponse"
+                },
+                "examples": {
+                  "deleteUserResponse": {
+                    "$ref": "#/components/examples/DeleteUserResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You can only delete your own profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/users/{id}/change-password": {
       "put": {
-        "description": "",
+        "tags": [
+          "User"
+        ],
+        "summary": "Changes the user's password after verifying the old password.",
+        "description": "This endpoint allows the user to change their password after verifying the old password. It checks if the old password is correct, hashes the new password, and updates the user's password in the database. The user can only change their own password, and a success message is returned upon successful update.",
         "parameters": [
           {
             "name": "id",
@@ -598,27 +974,98 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Unique MongoDB ID"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Password changed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangePasswordResponse"
+                },
+                "examples": {
+                  "changePasswordResponse": {
+                    "$ref": "#/components/examples/ChangePasswordResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You can only change your own password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "oldPassword": {
-                    "example": "any"
-                  },
-                  "newPassword": {
-                    "example": "any"
-                  }
-                }
+                "$ref": "#/components/schemas/ChangePasswordRequest"
               }
             }
           }
@@ -627,7 +1074,11 @@
     },
     "/api/v1/users/{id}/friends": {
       "get": {
-        "description": "",
+        "tags": [
+          "User"
+        ],
+        "summary": "Retrieves a paginated list of friends for a specific user.",
+        "description": "This endpoint retrieves a paginated list of friends for a specific user. It supports search functionality by friend name and cursor-based pagination for efficient navigation through large lists. The response includes friend details, pagination info, and allows skipping to the next set of results.",
         "parameters": [
           {
             "name": "id",
@@ -635,11 +1086,14 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Unique MongoDB ID"
           },
           {
             "name": "cursor",
             "in": "query",
+            "description": "Cursor for fetching the next page of results (i.e., the ID of the last user from the previous page).",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -647,6 +1101,8 @@
           {
             "name": "take",
             "in": "query",
+            "description": "The number of users to fetch in one request. Defaults to a predefined batch size.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -654,6 +1110,8 @@
           {
             "name": "query",
             "in": "query",
+            "description": "Optional search query to filter users by their name.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -661,14 +1119,80 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Friends fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFriendsResponse"
+                },
+                "examples": {
+                  "getFriendsResponse": {
+                    "$ref": "#/components/examples/GetFriendsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/users/{id}/friend-requests": {
       "get": {
-        "description": "",
+        "tags": [
+          "User"
+        ],
+        "summary": "Retrieves a paginated list of pending friend requests for a specific user.",
+        "description": "This endpoint retrieves a paginated list of pending friend requests for the current user. It supports searching by sender's name and cursor-based pagination to load more friend requests. The response includes details about the friend requests, pagination info, and ensures that users can only fetch their own friend requests.",
         "parameters": [
           {
             "name": "id",
@@ -676,11 +1200,14 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Unique MongoDB ID"
           },
           {
             "name": "cursor",
             "in": "query",
+            "description": "Cursor for fetching the next page of results (i.e., the ID of the last user from the previous page).",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -688,6 +1215,8 @@
           {
             "name": "take",
             "in": "query",
+            "description": "The number of users to fetch in one request. Defaults to a predefined batch size.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -695,21 +1224,104 @@
           {
             "name": "query",
             "in": "query",
+            "description": "Optional search query to filter users by their name.",
+            "required": false,
             "schema": {
               "type": "string"
             }
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Friends requests fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFriendRequestsResponse"
+                },
+                "examples": {
+                  "getFriendRequestsResponse": {
+                    "$ref": "#/components/examples/GetFriendRequestsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You can only fetch your own friend requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/users/{id}/unfriend/{friendId}": {
       "post": {
-        "description": "",
+        "tags": [
+          "User"
+        ],
+        "summary": "Removes a friend relationship between two users.",
+        "description": "This endpoint removes the friendship between two users. It ensures the user is attempting to unfriend their own friend and verifies that both users exist. If the users are friends, the friendship is removed, and any pending friend requests between them are deleted. The response confirms the success of the operation.",
         "parameters": [
           {
             "name": "id",
@@ -717,7 +1329,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Unique MongoDB ID"
           },
           {
             "name": "friendId",
@@ -725,53 +1338,101 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Unique MongoDB ID"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Friend removed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnfriendUserResponse"
+                },
+                "examples": {
+                  "unfriendUserResponse": {
+                    "$ref": "#/components/examples/UnfriendUserResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You can only unfriend your friends",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/users/{id}/suggested-friends": {
       "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "cursor",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "take",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
+        "tags": [
+          "User"
         ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/v1/users/{id}/mutual-friends/{otherUserId}": {
-      "get": {
-        "description": "",
+        "summary": "Retrieves a paginated list of suggested friends for a specific user.",
+        "description": "This endpoint retrieves a paginated list of suggested friends for the specified user. Suggested friends are individuals who are friends of the user's friends but are not yet friends with the user. The request supports pagination using cursor-based pagination, and the response includes suggested friends data and pagination information.",
         "parameters": [
           {
             "name": "id",
@@ -779,19 +1440,14 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "otherUserId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+            },
+            "description": "Unique MongoDB ID"
           },
           {
             "name": "cursor",
             "in": "query",
+            "description": "Cursor for fetching the next page of results (i.e., the ID of the last user from the previous page).",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -799,6 +1455,17 @@
           {
             "name": "take",
             "in": "query",
+            "description": "The number of users to fetch in one request. Defaults to a predefined batch size.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Optional search query to filter users by their name.",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -806,14 +1473,95 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Suggested friends fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSuggestedFriendsResponse"
+                },
+                "examples": {
+                  "getSuggestedFriends": {
+                    "$ref": "#/components/examples/GetSuggestedFriendsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You can only fetch your suggested friends",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
-    "/api/v1/users/{id}/friendship-status/{otherUserId}": {
+    "/api/v1/users/{id}/mutual-friends/{otherUserId}": {
       "get": {
-        "description": "",
+        "tags": [
+          "User"
+        ],
+        "summary": "Retrieves a paginated list of mutual friends between the current user and another user.",
+        "description": "This endpoint retrieves a paginated list of mutual friends between the current user and another specified user. Mutual friends are defined as users who are friends with both the current user and the specified user. The response includes pagination details to facilitate efficient data retrieval.",
         "parameters": [
           {
             "name": "id",
@@ -821,7 +1569,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Unique MongoDB ID"
           },
           {
             "name": "otherUserId",
@@ -830,13 +1579,228 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "Cursor for fetching the next page of results (i.e., the ID of the last user from the previous page).",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "take",
+            "in": "query",
+            "description": "The number of users to fetch in one request. Defaults to a predefined batch size.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Optional search query to filter users by their name.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Mutual friends fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMutualFriendsResponse"
+                },
+                "examples": {
+                  "getMutualFriends": {
+                    "$ref": "#/components/examples/GetMutualFriendsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You can only fetch your mutual friends",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/users/{id}/friendship-status/{otherUserId}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Retrieves the friendship status between the current user and another user.",
+        "description": "This endpoint retrieves the friendship status between the current user and another specified user. It verifies that the request is for the current user's own friendship status and checks whether they are friends, have a pending friend request, or are not friends at all. The response includes the friendship status and a success message.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Unique MongoDB ID"
+          },
+          {
+            "name": "otherUserId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Unique MongoDB ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mutual friends fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFriendshipStatusResponse"
+                },
+                "examples": {
+                  "getFriendshipStatus": {
+                    "$ref": "#/components/examples/GetFriendshipStatusResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You can only check your own friendship status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/friend-requests/": {
@@ -918,37 +1882,116 @@
         }
       }
     },
-    "/api/v1/friend-requests/{{where{id}}": {
-      "delete": {
-        "description": "",
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
     "/api/v1/chats/one-on-one/create": {
       "post": {
-        "description": "",
+        "tags": [
+          "One-On-One Chats"
+        ],
+        "summary": "Create a new one-on-one chat",
+        "description": "Initiates a secure, direct conversation between two users who are confirmed friends.   This endpoint verifies the friendship status, prevents duplicate chats, and establishes   a private space for personal communication.",
         "responses": {
-          "default": {
-            "description": ""
+          "201": {
+            "description": "Chat created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOneOnOneChatResponse"
+                },
+                "examples": {
+                  "chatCreationResponse": {
+                    "$ref": "#/components/examples/CreateOneOnOneChatResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/BadRequestResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictResponse"
+                },
+                "examples": {
+                  "conflictResponse": {
+                    "$ref": "#/components/examples/ConflictResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "initiatorId": {
-                    "example": "any"
-                  },
-                  "participantId": {
-                    "example": "any"
-                  }
-                }
+                "$ref": "#/components/schemas/CreateOneOnOneChatRequest"
               }
             }
           }
@@ -957,7 +2000,11 @@
     },
     "/api/v1/chats/one-on-one/{chatId}": {
       "get": {
-        "description": "",
+        "tags": [
+          "One-On-One Chats"
+        ],
+        "summary": "Get details of an existing one-on-one chat",
+        "description": "Fetches detailed information about an existing one-on-one chat, including participant details,   chat settings, and metadata.   This endpoint provides a complete overview of the chat",
         "parameters": [
           {
             "name": "chatId",
@@ -965,19 +2012,101 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "one-on-one chat ID"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Chat details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOneOnOneChatDetailsResponse"
+                },
+                "examples": {
+                  "chatCreationResponse": {
+                    "$ref": "#/components/examples/GetOneOnOneChatDetailsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConflictResponse"
+                },
+                "examples": {
+                  "conflictResponse": {
+                    "$ref": "#/components/examples/ConflictResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/chats/one-on-one/{chatId}/settings": {
       "patch": {
-        "description": "",
+        "tags": [
+          "One-On-One Chats"
+        ],
+        "summary": "Update settings of an existing one-on-one chat",
+        "description": "Modifies the settings of an existing one-on-one chat. This endpoint allows users to toggle   the vanish mode on or off for v1, enhancing privacy options for sensitive conversations.",
         "parameters": [
           {
             "name": "chatId",
@@ -985,24 +2114,113 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "one-on-one chat ID"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Chat settings updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateOneOnOneChatSettingsResponse"
+                },
+                "examples": {
+                  "chatUpdationResponse": {
+                    "$ref": "#/components/examples/UpdateOneOnOneChatSettingsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/BadRequestResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "settings": {
-                    "example": "any"
-                  }
-                }
+                "$ref": "#/components/schemas/UpdateOneOnOneChatSettingsRequest"
               }
             }
           }
@@ -1011,7 +2229,11 @@
     },
     "/api/v1/chats/one-on-one/{chatId}/messages": {
       "get": {
-        "description": "",
+        "tags": [
+          "One-On-One Chats"
+        ],
+        "summary": "Retrieve messages from a specific one-on-one chat",
+        "description": "Fetches the message history of an existing one-on-one chat.   This endpoint allows users to access the conversation content, including text messages,   timestamps, and any associated metadata.   It supports pagination for efficient retrieval of large message histories.",
         "parameters": [
           {
             "name": "chatId",
@@ -1019,11 +2241,14 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "one-on-one chat ID"
           },
           {
             "name": "cursor",
             "in": "query",
+            "description": "Pagination cursor for fetching the next set of results",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -1031,6 +2256,8 @@
           {
             "name": "search",
             "in": "query",
+            "description": "Search term to filter messages by content",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -1038,16 +2265,95 @@
           {
             "name": "take",
             "in": "query",
+            "description": "Number of messages to retrieve per request",
+            "required": false,
             "schema": {
               "type": "string"
             }
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Chat messages retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOneOnOneChatMessagesResponse"
+                },
+                "examples": {
+                  "getMessagesResponse": {
+                    "$ref": "#/components/examples/GetOneOnOneChatMessagesResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/chats/group/create": {
@@ -1359,6 +2665,477 @@
           "message": "Unauthorized access",
           "data": null
         }
+      },
+      "NotFoundResponse": {
+        "value": {
+          "success": false,
+          "message": "Not Found",
+          "data": null
+        }
+      },
+      "ForbiddenResponse": {
+        "value": {
+          "success": false,
+          "message": "Forbidden",
+          "data": null
+        }
+      },
+      "ConflictResponse": {
+        "value": {
+          "success": false,
+          "message": "Conflict",
+          "data": null
+        }
+      },
+      "CreateOneOnOneChatResponse": {
+        "value": {
+          "success": true,
+          "message": "Chat created successfully!",
+          "data": {
+            "id": "67162056177977602501d7d6",
+            "initiatorId": "66b30bbeaea1612592e8609b",
+            "participantId": "66c58d3c09c4603fe4b47527",
+            "vanishMode": false,
+            "createdAt": "2024-10-21T09:35:18.596Z",
+            "updatedAt": "2024-10-21T09:35:18.596Z",
+            "lastMessageAt": "2024-10-21T09:35:18.596Z",
+            "deletedForInitiator": null,
+            "deletedForParticipant": null
+          }
+        }
+      },
+      "GetOneOnOneChatDetailsResponse": {
+        "value": {
+          "success": true,
+          "message": "Chat details retrieved successfully!",
+          "data": {
+            "id": "67162056177977602501d7d6",
+            "initiatorId": "66b30bbeaea1612592e8609b",
+            "participantId": "66c58d3c09c4603fe4b47527",
+            "vanishMode": false,
+            "createdAt": "2024-10-21T09:35:18.596Z",
+            "updatedAt": "2024-10-21T09:35:18.596Z",
+            "lastMessageAt": "2024-10-21T09:35:18.596Z",
+            "deletedForInitiator": null,
+            "deletedForParticipant": null
+          }
+        }
+      },
+      "UpdateOneOnOneChatSettingsResponse": {
+        "value": {
+          "success": true,
+          "message": "Chat settings updated successfully!",
+          "data": null
+        }
+      },
+      "GetOneOnOneChatMessagesResponse": {
+        "value": {
+          "success": true,
+          "message": "Chat messages retrieved successfully!",
+          "data": {
+            "messages": [
+              {
+                "id": "66f3f8b0e493af07d1fe4537",
+                "content": "Hi there!",
+                "senderId": "66b33a2d19b3564668300673",
+                "oneOnOneChatId": "66d6cd74e5cb752390d88fab",
+                "groupChatId": null,
+                "createdAt": "2024-09-25T11:49:04.375Z",
+                "updatedAt": "2024-09-25T11:55:18.398Z",
+                "isDeleted": false
+              },
+              {
+                "id": "66f3f4523f136de60dd42f5a",
+                "content": "Hello!",
+                "senderId": "66b33a2d19b3564668300673",
+                "oneOnOneChatId": "66d6cd74e5cb752390d88fab",
+                "groupChatId": null,
+                "createdAt": "2024-09-25T11:30:26.503Z",
+                "updatedAt": "2024-09-25T11:55:56.196Z",
+                "isDeleted": false
+              },
+              {
+                "id": "66d6ce4ae5cb752390d88fac",
+                "content": "How are you?",
+                "senderId": "66b33a2d19b3564668300673",
+                "oneOnOneChatId": "66d6cd74e5cb752390d88fab",
+                "groupChatId": null,
+                "createdAt": "2024-09-03T08:52:26.926Z",
+                "updatedAt": "2024-09-03T08:52:26.926Z",
+                "isDeleted": false
+              }
+            ],
+            "pagination": {
+              "totalCount": 3,
+              "hasNextPage": false,
+              "nextCursor": null
+            }
+          }
+        }
+      },
+      "GetUsersResponse": {
+        "value": {
+          "success": true,
+          "message": "Users fetched successfully!",
+          "data": {
+            "users": [
+              {
+                "id": "60d725b8b0d7c911b2f28f0c",
+                "name": "John Doe",
+                "email": "john@example.com",
+                "bio": "A short bio about me",
+                "profilePicture": "https://example.com/profile.jpg"
+              },
+              {
+                "id": "60d725b8b0d7c911b2f28f0e",
+                "name": "Jane Doe",
+                "email": "Jane@example.com",
+                "bio": "A short bio about me",
+                "profilePicture": "https://example.com/profile.jpg"
+              }
+            ],
+            "pagination": {
+              "totalCount": 27,
+              "hasNextPage": true,
+              "nextCursor": "60d7..."
+            }
+          }
+        }
+      },
+      "GetUserChatsResponse": {
+        "value": {
+          "success": true,
+          "message": "User chats fetched successfully!",
+          "data": {
+            "chats": [
+              {
+                "id": "66d6cd74e5cb752390d88fab",
+                "initiatorId": "66b33a2d19b3564668300673",
+                "participantId": "66b30bbeaea1612592e8609b",
+                "vanishMode": false,
+                "createdAt": "2024-09-03T08:48:52.406Z",
+                "updatedAt": "2024-09-25T11:49:04.375Z",
+                "lastMessageAt": "2024-09-25T11:49:04.375Z",
+                "deletedForInitiator": null,
+                "deletedForParticipant": null,
+                "initiator": {
+                  "id": "66b33a2d19b3564668300673",
+                  "name": "John doe",
+                  "profilePicture": "https://res.cloudinary.com/du6x7e2oh/image/upload/v1723021868/profile_images/co9vn8qwkejwid9t6pkc.png",
+                  "isDeleted": false
+                },
+                "participant": {
+                  "id": "66b30bbeaea1612592e8609b",
+                  "name": "Jane doe",
+                  "profilePicture": "https://res.cloudinary.com/du6x7e2oh/image/upload/v1726131950/profile_image/esjwefpmvrchidqcg6yq.png",
+                  "isDeleted": false
+                },
+                "messages": [
+                  {
+                    "id": "66f3f8b0e493af07d1fe4537",
+                    "content": "First messsage",
+                    "senderId": "66b33a2d19b3564668300673",
+                    "oneOnOneChatId": "66d6cd74e5cb752390d88fab",
+                    "groupChatId": null,
+                    "createdAt": "2024-09-25T11:49:04.375Z",
+                    "updatedAt": "2024-09-25T11:55:18.398Z",
+                    "isDeleted": false,
+                    "sender": {
+                      "id": "66b33a2d19b3564668300673",
+                      "name": "John doe",
+                      "isDeleted": false
+                    }
+                  }
+                ],
+                "type": "ONE_ON_ONE",
+                "name": "Jane doe"
+              },
+              {
+                "id": "66f15453eda9647f5be80fc6",
+                "name": "New Group",
+                "ownerId": "66b33a2d19b3564668300673",
+                "groupDescription": "New Group Desc",
+                "groupIcon": "https://res.cloudinary.com/du6x7e2oh/image/upload/v1727159813/group_icons/e4tdoeazmmjejjocchou.jpg",
+                "createdAt": "2024-09-23T11:43:15.115Z",
+                "updatedAt": "2024-09-25T11:12:54.370Z",
+                "lastMessageAt": "2024-09-25T11:12:54.370Z",
+                "memberIds": [
+                  "66b30bbeaea1612592e8609b",
+                  "66b33a2d19b3564668300673",
+                  "66a738b1f96d2cc3bbc9ae8d",
+                  "66a738b1f96d2cc3bbc9ae8b",
+                  "66a738b1f96d2cc3bbc9ae8e"
+                ],
+                "messages": [
+                  {
+                    "id": "66f3f036e793e250468d5f66",
+                    "content": "Group message",
+                    "senderId": "66b33a2d19b3564668300673",
+                    "oneOnOneChatId": null,
+                    "groupChatId": "66f15453eda9647f5be80fc6",
+                    "createdAt": "2024-09-25T11:12:54.370Z",
+                    "updatedAt": "2024-09-25T11:56:20.789Z",
+                    "isDeleted": false,
+                    "sender": {
+                      "id": "66b33a2d19b3564668300673",
+                      "name": "John doe"
+                    }
+                  }
+                ],
+                "type": "GROUP"
+              }
+            ],
+            "friendsWithNoChats": [
+              {
+                "id": "60d725b8b0d7c911b2f28f0c",
+                "name": "John Doe",
+                "email": "john@example.com",
+                "bio": "A short bio about me",
+                "profilePicture": "https://example.com/profile.jpg"
+              },
+              {
+                "id": "60d725b8b0d7c911b2f28f0e",
+                "name": "Jane Doe",
+                "email": "Jane@example.com",
+                "bio": "A short bio about me",
+                "profilePicture": "https://example.com/profile.jpg"
+              }
+            ],
+            "pagination": {
+              "totalCount": 27,
+              "hasNextPage": true,
+              "nextCursor": "60d7..."
+            }
+          }
+        }
+      },
+      "GetUserResponse": {
+        "value": {
+          "success": true,
+          "message": "User fetched successfully",
+          "data": {
+            "id": "66b30bbeaea1612592e8609b",
+            "name": "Jane doe",
+            "email": "janedoe@gmail.com",
+            "bio": "SDE @Google",
+            "profilePicture": "https://res.cloudinary.com/du6x7e2oh/image/upload/v1726131950/profile_image/esjwefpmvrchidqcg6yq.png",
+            "friendIds": [
+              "66c58d3c09c4603fe4b47527",
+              "66b33a2d19b3564668300673"
+            ],
+            "friendOfIds": [
+              "66a738b1f96d2cc3bbc9ae8b",
+              "66a738b1f96d2cc3bbc9ae8b"
+            ],
+            "memberOfGroupIds": [
+              "66d6dfb72db9bac027f38c8e",
+              "66f0f5a3745ce55176d20cd9",
+              "66f0f5b3745ce55176d20cda",
+              "66f0f5e539dc71410a14c916",
+              "66f0f60fd5534b22f99189b8",
+              "66f0f7429f2815ed89a33669",
+              "66f15453eda9647f5be80fc6"
+            ],
+            "updatedAt": "2024-09-23T12:40:42.525Z",
+            "createdAt": "2024-08-07T05:53:02.678Z"
+          }
+        }
+      },
+      "UpdateUserResponse": {
+        "value": {
+          "success": true,
+          "message": "User updated successfully",
+          "data": {
+            "id": "66b30bbeaea1612592e8609b",
+            "name": "Jane doe",
+            "email": "janedoe@gmail.com",
+            "bio": "SDE @Google",
+            "profilePicture": "https://res.cloudinary.com/du6x7e2oh/image/upload/v1726131950/profile_image/esjwefpmvrchidqcg6yq.png",
+            "friendIds": [
+              "66c58d3c09c4603fe4b47527",
+              "66b33a2d19b3564668300673"
+            ],
+            "friendOfIds": [
+              "66a738b1f96d2cc3bbc9ae8b",
+              "66a738b1f96d2cc3bbc9ae8b"
+            ],
+            "memberOfGroupIds": [
+              "66d6dfb72db9bac027f38c8e",
+              "66f0f5a3745ce55176d20cd9",
+              "66f0f5b3745ce55176d20cda",
+              "66f0f5e539dc71410a14c916",
+              "66f0f60fd5534b22f99189b8",
+              "66f0f7429f2815ed89a33669",
+              "66f15453eda9647f5be80fc6"
+            ],
+            "updatedAt": "2024-09-23T12:40:42.525Z",
+            "createdAt": "2024-08-07T05:53:02.678Z"
+          }
+        }
+      },
+      "DeleteUserResponse": {
+        "value": {
+          "success": true,
+          "message": "User deleted successfully",
+          "data": null
+        }
+      },
+      "ChangePasswordResponse": {
+        "value": {
+          "success": true,
+          "message": "Password changed successfully",
+          "data": null
+        }
+      },
+      "GetFriendsResponse": {
+        "value": {
+          "success": true,
+          "message": "Friends fetched successfully",
+          "data": {
+            "friends": [
+              {
+                "id": "66a738b1f96d2cc3bbc9ae8b",
+                "name": "John Doe",
+                "email": "johndoe@gmail.com",
+                "profilePicture": "https://avatars.githubusercontent.com/u/8733371"
+              },
+              {
+                "id": "66b33a2d19b3564668300673",
+                "name": "Jane Doe",
+                "email": "janedoe@gmail.com",
+                "profilePicture": "https://res.cloudinary.com/du6x7e2oh/image/upload/v1723021868/profile_images/co9vn8qwkejwid9t6pkc.png"
+              }
+            ],
+            "pagination": {
+              "totalCount": 27,
+              "hasNextPage": true,
+              "nextCursor": "60d7..."
+            }
+          }
+        }
+      },
+      "UnfriendUserResponse": {
+        "value": {
+          "success": true,
+          "message": "Friend removed successfully",
+          "data": null
+        }
+      },
+      "GetSuggestedFriendsResponse": {
+        "value": {
+          "success": true,
+          "message": "Suggested friends fetched successfully",
+          "data": {
+            "suggestedFriends": [
+              {
+                "id": "66a738b1f96d2cc3bbc9ae8b",
+                "name": "John Doe",
+                "email": "johndoe@gmail.com",
+                "profilePicture": "https://avatars.githubusercontent.com/u/8733371"
+              },
+              {
+                "id": "66b33a2d19b3564668300673",
+                "name": "Jane Doe",
+                "email": "janedoe@gmail.com",
+                "profilePicture": "https://res.cloudinary.com/du6x7e2oh/image/upload/v1723021868/profile_images/co9vn8qwkejwid9t6pkc.png"
+              }
+            ],
+            "pagination": {
+              "totalCount": 27,
+              "hasNextPage": true,
+              "nextCursor": "60d7..."
+            }
+          }
+        }
+      },
+      "GetMutualFriendsResponse": {
+        "value": {
+          "success": true,
+          "message": "Mutual friends fetched successfully",
+          "data": {
+            "mutualFriends": [
+              {
+                "id": "66a738b1f96d2cc3bbc9ae8b",
+                "name": "John Doe",
+                "email": "johndoe@gmail.com",
+                "profilePicture": "https://avatars.githubusercontent.com/u/8733371"
+              },
+              {
+                "id": "66b33a2d19b3564668300673",
+                "name": "Jane Doe",
+                "email": "janedoe@gmail.com",
+                "profilePicture": "https://res.cloudinary.com/du6x7e2oh/image/upload/v1723021868/profile_images/co9vn8qwkejwid9t6pkc.png"
+              }
+            ],
+            "pagination": {
+              "totalCount": 27,
+              "hasNextPage": true,
+              "nextCursor": "60d7..."
+            }
+          }
+        }
+      },
+      "GetFriendshipStatusResponse": {
+        "value": {
+          "success": true,
+          "message": "Friendship status fetched successfully",
+          "data": {
+            "id": "66a738b1f96d2cc3bbc9ae8b",
+            "status": "FRIENDS"
+          }
+        }
+      },
+      "GetFriendRequestsResponse": {
+        "value": {
+          "success": true,
+          "message": "Friend Request fetched successfully",
+          "data": {
+            "friendRequests": [
+              {
+                "id": "66a738b1f96d2cc3bbc9ae8b",
+                "senderId": "66a738b1f96d2cc3bbc9ae8e",
+                "receiverId": "66a738b1f96d2cc3bbc9ae8g",
+                "status": "PENDING",
+                "createdAt": "2024-09-25T11:49:04.375Z",
+                "updatedAt": "2024-09-25T11:49:04.375Z",
+                "sender": {
+                  "id": "66a738b1f96d2cc3bbc9ae8a",
+                  "name": "John Doe",
+                  "email": "johndoe@gmail.com",
+                  "profilePicture": "https://avatars.githubusercontent.com/u/8733371"
+                }
+              },
+              {
+                "id": "66a738b1f96d2cc3bbc9ae8k",
+                "senderId": "66a738b1f96d2cc3bbc9ae8h",
+                "receiverId": "66a738b1f96d2cc3bbc9ae8n",
+                "status": "PENDING",
+                "createdAt": "2024-09-25T11:49:04.375Z",
+                "updatedAt": "2024-09-25T11:49:04.375Z",
+                "sender": {
+                  "id": "66a738b1f96d2cc3bbc9ae8z",
+                  "name": "Jane Doe",
+                  "email": "janedoe@gmail.com",
+                  "profilePicture": "https://avatars.githubusercontent.com/u/8733371"
+                }
+              }
+            ],
+            "pagination": {
+              "totalCount": 27,
+              "hasNextPage": true,
+              "nextCursor": "60d7..."
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "cursor": {
+        "name": "cursor",
+        "in": "query",
+        "type": "number",
+        "description": "Cursor for pagination",
+        "required": false
       }
     },
     "schemas": {
@@ -1668,6 +3445,1009 @@
           "data": {
             "type": "object",
             "nullable": true
+          }
+        }
+      },
+      "ForbiddenResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "NotFoundResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "ConflictResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "CreateOneOnOneChatRequest": {
+        "type": "object",
+        "properties": {
+          "initiatorId": {
+            "type": "string",
+            "description": "Initiator's ID",
+            "example": ""
+          },
+          "participantId": {
+            "type": "string",
+            "description": "Participant's ID",
+            "example": ""
+          }
+        }
+      },
+      "CreateOneOnOneChatResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "initiatorId": {
+                "type": "string"
+              },
+              "participantId": {
+                "type": "string"
+              },
+              "vanishMode": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "lastMessageAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "deletedForInitiator": {
+                "type": "boolean",
+                "nullable": true
+              },
+              "deletedForParticipant": {
+                "type": "object",
+                "nullable": true
+              }
+            }
+          }
+        }
+      },
+      "GetOneOnOneChatDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "initiatorId": {
+                "type": "string"
+              },
+              "participantId": {
+                "type": "string"
+              },
+              "vanishMode": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "lastMessageAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "deletedForInitiator": {
+                "type": "boolean",
+                "nullable": true
+              },
+              "deletedForParticipant": {
+                "type": "boolean",
+                "nullable": true
+              }
+            }
+          }
+        }
+      },
+      "UpdateOneOnOneChatSettingsRequest": {
+        "type": "object",
+        "properties": {
+          "settings": {
+            "type": "object",
+            "properties": {
+              "vanishMode": {
+                "type": "boolean",
+                "nullable": true,
+                "example": false
+              }
+            }
+          }
+        }
+      },
+      "UpdateOneOnOneChatSettingsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "GetOneOnOneChatMessagesResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "messages": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "content": {
+                      "type": "string"
+                    },
+                    "senderId": {
+                      "type": "string"
+                    },
+                    "oneOnOnechatId": {
+                      "type": "string"
+                    },
+                    "groupChatId": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "isDeleted": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalCount": {
+                    "type": "number"
+                  },
+                  "hasNextPage": {
+                    "type": "boolean"
+                  },
+                  "nextCursor": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetUsersResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "properties": {
+              "users": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "bio": {
+                      "type": "string"
+                    },
+                    "profilePicture": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalCount": {
+                    "type": "number"
+                  },
+                  "hasNextPage": {
+                    "type": "boolean"
+                  },
+                  "nextCursor": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetUserChatsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "properties": {
+              "chats": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "initiatorId": {
+                          "type": "string"
+                        },
+                        "participantId": {
+                          "type": "string"
+                        },
+                        "vanishMode": {
+                          "type": "boolean"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "lastMessageAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "initiator": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "profilePicture": {
+                              "type": "string"
+                            },
+                            "isDeleted": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "participant": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "profilePicture": {
+                              "type": "string"
+                            },
+                            "isDeleted": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "messages": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "content": {
+                                "type": "string"
+                              },
+                              "senderId": {
+                                "type": "string"
+                              },
+                              "oneOnOneChatId": {
+                                "type": "string"
+                              },
+                              "groupChatId": {
+                                "type": "string"
+                              },
+                              "createdAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "updatedAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "isDeleted": {
+                                "type": "boolean"
+                              },
+                              "sender": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "isDeleted": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "chatType": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "ownerId": {
+                          "type": "string"
+                        },
+                        "groupDescription": {
+                          "type": "string"
+                        },
+                        "groupIcon": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "lastMessageAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "memberIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "messages": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "content": {
+                                "type": "string"
+                              },
+                              "senderId": {
+                                "type": "string"
+                              },
+                              "oneOnOneChatId": {
+                                "type": "string"
+                              },
+                              "groupChatId": {
+                                "type": "string"
+                              },
+                              "createdAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "updatedAt": {
+                                "type": "string",
+                                "format": "date-time"
+                              },
+                              "isDeleted": {
+                                "type": "boolean"
+                              },
+                              "sender": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "isDeleted": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "chatType": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "friendsWithNoChats": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "bio": {
+                      "type": "string"
+                    },
+                    "profilePicture": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalCount": {
+                    "type": "number"
+                  },
+                  "hasNextPage": {
+                    "type": "boolean"
+                  },
+                  "nextCursor": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetUserResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "bio": {
+                "type": "string"
+              },
+              "profilePicture": {
+                "type": "string"
+              },
+              "friendIds": {
+                "type": "array",
+                "item": {
+                  "type": "string"
+                }
+              },
+              "friendOfIds": {
+                "type": "array",
+                "item": {
+                  "type": "string"
+                }
+              },
+              "memberOfGroupIds": {
+                "type": "array",
+                "item": {
+                  "type": "string"
+                }
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "User's full name",
+            "example": ""
+          },
+          "bio": {
+            "type": "string",
+            "description": "User's bio",
+            "example": ""
+          },
+          "profilePicture": {
+            "type": "string",
+            "format": "binary",
+            "description": ""
+          }
+        }
+      },
+      "UpdateUserResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "bio": {
+                "type": "string"
+              },
+              "profilePicture": {
+                "type": "string"
+              },
+              "friendIds": {
+                "type": "array",
+                "item": {
+                  "type": "string"
+                }
+              },
+              "friendOfIds": {
+                "type": "array",
+                "item": {
+                  "type": "string"
+                }
+              },
+              "memberOfGroupIds": {
+                "type": "array",
+                "item": {
+                  "type": "string"
+                }
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "DeleteUserResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "properties": {
+          "oldPassword": {
+            "type": "string",
+            "description": "User's old password",
+            "example": ""
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "User's new password",
+            "example": ""
+          }
+        }
+      },
+      "ChangePasswordResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "GetFriendsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "friends": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "profilePicture": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalCount": {
+                    "type": "number"
+                  },
+                  "hasNextPage": {
+                    "type": "boolean"
+                  },
+                  "nextCursor": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetFriendRequestsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "friendsRequests": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "senderId": {
+                      "type": "string"
+                    },
+                    "receiverId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "PENDING",
+                        "ACCEPTED",
+                        "REJECTED"
+                      ]
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalCount": {
+                    "type": "number"
+                  },
+                  "hasNextPage": {
+                    "type": "boolean"
+                  },
+                  "nextCursor": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "UnfriendUserResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "GetSuggestedFriendsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "suggestedFriends": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "profilePicture": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalCount": {
+                    "type": "number"
+                  },
+                  "hasNextPage": {
+                    "type": "boolean"
+                  },
+                  "nextCursor": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetMututalFriendsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "mutualFriends": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "profilePicture": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "pagination": {
+                "type": "object",
+                "properties": {
+                  "totalCount": {
+                    "type": "number"
+                  },
+                  "hasNextPage": {
+                    "type": "boolean"
+                  },
+                  "nextCursor": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetFriendshipStatusResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "FRIENDS",
+                  "REQUEST_SENT",
+                  "REQUEST_RECEIVED",
+                  "NOT_FRIENDS"
+                ]
+              }
+            }
           }
         }
       }

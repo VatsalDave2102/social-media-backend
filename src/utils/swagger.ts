@@ -22,6 +22,10 @@ const doc = {
     {
       name: 'Auth',
       description: 'Authentication routes'
+    },
+    {
+      name: 'User',
+      description: 'User Management routes'
     }
   ],
   components: {
@@ -33,7 +37,16 @@ const doc = {
       }
     },
     '@schemas': swaggerSchemas,
-    examples: swaggerExamples
+    examples: swaggerExamples,
+    parameters: {
+      cursor: {
+        name: 'cursor',
+        in: 'query',
+        type: 'number',
+        description: 'Cursor for pagination',
+        required: false
+      }
+    }
   },
   security: [
     {
