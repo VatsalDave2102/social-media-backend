@@ -586,9 +586,7 @@ const getFriends = async (req: Request, res: Response, next: NextFunction) => {
       message: 'Friends fetched successfully',
       data: {
         friends: paginatedFriends,
-        pagination: {
-          pagination: { hasNextPage, nextCursor }
-        }
+        pagination: { hasNextPage, nextCursor }
       }
     });
   } catch (error) {
