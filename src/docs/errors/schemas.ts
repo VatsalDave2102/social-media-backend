@@ -46,5 +46,5 @@ export const errorSchemas = {
       message: { type: 'string' },
       data: { type: 'object', nullable: true }
     }
-  },
+  }
 };
