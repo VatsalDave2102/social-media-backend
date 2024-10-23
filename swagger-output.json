@@ -1805,25 +1805,84 @@
     },
     "/api/v1/friend-requests/": {
       "post": {
-        "description": "",
+        "tags": [
+          "Friend Requests"
+        ],
+        "summary": "Sends a friend request from one user to another.",
+        "description": "This endpoint allows a user to send a friend request to another user. It checks if both the sender and receiver exist, verifies that they are not already friends, and ensures that no pending friend request exists between them. If all conditions are met, a new friend request is created and a success message is returned.",
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Friend request sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendFriendRequestResponse"
+                },
+                "examples": {
+                  "sendFriendRequestResponse": {
+                    "$ref": "#/components/examples/SendFriendRequestResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "senderId": {
-                    "example": "any"
-                  },
-                  "receiverId": {
-                    "example": "any"
-                  }
-                }
+                "$ref": "#/components/schemas/SendFriendRequestRequest"
               }
             }
           }
@@ -1832,7 +1891,11 @@
     },
     "/api/v1/friend-requests/{id}": {
       "put": {
-        "description": "",
+        "tags": [
+          "Friend Requests"
+        ],
+        "summary": "Updates the status of a friend request.",
+        "description": "This endpoint updates the status of a friend request based on its ID. It verifies the existence of the friend request, checks that it is still pending, and ensures the current user is the intended receiver. The request can either accept or reject the friend request, updating the relevant user relationships accordingly. If the friend request is not found, has already been processed, or the user is not the receiver, an error is thrown.",
         "parameters": [
           {
             "name": "id",
@@ -1840,31 +1903,119 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Friend Request ID"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Shows response as per accepted/rejected status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/AcceptedFriendRequestResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RejectedFriendRequestResponse"
+                    }
+                  ]
+                },
+                "examples": {
+                  "acceptedFriendRequestResponse": {
+                    "$ref": "#/components/examples/AcceptedFriendRequestResponse"
+                  },
+                  "rejectedFriendRequestResponse": {
+                    "$ref": "#/components/examples/RejectedFriendRequestResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You are not the receiver of this friend request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "status": {
-                    "example": "any"
-                  }
-                }
+                "$ref": "#/components/schemas/UpdateFriendRequestRequest"
               }
             }
           }
         }
       },
       "delete": {
-        "description": "",
+        "tags": [
+          "Friend Requests"
+        ],
+        "summary": "Cancels a pending friend request sent by the current user.",
+        "description": "This endpoint allows the current user to cancel a pending friend request they have sent. It verifies that the friend request exists, checks that the current user is the sender, and ensures the request is still pending before proceeding to delete it. If successful, a confirmation message is returned; otherwise, appropriate errors are thrown.",
         "parameters": [
           {
             "name": "id",
@@ -1872,14 +2023,92 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Friend Request ID"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Friend request cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CancelFriendRequestResponse"
+                },
+                "examples": {
+                  "cancelFriendRequestResponse": {
+                    "$ref": "#/components/examples/CancelFriendRequestResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "You are not the sender of this friend request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/v1/chats/one-on-one/create": {
@@ -2687,6 +2916,43 @@
           "data": null
         }
       },
+      "SendFriendRequestResponse": {
+        "value": {
+          "success": true,
+          "message": "Friend request sent successfully",
+          "data": {
+            "friendRequest": {
+              "id": "67188890a6b849e1342c0f74",
+              "senderId": "66b33a2d19b3564668300673",
+              "receiverId": "66ac8081d35c80d020768a2b",
+              "status": "PENDING",
+              "createdAt": "2024-10-23T05:24:32.774Z",
+              "updatedAt": "2024-10-23T05:24:32.774Z"
+            }
+          }
+        }
+      },
+      "AcceptedFriendRequestResponse": {
+        "value": {
+          "success": true,
+          "message": "Friend request accepted successfully",
+          "data": null
+        }
+      },
+      "RejectedFriendRequestResponse": {
+        "value": {
+          "success": true,
+          "message": "Friend request rejected successfully",
+          "data": null
+        }
+      },
+      "CancelFriendRequestResponse": {
+        "value": {
+          "success": true,
+          "message": "Friend request cancelled successfully",
+          "data": null
+        }
+      },
       "CreateOneOnOneChatResponse": {
         "value": {
           "success": true,
@@ -3479,6 +3745,114 @@
         }
       },
       "ConflictResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "SendFriendRequestRequest": {
+        "type": "object",
+        "properties": {
+          "senderId": {
+            "type": "string",
+            "description": "Sender's ID",
+            "example": ""
+          },
+          "receiverId": {
+            "type": "string",
+            "description": "Receiver's ID",
+            "example": ""
+          }
+        }
+      },
+      "SendFriendRequestResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "senderId": {
+                "type": "string"
+              },
+              "receiverId": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "UpdateFriendRequestRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACCEPTED",
+              "REJECTED"
+            ]
+          }
+        }
+      },
+      "AcceptedFriendRequestResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "RejectedFriendRequestResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "CancelFriendRequestResponse": {
         "type": "object",
         "properties": {
           "success": {
