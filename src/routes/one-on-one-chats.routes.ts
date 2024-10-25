@@ -2,6 +2,7 @@ import express from 'express';
 
 import {
   createOneOnOneChat,
+  getOneOnOneChatByUserIds,
   getOneOnOneChatDetails,
   getOneOnOneChatMessages,
   updateOneOnOneChatSettings
@@ -360,5 +361,7 @@ oneOnOneChatRouter.get(
   } 
   */
 );
+
+oneOnOneChatRouter.get('/:userId1/:userId2', verifyToken('accessToken'), getOneOnOneChatByUserIds);
 
 export default oneOnOneChatRouter;

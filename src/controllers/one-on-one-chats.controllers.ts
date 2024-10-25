@@ -263,9 +263,50 @@ const getOneOnOneChatMessages = async (req: Request, res: Response, next: NextFu
   }
 };
 
+const getOneOnOneChatByUserIds = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract the user from the request
+    const { user } = req;
+
+    // Extract the user ids from the url
+    const { userId1, userId2 } = req.params;
+    if (!(userId1 && userId2)) throw new AppError('User Ids are missing!', StatusCodes.NOT_FOUND);
+
+    // Check if the chat exists in the database
+    const existingChat = await prisma.oneOnOneChat.findFirst({
+      where: {
+        OR: [
+          {
+            AND: [{ initiatorId: userId1 }, { participantId: userId2 }]
+          },
+          {
+            AND: [{ initiatorId: userId2 }, { participantId: userId1 }]
+          }
+        ]
+      }
+    });
+    if (!existingChat) throw new AppError('Chat not found!', StatusCodes.NOT_FOUND);
+
+    // Check if the user is either the initiator or the participant of the chat
+    if (existingChat.initiatorId !== user.userId && existingChat.participantId !== user.userId)
+      throw new AppError('You are not allowed to view this chat!', StatusCodes.FORBIDDEN);
+
+    // Respond with success message and data
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Chat details retrieved successfully!',
+      data: existingChat
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
 export {
   createOneOnOneChat,
   getOneOnOneChatDetails,
   updateOneOnOneChatSettings,
-  getOneOnOneChatMessages
+  getOneOnOneChatMessages,
+  getOneOnOneChatByUserIds
 };
