@@ -150,7 +150,8 @@ const getGroupChatDetails = async (req: Request, res: Response, next: NextFuncti
  */
 const updateGroupChatSettings = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    let uploadedUpdatedGroupIcon, updatedSettings: GroupChatSettings;
+    let uploadedUpdatedGroupIcon,
+      updatedSettings: GroupChatSettings | null = null;
 
     // Extract the user from the request
     const { user } = req;
@@ -158,26 +159,15 @@ const updateGroupChatSettings = async (req: Request, res: Response, next: NextFu
     // Extract the chatId from the request params
     const { chatId } = req.params;
 
-    // Check if the settings are provided in the request body
+    // Extract the settings if provided in the request body
     const { settings } = req.body;
-    if (!settings) throw new AppError('No settings provided!', StatusCodes.BAD_REQUEST);
-
-    // Check if the settings are in the correct format
-    try {
-      updatedSettings = JSON.parse(settings);
-    } catch (err) {
-      throw new AppError('Invalid settings!', StatusCodes.BAD_REQUEST);
-    }
 
     // Extract the groupIcon from the request if provided
     const groupIcon = req.file;
-    if (groupIcon) {
-      // Upload the group icon to Cloudinary
-      uploadedUpdatedGroupIcon = await cloudinary.uploader.upload(groupIcon.path, {
-        folder: 'group_icons'
-      });
-      if (!uploadedUpdatedGroupIcon)
-        throw new AppError('Error uploading group icon', StatusCodes.INTERNAL_SERVER_ERROR);
+
+    // If neither settings nor groupIcon are provided, throw an error
+    if (!settings && !groupIcon) {
+      throw new AppError('Either settings or group icon must be provided', StatusCodes.BAD_REQUEST);
     }
 
     // Check if the chat exists in the database
@@ -193,18 +183,41 @@ const updateGroupChatSettings = async (req: Request, res: Response, next: NextFu
         StatusCodes.FORBIDDEN
       );
 
-    // Update the chat settings
-    await prisma.groupChat.update({
-      where: { id: chatId },
-      data: { ...updatedSettings, groupIcon: uploadedUpdatedGroupIcon?.secure_url }
-    });
+    // Handle group icon upload if provided
+    if (groupIcon) {
+      // Upload the group icon to Cloudinary
+      uploadedUpdatedGroupIcon = await cloudinary.uploader.upload(groupIcon.path, {
+        folder: 'group_icons'
+      });
+      if (!uploadedUpdatedGroupIcon)
+        throw new AppError('Error uploading group icon', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
 
-    // Respond with success message and data
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: 'Chat settings updated successfully!',
-      data: null
-    });
+    // Handle settings update
+    if (settings) {
+      // Check if the settings are in the correct format
+      try {
+        updatedSettings = JSON.parse(settings);
+      } catch (err) {
+        throw new AppError('Invalid settings!', StatusCodes.BAD_REQUEST);
+      }
+
+      // Update the chat settings
+      await prisma.groupChat.update({
+        where: { id: chatId },
+        data: {
+          ...(updatedSettings && updatedSettings),
+          ...(uploadedUpdatedGroupIcon && { groupIcon: uploadedUpdatedGroupIcon.secure_url })
+        }
+      });
+
+      // Respond with success message and data
+      res.status(StatusCodes.OK).json({
+        success: true,
+        message: 'Chat settings updated successfully!',
+        data: null
+      });
+    }
   } catch (error) {
     // Pass any errors to the error handling middleware
     next(error);
