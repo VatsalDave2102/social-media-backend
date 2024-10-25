@@ -1,3 +1,25 @@
+const oneOnOneChatDetails = {
+  type: 'object',
+  properties: {
+    success: { type: 'boolean' },
+    message: { type: 'string' },
+    data: {
+      type: 'object',
+      properties: {
+        id: { type: 'string' },
+        initiatorId: { type: 'string' },
+        participantId: { type: 'string' },
+        vanishMode: { type: 'boolean' },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' },
+        lastMessageAt: { type: 'string', format: 'date-time' },
+        deletedForInitiator: { type: 'boolean', nullable: true },
+        deletedForParticipant: { type: 'object', nullable: true }
+      }
+    }
+  }
+};
+
 export const oneOnOneChatSchemas = {
   CreateOneOnOneChatRequest: {
     type: 'object',
@@ -14,48 +36,8 @@ export const oneOnOneChatSchemas = {
       }
     }
   },
-  CreateOneOnOneChatResponse: {
-    type: 'object',
-    properties: {
-      success: { type: 'boolean' },
-      message: { type: 'string' },
-      data: {
-        type: 'object',
-        properties: {
-          id: { type: 'string' },
-          initiatorId: { type: 'string' },
-          participantId: { type: 'string' },
-          vanishMode: { type: 'boolean' },
-          createdAt: { type: 'string', format: 'date-time' },
-          updatedAt: { type: 'string', format: 'date-time' },
-          lastMessageAt: { type: 'string', format: 'date-time' },
-          deletedForInitiator: { type: 'boolean', nullable: true },
-          deletedForParticipant: { type: 'object', nullable: true }
-        }
-      }
-    }
-  },
-  GetOneOnOneChatDetailsResponse: {
-    type: 'object',
-    properties: {
-      success: { type: 'boolean' },
-      message: { type: 'string' },
-      data: {
-        type: 'object',
-        properties: {
-          id: { type: 'string' },
-          initiatorId: { type: 'string' },
-          participantId: { type: 'string' },
-          vanishMode: { type: 'boolean' },
-          createdAt: { type: 'string', format: 'date-time' },
-          updatedAt: { type: 'string', format: 'date-time' },
-          lastMessageAt: { type: 'string', format: 'date-time' },
-          deletedForInitiator: { type: 'boolean', nullable: true },
-          deletedForParticipant: { type: 'boolean', nullable: true }
-        }
-      }
-    }
-  },
+  CreateOneOnOneChatResponse: oneOnOneChatDetails,
+  GetOneOnOneChatDetailsResponse: oneOnOneChatDetails,
   UpdateOneOnOneChatSettingsRequest: {
     type: 'object',
     properties: {
@@ -110,5 +92,6 @@ export const oneOnOneChatSchemas = {
         }
       }
     }
-  }
+  },
+  GetOneOnOneChatByUserIdsResponse: oneOnOneChatDetails
 };

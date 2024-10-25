@@ -133,13 +133,29 @@ oneOnOneChatRouter.get(
           $ref: '#/components/schemas/GetOneOnOneChatDetailsResponse'
         },
         examples: {
-          chatCreationResponse: {
+          chatRetrievalResponse: {
             $ref: "#/components/examples/GetOneOnOneChatDetailsResponse"
           }
         }
       }
     }
   }
+
+  #swagger.responses[403] = {
+    description: 'Forbidden',
+    content: {
+      'application/json': {
+        schema:{
+          $ref: "#/components/schemas/ForbiddenResponse"
+        },
+        examples: {
+          forbiddenResponse: {
+            $ref: "#/components/examples/ForbiddenResponse"
+          }
+        }
+      }           
+    }
+  } 
 
   #swagger.responses[404] = {
     description: 'Not found',
@@ -151,22 +167,6 @@ oneOnOneChatRouter.get(
         examples: {
           notFoundResponse: {
             $ref: "#/components/examples/NotFoundResponse"
-          }
-        }
-      }           
-    }
-  } 
-
-  #swagger.responses[409] = {
-    description: 'Conflict',
-    content: {
-      'application/json': {
-        schema:{
-          $ref: "#/components/schemas/ConflictResponse"
-        },
-        examples: {
-          conflictResponse: {
-            $ref: "#/components/examples/ConflictResponse"
           }
         }
       }           
@@ -213,7 +213,7 @@ oneOnOneChatRouter.patch(
           $ref: '#/components/schemas/UpdateOneOnOneChatSettingsResponse'
         },
         examples: {
-          chatUpdationResponse: {
+          chatSettingsUpdationResponse: {
             $ref: "#/components/examples/UpdateOneOnOneChatSettingsResponse"
           }
         }
@@ -362,6 +362,80 @@ oneOnOneChatRouter.get(
   */
 );
 
-oneOnOneChatRouter.get('/:userId1/:userId2', verifyToken('accessToken'), getOneOnOneChatByUserIds);
+oneOnOneChatRouter.get(
+  '/:userId1/:userId2',
+  verifyToken('accessToken'),
+  getOneOnOneChatByUserIds
+  /*
+  #swagger.summary = 'Retrieve one-on-one chat details using user IDs'
+
+  #swagger.description = 'Fetches detailed information about a specific one-on-one chat by 
+  providing two user IDs. The endpoint verifies chat existence and ensures only chat participants 
+  can access the details. Returns comprehensive chat information including participant details and 
+  chat metadata.'
+
+  #swagger.parameters['userId1'] = {
+    in: 'path',                            
+    description: 'first user ID',                   
+    required: true,                     
+    type: 'string',                                                     
+  } 
+
+  #swagger.parameters['userId2'] = {
+    in: 'path',
+    description: 'second user ID',
+    required: true,
+    type: 'string',
+  }
+
+  #swagger.responses[200] = {
+    description: 'Chat details retrieved successfully',
+    content: {
+      'application/json': {
+        schema: {
+          $ref: '#/components/schemas/GetOneOnOneChatByUserIdsResponse'
+        },
+        examples: {
+          chatRetrievalResponse: {
+            $ref: "#/components/examples/GetOneOnOneChatByUserIdsResponse"
+          }
+        }
+      }
+    }
+  }
+
+  #swagger.responses[403] = {
+    description: 'Forbidden',
+    content: {
+      'application/json': {
+        schema:{
+          $ref: "#/components/schemas/ForbiddenResponse"
+        },
+        examples: {
+          forbiddenResponse: {
+            $ref: "#/components/examples/ForbiddenResponse"
+          }
+        }
+      }           
+    }
+  } 
+
+  #swagger.responses[404] = {
+    description: 'Not found',
+    content: {
+      'application/json': {
+        schema:{
+          $ref: "#/components/schemas/NotFoundResponse"
+        },
+        examples: {
+          notFoundResponse: {
+            $ref: "#/components/examples/NotFoundResponse"
+          }
+        }
+      }           
+    }
+  } 
+  */
+);
 
 export default oneOnOneChatRouter;

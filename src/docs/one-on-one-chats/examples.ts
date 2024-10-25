@@ -84,5 +84,20 @@ export const oneOnOneChatExamples = {
         }
       }
     }
+  },
+  GetOneOnOneChatByUserIdsResponse: {
+    success: true,
+    message: 'Chat details retrieved successfully!',
+    data: {
+      id: '681348cb3911ee75265ig721',
+      initiatorId: '66b33a2d19d3564668312345',
+      participantId: '66a456b1f96d2bc3bbc9ae8b',
+      vanishMode: true,
+      createdAt: '2024-10-22T06:40:11.788Z',
+      updatedAt: '2024-10-22T06:47:14.496Z',
+      lastMessageAt: '2024-10-22T06:40:11.788Z',
+      deletedForInitiator: null,
+      deletedForParticipant: null
+    }
   }
 };

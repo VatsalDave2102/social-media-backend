@@ -26,6 +26,22 @@ const doc = {
     {
       name: 'User',
       description: 'User Management routes'
+    },
+    {
+      name: 'One-On-One Chats',
+      description: 'One-On-One Chat routes'
+    },
+    {
+      name: 'Group Chats',
+      description: 'Group Chat routes'
+    },
+    {
+      name: 'Messages',
+      description: 'Messaging routes'
+    },
+    {
+      name: 'Friend Requests',
+      description: 'Friend Request routes'
     }
   ],
   components: {
@@ -37,16 +53,7 @@ const doc = {
       }
     },
     '@schemas': swaggerSchemas,
-    examples: swaggerExamples,
-    parameters: {
-      cursor: {
-        name: 'cursor',
-        in: 'query',
-        type: 'number',
-        description: 'Cursor for pagination',
-        required: false
-      }
-    }
+    examples: swaggerExamples
   },
   security: [
     {

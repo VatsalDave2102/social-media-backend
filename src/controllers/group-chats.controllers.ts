@@ -465,7 +465,7 @@ const removeMemberFromGroupChat = async (req: Request, res: Response, next: Next
     // Respond with success message and data
     res.status(StatusCodes.OK).json({
       success: true,
-      message: 'Member deleted successfully!',
+      message: 'Member removed successfully!',
       data: null
     });
   } catch (error) {

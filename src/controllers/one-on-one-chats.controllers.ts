@@ -263,6 +263,16 @@ const getOneOnOneChatMessages = async (req: Request, res: Response, next: NextFu
   }
 };
 
+/**
+ * Retrieves details of a specific one-on-one chat between two users by their user IDs.
+ * @async
+ * @function getOneOnOneChatByUserIds
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @throws {AppError} - Throws an error if the chat is not found or the user is not allowed to view it
+ * @returns {Promise<void>}
+ */
 const getOneOnOneChatByUserIds = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Extract the user from the request
