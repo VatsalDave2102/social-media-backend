@@ -955,14 +955,6 @@ const getFriendshipStatus = async (req: Request, res: Response, next: NextFuncti
     const areFriends =
       currentUser.friendIds.includes(otherUserId) || currentUser.friendOfIds.includes(otherUserId);
 
-    if (areFriends) {
-      return res.status(StatusCodes.OK).json({
-        success: true,
-        message: 'Friendship status fetched successfully',
-        data: { status: FriendShipStatus.FRIENDS }
-      });
-    }
-
     // Check for pending friend requests
     const friendRequest = await prisma.friendRequest.findFirst({
       where: {
@@ -974,6 +966,14 @@ const getFriendshipStatus = async (req: Request, res: Response, next: NextFuncti
       }
     });
 
+    if (areFriends && friendRequest) {
+      return res.status(StatusCodes.OK).json({
+        success: true,
+        message: 'Friendship status fetched successfully',
+        data: { friendRequestId: friendRequest.id, status: FriendShipStatus.FRIENDS }
+      });
+    }
+
     if (friendRequest) {
       // Determine if the current user sent or received the request
       const status =
@@ -984,7 +984,7 @@ const getFriendshipStatus = async (req: Request, res: Response, next: NextFuncti
       return res.status(StatusCodes.OK).json({
         success: true,
         message: 'Friendship status fetched successfully',
-        data: { status }
+        data: { friendRequestId: friendRequest.id, status }
       });
     }
 
@@ -992,7 +992,7 @@ const getFriendshipStatus = async (req: Request, res: Response, next: NextFuncti
     return res.status(StatusCodes.OK).json({
       success: true,
       message: 'Friendship status fetched successfully',
-      data: { status: FriendShipStatus.NOT_FRIENDS }
+      data: { friendRequestId: null, status: FriendShipStatus.NOT_FRIENDS }
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
