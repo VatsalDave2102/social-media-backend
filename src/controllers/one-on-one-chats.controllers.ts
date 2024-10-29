@@ -235,7 +235,16 @@ const getOneOnOneChatMessages = async (req: Request, res: Response, next: NextFu
       take: take + 1, // Fetch one extra to determine if there are more messages
       skip: cursor ? 1 : undefined,
       cursor: cursor ? { id: cursor } : undefined,
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            profilePicture: true
+          }
+        }
+      }
     });
 
     // Determine if there are more messages and get the next cursor
