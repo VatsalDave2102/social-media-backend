@@ -961,8 +961,7 @@ const getFriendshipStatus = async (req: Request, res: Response, next: NextFuncti
         OR: [
           { senderId: id, receiverId: otherUserId },
           { senderId: otherUserId, receiverId: id }
-        ],
-        status: 'PENDING'
+        ]
       }
     });
 
