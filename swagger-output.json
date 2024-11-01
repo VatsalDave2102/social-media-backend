@@ -20,6 +20,22 @@
     {
       "name": "User",
       "description": "User Management routes"
+    },
+    {
+      "name": "One-On-One Chats",
+      "description": "One-On-One Chat routes"
+    },
+    {
+      "name": "Group Chats",
+      "description": "Group Chat routes"
+    },
+    {
+      "name": "Messages",
+      "description": "Messaging routes"
+    },
+    {
+      "name": "Friend Requests",
+      "description": "Friend Request routes"
     }
   ],
   "paths": {
@@ -2330,7 +2346,7 @@
                   "$ref": "#/components/schemas/GetOneOnOneChatDetailsResponse"
                 },
                 "examples": {
-                  "chatCreationResponse": {
+                  "chatRetrievalResponse": {
                     "$ref": "#/components/examples/GetOneOnOneChatDetailsResponse"
                   }
                 }
@@ -2352,6 +2368,21 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not found",
             "content": {
@@ -2362,21 +2393,6 @@
                 "examples": {
                   "notFoundResponse": {
                     "$ref": "#/components/examples/NotFoundResponse"
-                  }
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConflictResponse"
-                },
-                "examples": {
-                  "conflictResponse": {
-                    "$ref": "#/components/examples/ConflictResponse"
                   }
                 }
               }
@@ -2432,7 +2448,7 @@
                   "$ref": "#/components/schemas/UpdateOneOnOneChatSettingsResponse"
                 },
                 "examples": {
-                  "chatUpdationResponse": {
+                  "chatSettingsUpdationResponse": {
                     "$ref": "#/components/examples/UpdateOneOnOneChatSettingsResponse"
                   }
                 }
@@ -2588,6 +2604,117 @@
                 "examples": {
                   "getMessagesResponse": {
                     "$ref": "#/components/examples/GetOneOnOneChatMessagesResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/chats/one-on-one/{userId1}/{userId2}": {
+      "get": {
+        "tags": [
+          "One-On-One Chats"
+        ],
+        "summary": "Retrieve one-on-one chat details using user IDs",
+        "description": "Fetches detailed information about a specific one-on-one chat by   providing two user IDs. The endpoint verifies chat existence and ensures only chat participants   can access the details. Returns comprehensive chat information including participant details and   chat metadata.",
+        "parameters": [
+          {
+            "name": "userId1",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "first user ID"
+          },
+          {
+            "name": "userId2",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "second user ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOneOnOneChatByUserIdsResponse"
+                },
+                "examples": {
+                  "chatRetrievalResponse": {
+                    "$ref": "#/components/examples/GetOneOnOneChatByUserIdsResponse"
                   }
                 }
               }
@@ -3390,31 +3517,114 @@
     },
     "/api/v1/messages/send": {
       "post": {
-        "description": "",
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Send message to a group/one-on-one chat",
+        "description": "Enables users to send messages in either one-on-one or group chats.   The endpoint validates sender authorization, chat existence, and membership status.   It supports message creation in both chat types, updates the last message timestamp, and returns   the created message details.   The request body should contain only either a one-on-one chat ID or a group chat ID, not both.",
         "responses": {
-          "default": {
-            "description": ""
+          "201": {
+            "description": "Message sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendMessageResponse"
+                },
+                "examples": {
+                  "sendMessageResponse": {
+                    "$ref": "#/components/examples/SendMessageResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/BadRequestResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "content": {
-                    "example": "any"
-                  },
-                  "senderId": {
-                    "example": "any"
-                  },
-                  "oneOnOneChatId": {
-                    "example": "any"
-                  },
-                  "groupChatId": {
-                    "example": "any"
-                  }
-                }
+                "$ref": "#/components/schemas/SendMessageRequest"
               }
             }
           }
@@ -3423,7 +3633,11 @@
     },
     "/api/v1/messages/delete/{messageId}": {
       "patch": {
-        "description": "",
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Delete message from a group/one-on-one chat",
+        "description": "Enables message deletion in both one-on-one and group chats using a   soft delete approach. Message senders can delete their own messages, and in group chats,   group owners have additional deletion privileges. The deletion process preserves message structure   while removing content, maintaining chat history integrity.   The endpoint includes comprehensive validation of message existence, chat context, and user permissions.",
         "parameters": [
           {
             "name": "messageId",
@@ -3431,14 +3645,92 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "message ID"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Message deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteMessageResponse"
+                },
+                "examples": {
+                  "deleteMessageResponse": {
+                    "$ref": "#/components/examples/DeleteMessageResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     }
   },
@@ -4109,6 +4401,46 @@
           "data": null
         }
       },
+      "SendMessageResponse": {
+        "value": {
+          "success": true,
+          "message": "Message sent successfully!",
+          "data": {
+            "id": "6718b6f1cme3bda15881a0gk",
+            "content": "Hello there!",
+            "senderId": "66b33a2d19b3564668312345",
+            "oneOnOneChatId": "66d6sh74e5cb752390d99gap",
+            "groupChatId": null,
+            "createdAt": "2024-10-23T08:42:25.605Z",
+            "updatedAt": "2024-10-23T08:42:25.605Z",
+            "isDeleted": false
+          }
+        }
+      },
+      "DeleteMessageResponse": {
+        "value": {
+          "success": true,
+          "message": "Message deleted successfully!",
+          "data": null
+        }
+      },
+      "GetOneOnOneChatByUserIdsResponse": {
+        "value": {
+          "success": true,
+          "message": "Chat details retrieved successfully!",
+          "data": {
+            "id": "681348cb3911ee75265ig721",
+            "initiatorId": "66b33a2d19d3564668312345",
+            "participantId": "66a456b1f96d2bc3bbc9ae8b",
+            "vanishMode": true,
+            "createdAt": "2024-10-22T06:40:11.788Z",
+            "updatedAt": "2024-10-22T06:47:14.496Z",
+            "lastMessageAt": "2024-10-22T06:40:11.788Z",
+            "deletedForInitiator": null,
+            "deletedForParticipant": null
+          }
+        }
+      },
       "GetFriendRequestsResponse": {
         "value": {
           "success": true,
@@ -4151,15 +4483,6 @@
             }
           }
         }
-      }
-    },
-    "parameters": {
-      "cursor": {
-        "name": "cursor",
-        "in": "query",
-        "type": "number",
-        "description": "Cursor for pagination",
-        "required": false
       }
     },
     "schemas": {
@@ -4931,6 +5254,102 @@
           }
         }
       },
+      "SendMessageRequest": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "example": ""
+          },
+          "senderId": {
+            "type": "string",
+            "example": ""
+          },
+          "oneOnOneChatId": {
+            "type": "string",
+            "example": ""
+          },
+          "groupChatId": {
+            "type": "string",
+            "example": ""
+          }
+        },
+        "required": [
+          "content",
+          "senderId"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "oneOnOneChatId"
+            ]
+          },
+          {
+            "required": [
+              "groupChatId"
+            ]
+          }
+        ]
+      },
+      "SendMessageResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              },
+              "senderId": {
+                "type": "string"
+              },
+              "oneOnOneChatId": {
+                "type": "string",
+                "nullable": true
+              },
+              "groupChatId": {
+                "type": "string",
+                "nullable": true
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "Date-Time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "Date-Time"
+              },
+              "isDeleted": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "DeleteMessageResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "nullable": "true"
+          }
+        }
+      },
       "CreateOneOnOneChatRequest": {
         "type": "object",
         "properties": {
@@ -5035,7 +5454,7 @@
                 "nullable": true
               },
               "deletedForParticipant": {
-                "type": "boolean",
+                "type": "object",
                 "nullable": true
               }
             }
@@ -5132,6 +5551,54 @@
                     "nullable": true
                   }
                 }
+              }
+            }
+          }
+        }
+      },
+      "GetOneOnOneChatByUserIdsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "initiatorId": {
+                "type": "string"
+              },
+              "participantId": {
+                "type": "string"
+              },
+              "vanishMode": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "lastMessageAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "deletedForInitiator": {
+                "type": "boolean",
+                "nullable": true
+              },
+              "deletedForParticipant": {
+                "type": "object",
+                "nullable": true
               }
             }
           }
