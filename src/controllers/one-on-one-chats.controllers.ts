@@ -108,7 +108,23 @@ const getOneOnOneChatDetails = async (req: Request, res: Response, next: NextFun
 
     // Check if the chat exists in the database
     const existingChat = await prisma.oneOnOneChat.findUnique({
-      where: { id: chatId }
+      where: { id: chatId },
+      include: {
+        initiator: {
+          select: {
+            id: true,
+            name: true,
+            profilePicture: true
+          }
+        },
+        participant: {
+          select: {
+            id: true,
+            name: true,
+            profilePicture: true
+          }
+        }
+      }
     });
     if (!existingChat) throw new AppError('Chat not found!', StatusCodes.NOT_FOUND);
 
