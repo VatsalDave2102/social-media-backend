@@ -20,6 +20,22 @@
     {
       "name": "User",
       "description": "User Management routes"
+    },
+    {
+      "name": "One-On-One Chats",
+      "description": "One-On-One Chat routes"
+    },
+    {
+      "name": "Group Chats",
+      "description": "Group Chat routes"
+    },
+    {
+      "name": "Messages",
+      "description": "Messaging routes"
+    },
+    {
+      "name": "Friend Requests",
+      "description": "Friend Request routes"
     }
   ],
   "paths": {
@@ -49,7 +65,7 @@
           "Auth"
         ],
         "summary": "Register a new user",
-        "description": "Registers a new user and returns an access token.   This endpoint allows new users to create an account by providing necessary information.  Upon successful registration, it creates a new user account and returns an access token   that can be used for subsequent authenticated requests.",
+        "description": "Registers a new user and returns an access token. \r  This endpoint allows new users to create an account by providing necessary information.\r  Upon successful registration, it creates a new user account and returns an access token \r  that can be used for subsequent authenticated requests.",
         "responses": {
           "201": {
             "description": "User successfully registered",
@@ -115,7 +131,7 @@
           "Auth"
         ],
         "summary": "Login a user",
-        "description": "Authenticates a user and returns a token.   This endpoint allows users to log in by providing their credentials (typically email and password).   Upon successful authentication, it returns a token that can be used for subsequent authenticated requests.",
+        "description": "Authenticates a user and returns a token. \r  This endpoint allows users to log in by providing their credentials (typically email and password). \r  Upon successful authentication, it returns a token that can be used for subsequent authenticated requests.",
         "responses": {
           "200": {
             "description": "Login Successful",
@@ -181,7 +197,7 @@
           "Auth"
         ],
         "summary": "Logout a user",
-        "description": "Logs out the current user.   This endpoint invalidates the user",
+        "description": "Logs out the current user. \r  This endpoint invalidates the user",
         "responses": {
           "200": {
             "description": "Logout Successful",
@@ -242,7 +258,7 @@
           "Auth"
         ],
         "summary": "Refresh access token",
-        "description": "Generate a new access token using a valid refresh token.   The refresh token must be provided in the Authorization header.",
+        "description": "Generate a new access token using a valid refresh token. \r  The refresh token must be provided in the Authorization header.",
         "responses": {
           "200": {
             "description": "Access token refreshed successfully",
@@ -303,7 +319,7 @@
           "Auth"
         ],
         "summary": "Forgot Password",
-        "description": "Sends a link to the user\\'s email address to reset their password.   The link will have the reset password JWT in the query params & will expire in 15 minutes.   If the user does not click on the link within 15 minutes,   the link will expire and the user will need to request a new password reset.",
+        "description": "Sends a link to the user\\'s email address to reset their password. \r  The link will have the reset password JWT in the query params & will expire in 15 minutes. \r  If the user does not click on the link within 15 minutes, \r  the link will expire and the user will need to request a new password reset.",
         "responses": {
           "200": {
             "description": "Reset password email sent successfully",
@@ -369,7 +385,7 @@
           "Auth"
         ],
         "summary": "Reset Password",
-        "description": "Resets the user\\'s password using a valid reset password token.   The reset password token must be provided in the query string.",
+        "description": "Resets the user\\'s password using a valid reset password token. \r  The reset password token must be provided in the query string.",
         "parameters": [
           {
             "name": "token",
@@ -2193,7 +2209,7 @@
           "One-On-One Chats"
         ],
         "summary": "Create a new one-on-one chat",
-        "description": "Initiates a secure, direct conversation between two users who are confirmed friends.   This endpoint verifies the friendship status, prevents duplicate chats, and establishes   a private space for personal communication.",
+        "description": "Initiates a secure, direct conversation between two users who are confirmed friends. \r  This endpoint verifies the friendship status, prevents duplicate chats, and establishes \r  a private space for personal communication.",
         "responses": {
           "201": {
             "description": "Chat created successfully",
@@ -2309,7 +2325,7 @@
           "One-On-One Chats"
         ],
         "summary": "Get details of an existing one-on-one chat",
-        "description": "Fetches detailed information about an existing one-on-one chat, including participant details,   chat settings, and metadata.   This endpoint provides a complete overview of the chat",
+        "description": "Fetches detailed information about an existing one-on-one chat, including participant details, \r  chat settings, and metadata. \r  This endpoint provides a complete overview of the chat",
         "parameters": [
           {
             "name": "chatId",
@@ -2330,7 +2346,7 @@
                   "$ref": "#/components/schemas/GetOneOnOneChatDetailsResponse"
                 },
                 "examples": {
-                  "chatCreationResponse": {
+                  "chatRetrievalResponse": {
                     "$ref": "#/components/examples/GetOneOnOneChatDetailsResponse"
                   }
                 }
@@ -2352,6 +2368,21 @@
               }
             }
           },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
           "404": {
             "description": "Not found",
             "content": {
@@ -2362,21 +2393,6 @@
                 "examples": {
                   "notFoundResponse": {
                     "$ref": "#/components/examples/NotFoundResponse"
-                  }
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "Conflict",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConflictResponse"
-                },
-                "examples": {
-                  "conflictResponse": {
-                    "$ref": "#/components/examples/ConflictResponse"
                   }
                 }
               }
@@ -2411,7 +2427,7 @@
           "One-On-One Chats"
         ],
         "summary": "Update settings of an existing one-on-one chat",
-        "description": "Modifies the settings of an existing one-on-one chat. This endpoint allows users to toggle   the vanish mode on or off for v1, enhancing privacy options for sensitive conversations.",
+        "description": "Modifies the settings of an existing one-on-one chat. This endpoint allows users to toggle \r  the vanish mode on or off for v1, enhancing privacy options for sensitive conversations.",
         "parameters": [
           {
             "name": "chatId",
@@ -2432,7 +2448,7 @@
                   "$ref": "#/components/schemas/UpdateOneOnOneChatSettingsResponse"
                 },
                 "examples": {
-                  "chatUpdationResponse": {
+                  "chatSettingsUpdationResponse": {
                     "$ref": "#/components/examples/UpdateOneOnOneChatSettingsResponse"
                   }
                 }
@@ -2538,7 +2554,7 @@
           "One-On-One Chats"
         ],
         "summary": "Retrieve messages from a specific one-on-one chat",
-        "description": "Fetches the message history of an existing one-on-one chat.   This endpoint allows users to access the conversation content, including text messages,   timestamps, and any associated metadata.   It supports pagination for efficient retrieval of large message histories.",
+        "description": "Fetches the message history of an existing one-on-one chat. \r  This endpoint allows users to access the conversation content, including text messages, \r  timestamps, and any associated metadata. \r  It supports pagination for efficient retrieval of large message histories.",
         "parameters": [
           {
             "name": "chatId",
@@ -2661,13 +2677,124 @@
         ]
       }
     },
+    "/api/v1/chats/one-on-one/{userId1}/{userId2}": {
+      "get": {
+        "tags": [
+          "One-On-One Chats"
+        ],
+        "summary": "Retrieve one-on-one chat details using user IDs",
+        "description": "Fetches detailed information about a specific one-on-one chat by \r  providing two user IDs. The endpoint verifies chat existence and ensures only chat participants \r  can access the details. Returns comprehensive chat information including participant details and \r  chat metadata.",
+        "parameters": [
+          {
+            "name": "userId1",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "first user ID"
+          },
+          {
+            "name": "userId2",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "second user ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOneOnOneChatByUserIdsResponse"
+                },
+                "examples": {
+                  "chatRetrievalResponse": {
+                    "$ref": "#/components/examples/GetOneOnOneChatByUserIdsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
     "/api/v1/chats/group/create": {
       "post": {
         "tags": [
           "Group Chats"
         ],
         "summary": "Create a new group chat",
-        "description": "Creates a group chat with specified members, customizable name, description,   and group icon. The creator must be friends with all added members, and a group icon is mandatory.   The creator automatically becomes the group owner with administrative privileges.",
+        "description": "Creates a group chat with specified members, customizable name, description, \r  and group icon. The creator must be friends with all added members, and a group icon is mandatory. \r  The creator automatically becomes the group owner with administrative privileges.",
         "responses": {
           "201": {
             "description": "Chat created successfully",
@@ -2768,7 +2895,7 @@
           "Group Chats"
         ],
         "summary": "Get details of a specific group chat",
-        "description": "Fetches comprehensive details of a specific group chat,   including name, description, icon, owner, and member information.   Only group members and the owner can access these details.   The response includes all current group settings and participant information.",
+        "description": "Fetches comprehensive details of a specific group chat, \r  including name, description, icon, owner, and member information. \r  Only group members and the owner can access these details. \r  The response includes all current group settings and participant information.",
         "parameters": [
           {
             "name": "chatId",
@@ -2869,7 +2996,7 @@
           "Group Chats"
         ],
         "summary": "Update settings of an existing group chat",
-        "description": "Enables group owners to modify chat settings including name, description, and group icon.   The endpoint accepts settings in JSON format and supports image uploads for the group icon.   Only the group owner has permission to update these settings.",
+        "description": "Enables group owners to modify chat settings including name, description, and group icon. \r  The endpoint accepts settings in JSON format and supports image uploads for the group icon. \r  Only the group owner has permission to update these settings.",
         "parameters": [
           {
             "name": "chatId",
@@ -2996,7 +3123,7 @@
           "Group Chats"
         ],
         "summary": "Retrieve messages from a specific group chat",
-        "description": "Retrieves messages from a group chat with advanced filtering capabilities.   Features include pagination for efficient message loading, text-based search functionality,   and customizable batch sizes. Messages are returned in descending chronological order,   and only group members or the owner can access the chat history.   The response includes message content, metadata, and pagination details for seamless navigation   through the chat history.",
+        "description": "Retrieves messages from a group chat with advanced filtering capabilities. \r  Features include pagination for efficient message loading, text-based search functionality, \r  and customizable batch sizes. Messages are returned in descending chronological order, \r  and only group members or the owner can access the chat history. \r  The response includes message content, metadata, and pagination details for seamless navigation \r  through the chat history.",
         "parameters": [
           {
             "name": "chatId",
@@ -3125,7 +3252,7 @@
           "Group Chats"
         ],
         "summary": "Add members to a specific group chat",
-        "description": "Enables group owners to add new members to an existing group chat.   The endpoint validates friendship status, ensuring new members are friends with the owner.   It handles duplicate member checks, preventing re-adding existing members, and supports adding   multiple members simultaneously.",
+        "description": "Enables group owners to add new members to an existing group chat. \r  The endpoint validates friendship status, ensuring new members are friends with the owner. \r  It handles duplicate member checks, preventing re-adding existing members, and supports adding \r  multiple members simultaneously.",
         "parameters": [
           {
             "name": "chatId",
@@ -3252,7 +3379,7 @@
           "Group Chats"
         ],
         "summary": "Remove a member from a specific group chat",
-        "description": "Enables group owners to remove members from an existing group chat.   The endpoint includes comprehensive validation checks: verifies member existence,   prevents owner removal, confirms removal permissions, and ensures the target member is   currently in the group.   Only group owners have the authority to remove members, and the operation is irreversible.",
+        "description": "Enables group owners to remove members from an existing group chat. \r  The endpoint includes comprehensive validation checks: verifies member existence, \r  prevents owner removal, confirms removal permissions, and ensures the target member is \r  currently in the group. \r  Only group owners have the authority to remove members, and the operation is irreversible.",
         "parameters": [
           {
             "name": "chatId",
@@ -3390,31 +3517,114 @@
     },
     "/api/v1/messages/send": {
       "post": {
-        "description": "",
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Send message to a group/one-on-one chat",
+        "description": "Enables users to send messages in either one-on-one or group chats. \r  The endpoint validates sender authorization, chat existence, and membership status. \r  It supports message creation in both chat types, updates the last message timestamp, and returns \r  the created message details. \r  The request body should contain only either a one-on-one chat ID or a group chat ID, not both.",
         "responses": {
-          "default": {
-            "description": ""
+          "201": {
+            "description": "Message sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendMessageResponse"
+                },
+                "examples": {
+                  "sendMessageResponse": {
+                    "$ref": "#/components/examples/SendMessageResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BadRequestResponse"
+                },
+                "examples": {
+                  "badRequestResponse": {
+                    "$ref": "#/components/examples/BadRequestResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
         },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "content": {
-                    "example": "any"
-                  },
-                  "senderId": {
-                    "example": "any"
-                  },
-                  "oneOnOneChatId": {
-                    "example": "any"
-                  },
-                  "groupChatId": {
-                    "example": "any"
-                  }
-                }
+                "$ref": "#/components/schemas/SendMessageRequest"
               }
             }
           }
@@ -3423,7 +3633,11 @@
     },
     "/api/v1/messages/delete/{messageId}": {
       "patch": {
-        "description": "",
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Delete message from a group/one-on-one chat",
+        "description": "Enables message deletion in both one-on-one and group chats using a \r  soft delete approach. Message senders can delete their own messages, and in group chats, \r  group owners have additional deletion privileges. The deletion process preserves message structure \r  while removing content, maintaining chat history integrity. \r  The endpoint includes comprehensive validation of message existence, chat context, and user permissions.",
         "parameters": [
           {
             "name": "messageId",
@@ -3431,14 +3645,92 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "message ID"
           }
         ],
         "responses": {
-          "default": {
-            "description": ""
+          "200": {
+            "description": "Message deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteMessageResponse"
+                },
+                "examples": {
+                  "deleteMessageResponse": {
+                    "$ref": "#/components/examples/DeleteMessageResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized Access",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UnauthorizedAccessResponse"
+                },
+                "examples": {
+                  "unauthorizedAccessResponse": {
+                    "$ref": "#/components/examples/UnauthorizedAccessResponse"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForbiddenResponse"
+                },
+                "examples": {
+                  "forbiddenResponse": {
+                    "$ref": "#/components/examples/ForbiddenResponse"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                },
+                "examples": {
+                  "notFoundResponse": {
+                    "$ref": "#/components/examples/NotFoundResponse"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerErrorResponse"
+                },
+                "examples": {
+                  "internalServerErrorResponse": {
+                    "$ref": "#/components/examples/InternalServerErrorResponse"
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     }
   },
@@ -4109,6 +4401,46 @@
           "data": null
         }
       },
+      "SendMessageResponse": {
+        "value": {
+          "success": true,
+          "message": "Message sent successfully!",
+          "data": {
+            "id": "6718b6f1cme3bda15881a0gk",
+            "content": "Hello there!",
+            "senderId": "66b33a2d19b3564668312345",
+            "oneOnOneChatId": "66d6sh74e5cb752390d99gap",
+            "groupChatId": null,
+            "createdAt": "2024-10-23T08:42:25.605Z",
+            "updatedAt": "2024-10-23T08:42:25.605Z",
+            "isDeleted": false
+          }
+        }
+      },
+      "DeleteMessageResponse": {
+        "value": {
+          "success": true,
+          "message": "Message deleted successfully!",
+          "data": null
+        }
+      },
+      "GetOneOnOneChatByUserIdsResponse": {
+        "value": {
+          "success": true,
+          "message": "Chat details retrieved successfully!",
+          "data": {
+            "id": "681348cb3911ee75265ig721",
+            "initiatorId": "66b33a2d19d3564668312345",
+            "participantId": "66a456b1f96d2bc3bbc9ae8b",
+            "vanishMode": true,
+            "createdAt": "2024-10-22T06:40:11.788Z",
+            "updatedAt": "2024-10-22T06:47:14.496Z",
+            "lastMessageAt": "2024-10-22T06:40:11.788Z",
+            "deletedForInitiator": null,
+            "deletedForParticipant": null
+          }
+        }
+      },
       "GetFriendRequestsResponse": {
         "value": {
           "success": true,
@@ -4151,15 +4483,6 @@
             }
           }
         }
-      }
-    },
-    "parameters": {
-      "cursor": {
-        "name": "cursor",
-        "in": "query",
-        "type": "number",
-        "description": "Cursor for pagination",
-        "required": false
       }
     },
     "schemas": {
@@ -4931,6 +5254,102 @@
           }
         }
       },
+      "SendMessageRequest": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "example": ""
+          },
+          "senderId": {
+            "type": "string",
+            "example": ""
+          },
+          "oneOnOneChatId": {
+            "type": "string",
+            "example": ""
+          },
+          "groupChatId": {
+            "type": "string",
+            "example": ""
+          }
+        },
+        "required": [
+          "content",
+          "senderId"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "oneOnOneChatId"
+            ]
+          },
+          {
+            "required": [
+              "groupChatId"
+            ]
+          }
+        ]
+      },
+      "SendMessageResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              },
+              "senderId": {
+                "type": "string"
+              },
+              "oneOnOneChatId": {
+                "type": "string",
+                "nullable": true
+              },
+              "groupChatId": {
+                "type": "string",
+                "nullable": true
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "Date-Time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "Date-Time"
+              },
+              "isDeleted": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "DeleteMessageResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "nullable": "true"
+          }
+        }
+      },
       "CreateOneOnOneChatRequest": {
         "type": "object",
         "properties": {
@@ -5035,7 +5454,7 @@
                 "nullable": true
               },
               "deletedForParticipant": {
-                "type": "boolean",
+                "type": "object",
                 "nullable": true
               }
             }
@@ -5132,6 +5551,54 @@
                     "nullable": true
                   }
                 }
+              }
+            }
+          }
+        }
+      },
+      "GetOneOnOneChatByUserIdsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "initiatorId": {
+                "type": "string"
+              },
+              "participantId": {
+                "type": "string"
+              },
+              "vanishMode": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "lastMessageAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "deletedForInitiator": {
+                "type": "boolean",
+                "nullable": true
+              },
+              "deletedForParticipant": {
+                "type": "object",
+                "nullable": true
               }
             }
           }

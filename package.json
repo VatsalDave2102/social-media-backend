@@ -12,7 +12,7 @@
     "release": "semantic-release",
     "seed": "node dist/utils/seed.js",
     "prepare": "if [ \"$NODE_ENV\" != \"production\" ]; then husky install; fi",
-    "swagger": "if [ \"$NODE_ENV\" = \"production\" ]; then node dist/utils/swagger.js; else ts-node src/utils/swagger.ts; fi"
+    "swagger": "ts-node src/utils/swagger.ts"
   },
   "repository": {
     "type": "git",
@@ -40,6 +40,7 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.14",
+    "socket.io": "^4.8.1",
     "winston": "^3.13.1",
     "zod": "^3.23.8"
   },
