@@ -280,7 +280,8 @@ const getGroupChatMessages = async (req: Request, res: Response, next: NextFunct
           select: {
             id: true,
             name: true,
-            profilePicture: true
+            profilePicture: true,
+            isDeleted: true
           }
         }
       }

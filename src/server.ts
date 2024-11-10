@@ -49,49 +49,110 @@ io.on('connection', (socket) => {
     joinChatRoom(chatId);
   });
 
-  socket.on('sendMessage', async ({ chatId, senderId, content }) => {
-    console.log('message received', content, senderId, chatId);
+  socket.on('sendMessage', async ({ chatId, senderId, content, vanishMode }) => {
+    console.log('message received', content, senderId, chatId, vanishMode);
 
-    if (chatId) {
-      // Create a new message
-      const newMessage = await prisma.$transaction(async (prisma) => {
-        const message = await prisma.message.create({
-          data: {
-            content,
-            senderId: senderId,
-            oneOnOneChatId: chatId
-          },
-          include: {
-            sender: {
-              select: {
-                id: true,
-                name: true,
-                profilePicture: true
+    if (!vanishMode) {
+      if (chatId) {
+        // Create a new message
+        const newMessage = await prisma.$transaction(async (prisma) => {
+          const message = await prisma.message.create({
+            data: {
+              content,
+              senderId: senderId,
+              oneOnOneChatId: chatId
+            },
+            include: {
+              sender: {
+                select: {
+                  id: true,
+                  name: true,
+                  profilePicture: true
+                }
               }
             }
+          });
+
+          if (chatId) {
+            await prisma.oneOnOneChat.update({
+              where: { id: chatId },
+              data: { lastMessageAt: message.createdAt }
+            });
           }
+
+          return message;
+        });
+        io.to(chatId).emit(`chat:${chatId}:messages`, newMessage);
+      }
+    } else if (vanishMode) {
+      if (senderId) {
+        const sender = await prisma.user.findUnique({
+          where: { id: senderId }
         });
 
-        if (chatId) {
-          await prisma.oneOnOneChat.update({
-            where: { id: chatId },
-            data: { lastMessageAt: message.createdAt }
-          });
+        if (sender) {
+          const newMessage = {
+            id: new Date().getMinutes(),
+            content,
+            senderId,
+            oneOnOneChatId: chatId,
+            isDeleted: false,
+            createdAt: new Date(),
+            sender: {
+              id: senderId,
+              name: sender.name,
+              profilePicture: sender.profilePicture
+            }
+          };
+          io.to(chatId).emit(`chat:${chatId}:messages`, newMessage);
         }
+      }
+    }
+  });
 
-        return message;
+  socket.on('deleteMessage', async ({ chatId, messageId, senderId, vanishMode }) => {
+    if (!vanishMode) {
+      const deletedMessage = await prisma.message.update({
+        where: { id: messageId },
+        data: {
+          content: '',
+          isDeleted: true
+        }
       });
-      io.to(chatId).emit(`chat:${chatId}:messages`, newMessage);
+      io.to(chatId).emit(`chat:${chatId}:messages:update`, deletedMessage);
+    } else if (vanishMode) {
+      if (senderId) {
+        const sender = await prisma.user.findUnique({
+          where: { id: senderId }
+        });
+
+        if (sender) {
+          const deletedMessage = {
+            id: messageId,
+            content: '',
+            senderId,
+            oneOnOneChatId: chatId,
+            isDeleted: true,
+            createdAt: new Date(),
+            sender: {
+              id: senderId,
+              name: sender.name,
+              profilePicture: sender.profilePicture
+            }
+          };
+          io.to(chatId).emit(`chat:${chatId}:messages:update`, deletedMessage);
+        }
+      }
     }
   });
 
   // Group Chat event handler
-  socket.on('sendGroupMessage', async ({ chatId, content }) => {
+  socket.on('sendGroupMessage', async ({ chatId, senderId, content }) => {
     const newMessage = await prisma.$transaction(async (prisma) => {
       const message = await prisma.message.create({
         data: {
           content,
-          senderId: userId,
+          senderId: senderId,
           groupChatId: chatId
         },
         include: {
@@ -99,7 +160,8 @@ io.on('connection', (socket) => {
             select: {
               id: true,
               name: true,
-              profilePicture: true
+              profilePicture: true,
+              isDeleted: true
             }
           }
         }
@@ -121,13 +183,14 @@ io.on('connection', (socket) => {
   // User starts typing
   socket.on('userTyping', ({ chatId, name }) => {
     console.log('user is typing', chatId, name);
-    io.to(chatId).emit('userTyping', { name });
-    // socket.broadcast.to(chatId).emit('userTyping', { name });
+    // io.to(chatId).emit('userTyping', { name });
+    socket.broadcast.to(chatId).emit('userTyping', { name });
   });
 
   // User stops typing
-  socket.on('userStoppedTyping', ({ chatId, userId }) => {
-    io.to(chatId).emit('userStoppedTyping', { userId });
+  socket.on('userStoppedTyping', ({ chatId, name }) => {
+    // io.to(chatId).emit('userStoppedTyping', { name });
+    socket.broadcast.to(chatId).emit('userStoppedTyping', { name });
   });
 
   // Online status updates
