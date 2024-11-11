@@ -203,7 +203,7 @@ const updateGroupChatSettings = async (req: Request, res: Response, next: NextFu
       }
 
       // Update the chat settings
-      await prisma.groupChat.update({
+      const updatedChat = await prisma.groupChat.update({
         where: { id: chatId },
         data: {
           ...(updatedSettings && updatedSettings),
@@ -215,7 +215,7 @@ const updateGroupChatSettings = async (req: Request, res: Response, next: NextFu
       res.status(StatusCodes.OK).json({
         success: true,
         message: 'Chat settings updated successfully!',
-        data: null
+        data: updatedChat
       });
     }
   } catch (error) {

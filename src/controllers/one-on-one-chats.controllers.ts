@@ -185,16 +185,32 @@ const updateOneOnOneChatSettings = async (req: Request, res: Response, next: Nex
     }
 
     // Update the chat settings
-    await prisma.oneOnOneChat.update({
+    const updatedChat = await prisma.oneOnOneChat.update({
       where: { id: chatId },
-      data: settings
+      data: settings,
+      include: {
+        initiator: {
+          select: {
+            id: true,
+            name: true,
+            profilePicture: true
+          }
+        },
+        participant: {
+          select: {
+            id: true,
+            name: true,
+            profilePicture: true
+          }
+        }
+      }
     });
 
     // Respond with success message and data
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Chat settings updated successfully!',
-      data: null
+      data: updatedChat
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
