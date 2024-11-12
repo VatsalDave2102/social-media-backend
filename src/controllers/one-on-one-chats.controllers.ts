@@ -114,14 +114,16 @@ const getOneOnOneChatDetails = async (req: Request, res: Response, next: NextFun
           select: {
             id: true,
             name: true,
-            profilePicture: true
+            profilePicture: true,
+            isDeleted: true
           }
         },
         participant: {
           select: {
             id: true,
             name: true,
-            profilePicture: true
+            profilePicture: true,
+            isDeleted: true
           }
         }
       }
@@ -157,6 +159,8 @@ const updateOneOnOneChatSettings = async (req: Request, res: Response, next: Nex
   try {
     // Extract the user from the request
     const { user } = req;
+
+    console.log(req.body);
 
     // Extract the chat id from the url
     const { chatId } = req.params;
@@ -273,7 +277,8 @@ const getOneOnOneChatMessages = async (req: Request, res: Response, next: NextFu
           select: {
             id: true,
             name: true,
-            profilePicture: true
+            profilePicture: true,
+            isDeleted: true
           }
         }
       }
