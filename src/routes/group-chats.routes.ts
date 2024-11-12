@@ -4,6 +4,7 @@ import {
   addMembersToGroupChat,
   createGroupChat,
   getGroupChatDetails,
+  getGroupChatMembers,
   getGroupChatMessages,
   removeMemberFromGroupChat,
   updateGroupChatSettings
@@ -560,4 +561,5 @@ groupChatRouter.patch(
   */
 );
 
+groupChatRouter.get('/:chatId/members', verifyToken('accessToken'), getGroupChatMembers);
 export default groupChatRouter;

@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
+import { GROUP_MEMBERS_BATCH, MESSAGES_BATCH } from '../utils/constants';
 import { AppError } from '../middlewares/errorHandler';
 import { GroupChatSettings } from '../types/group-chats.types';
-import { MESSAGES_BATCH } from '../utils/constants';
 import cloudinary from '../config/cloudinary';
 import prisma from '../config/db';
 
@@ -246,7 +246,7 @@ const getGroupChatMessages = async (req: Request, res: Response, next: NextFunct
     // Extract the cursor from the query parameters
     const cursor = req.query.cursor as string;
 
-    // Extract the searcch query from the query parameters
+    // Extract the search query from the query parameters
     const search = req.query.search as string;
 
     // Set the take value
@@ -484,11 +484,106 @@ const removeMemberFromGroupChat = async (req: Request, res: Response, next: Next
   }
 };
 
+/**
+ * Retrieves members of a specific group chat.
+ *
+ * @async
+ * @function getGroupChatMembers
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next middleware function
+ * @throws {AppError} - Throws an error if the chat doesn't exist or user lacks permission
+ * @returns {Promise<void>}
+ */
+const getGroupChatMembers = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Extract the user from the request
+    const { user } = req;
+
+    // Extract the chatId from the request params
+    const { chatId } = req.params;
+
+    // Extract the cursor from the query parameters
+    const cursor = req.query.cursor as string;
+
+    // Set the take value
+    const take = Number(req.query.take) || GROUP_MEMBERS_BATCH;
+
+    // Check if the chat exists in the database
+    const existingChat = await prisma.groupChat.findUnique({
+      where: { id: chatId }
+    });
+    if (!existingChat) throw new AppError('Group chat not found!', StatusCodes.NOT_FOUND);
+
+    // Check if the user is either the owner or a member of the chat
+    if (
+      existingChat.ownerId !== user.userId &&
+      !existingChat.memberIds.some((memberId) => memberId === user.userId)
+    )
+      throw new AppError('You are not allowed to view this chat!', StatusCodes.FORBIDDEN);
+
+    // Get the chat members
+    const [chatMembers, totalCount] = await Promise.all([
+      prisma.groupChat.findUnique({
+        where: { id: chatId },
+        select: {
+          members: {
+            select: {
+              id: true,
+              name: true,
+              profilePicture: true,
+              bio: true,
+              isDeleted: true
+            },
+            take: take + 1,
+            skip: cursor ? 1 : undefined,
+            cursor: cursor ? { id: cursor } : undefined,
+            orderBy: { createdAt: 'desc' }
+          }
+        }
+      }),
+      prisma.groupChat.findUnique({
+        where: { id: chatId },
+        select: {
+          _count: {
+            select: {
+              members: true
+            }
+          }
+        }
+      })
+    ]);
+    if (!chatMembers || !totalCount) {
+      throw new AppError('Failed to fetch chat members', StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+
+    const hasNextPage = chatMembers.members.length > take;
+    const nextCursor = hasNextPage ? chatMembers.members[take - 1].id : null;
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Members retrieved successfully!',
+      data: {
+        members: chatMembers.members.slice(0, take),
+        pagination: {
+          totalCount: totalCount._count.members,
+          hasNextPage,
+          nextCursor
+        }
+      }
+    });
+  } catch (error) {
+    // Pass any errors to the error handling middleware
+    next(error);
+  }
+};
+
 export {
   createGroupChat,
   getGroupChatDetails,
   updateGroupChatSettings,
   getGroupChatMessages,
   addMembersToGroupChat,
-  removeMemberFromGroupChat
+  removeMemberFromGroupChat,
+  getGroupChatMembers
 };
