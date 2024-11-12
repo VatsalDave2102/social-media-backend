@@ -2,7 +2,6 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
 import swaggerUI from 'swagger-ui-express';
 
 import authRouter from './routes/auth.routes';
@@ -18,7 +17,7 @@ import userRouter from './routes/users.routes';
 
 const app = express();
 
-app.set('trust proxy', 1 /* number of proxies between user and server */);
+// app.set('trust proxy', 1 /* number of proxies between user and server */);
 
 // Middleware
 app.use(cors());
@@ -27,12 +26,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
+// // Rate limiting
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 100 // limit each IP to 100 requests per windowMs
+// });
+// app.use(limiter);
 
 // Routes
 app.get('/', (req, res) => {
