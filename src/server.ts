@@ -36,13 +36,11 @@ const onlineUsers = new Map<string, string>();
 io.on('connection', (socket) => {
   const userId = socket.data.user.id;
   onlineUsers.set(userId, socket.id);
-  console.log('user online', userId);
 
   socket.broadcast.emit('userOnline', { userId });
 
   const joinChatRoom = (chatId: string) => {
     socket.join(chatId);
-    console.log(`User ${userId} joined chat room ${chatId}`);
   };
 
   socket.on('joinChat', ({ chatId }) => {
@@ -50,8 +48,6 @@ io.on('connection', (socket) => {
   });
 
   socket.on('sendMessage', async ({ chatId, senderId, content, vanishMode }) => {
-    console.log('message received', content, senderId, chatId, vanishMode);
-
     if (!vanishMode) {
       if (chatId) {
         // Create a new message
@@ -110,8 +106,12 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('deleteMessage', async ({ chatId, messageId, senderId, vanishMode }) => {
-    if (!vanishMode) {
+  socket.on('deleteMessage', async ({ chatId, messageId, senderId }) => {
+    const deletedMessage = await prisma.message.findUnique({
+      where: { id: messageId }
+    });
+
+    if (deletedMessage) {
       const deletedMessage = await prisma.message.update({
         where: { id: messageId },
         data: {
@@ -120,28 +120,29 @@ io.on('connection', (socket) => {
         }
       });
       io.to(chatId).emit(`chat:${chatId}:messages:update`, deletedMessage);
-    } else if (vanishMode) {
-      if (senderId) {
-        const sender = await prisma.user.findUnique({
-          where: { id: senderId }
-        });
+      return;
+    }
 
-        if (sender) {
-          const deletedMessage = {
-            id: messageId,
-            content: '',
-            senderId,
-            oneOnOneChatId: chatId,
-            isDeleted: true,
-            createdAt: new Date(),
-            sender: {
-              id: senderId,
-              name: sender.name,
-              profilePicture: sender.profilePicture
-            }
-          };
-          io.to(chatId).emit(`chat:${chatId}:messages:update`, deletedMessage);
-        }
+    if (senderId) {
+      const sender = await prisma.user.findUnique({
+        where: { id: senderId }
+      });
+
+      if (sender) {
+        const deletedMessage = {
+          id: messageId,
+          content: '',
+          senderId,
+          oneOnOneChatId: chatId,
+          isDeleted: true,
+          createdAt: new Date(),
+          sender: {
+            id: senderId,
+            name: sender.name,
+            profilePicture: sender.profilePicture
+          }
+        };
+        io.to(chatId).emit(`chat:${chatId}:messages:update`, deletedMessage);
       }
     }
   });
@@ -179,10 +180,30 @@ io.on('connection', (socket) => {
     io.to(chatId).emit(`chat:${chatId}:messages`, newMessage);
   });
 
+  socket.on('deleteGroupMessage', async ({ chatId, messageId }) => {
+    const deletedMessage = await prisma.message.update({
+      where: { id: messageId },
+      data: {
+        content: '',
+        isDeleted: true
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            profilePicture: true,
+            isDeleted: true
+          }
+        }
+      }
+    });
+    io.to(chatId).emit(`chat:${chatId}:messages:update`, deletedMessage);
+  });
+
   // Typing indicators
   // User starts typing
   socket.on('userTyping', ({ chatId, name }) => {
-    console.log('user is typing', chatId, name);
     // io.to(chatId).emit('userTyping', { name });
     socket.broadcast.to(chatId).emit('userTyping', { name });
   });
