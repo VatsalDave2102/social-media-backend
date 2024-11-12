@@ -86,9 +86,13 @@ io.on('connection', (socket) => {
           where: { id: senderId }
         });
 
+        function generateObjectId() {
+          return [...Array(24)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+        }
+
         if (sender) {
           const newMessage = {
-            id: new Date().getUTCMilliseconds().toString(),
+            id: generateObjectId(),
             content,
             senderId,
             oneOnOneChatId: chatId,
