@@ -88,7 +88,7 @@ io.on('connection', (socket) => {
 
         if (sender) {
           const newMessage = {
-            id: new Date().getMinutes(),
+            id: new Date().getUTCMilliseconds().toString(),
             content,
             senderId,
             oneOnOneChatId: chatId,
