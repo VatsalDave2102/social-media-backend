@@ -79,6 +79,7 @@ io.on('connection', (socket) => {
           return message;
         });
         io.to(chatId).emit(`chat:${chatId}:messages`, newMessage);
+        io.emit('chatlist:newMessage', { chatId, message: newMessage });
       }
     } else if (vanishMode) {
       if (senderId) {
@@ -105,6 +106,7 @@ io.on('connection', (socket) => {
             }
           };
           io.to(chatId).emit(`chat:${chatId}:messages`, newMessage);
+          io.emit('chatlist:newMessage', { chatId, message: newMessage });
         }
       }
     }
@@ -182,6 +184,7 @@ io.on('connection', (socket) => {
       return message;
     });
     io.to(chatId).emit(`chat:${chatId}:messages`, newMessage);
+    io.emit('chatlist:newMessage', { chatId, message: newMessage });
   });
 
   socket.on('deleteGroupMessage', async ({ chatId, messageId }) => {
