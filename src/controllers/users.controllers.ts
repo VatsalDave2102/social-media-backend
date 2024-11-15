@@ -787,6 +787,23 @@ const getSuggestedFriends = async (req: Request, res: Response, next: NextFuncti
       throw new AppError('User not found', StatusCodes.NOT_FOUND);
     }
 
+    // Fetch any pending friend requests involving the user
+    const pendingRequests = await prisma.friendRequest.findMany({
+      where: {
+        OR: [{ senderId: id }, { receiverId: id }],
+        status: 'PENDING'
+      },
+      select: {
+        senderId: true,
+        receiverId: true
+      }
+    });
+
+    // Create a Set of user IDs involved in friend requests to exclude them
+    const friendRequestUserIds = new Set(
+      pendingRequests.flatMap((request) => [request.senderId, request.receiverId])
+    );
+
     // Combine friendIds and friendOfIds to get all existing friend IDs
     const existingFriendIds = Array.from([...user.friendIds, ...user.friendOfIds]);
 
@@ -794,7 +811,7 @@ const getSuggestedFriends = async (req: Request, res: Response, next: NextFuncti
     const suggestedFriends = await prisma.user.findMany({
       where: {
         AND: [
-          { id: { notIn: [...existingFriendIds, id] }, isDeleted: false },
+          { id: { notIn: [...existingFriendIds, ...friendRequestUserIds, id] }, isDeleted: false },
           {
             OR: [
               { friendIds: { hasSome: existingFriendIds } },
