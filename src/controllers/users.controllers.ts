@@ -575,7 +575,7 @@ const getFriends = async (req: Request, res: Response, next: NextFunction) => {
       distinct: ['id']
     });
 
-    const totalCount = prisma.user.count({
+    const totalCount = await prisma.user.count({
       where: {
         ...(searchQuery && { name: { contains: searchQuery, mode: 'insensitive' } }),
         OR: [{ friendIds: { has: id } }, { friendOfIds: { has: id } }],
