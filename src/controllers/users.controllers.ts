@@ -575,6 +575,14 @@ const getFriends = async (req: Request, res: Response, next: NextFunction) => {
       distinct: ['id']
     });
 
+    const totalCount = prisma.user.count({
+      where: {
+        ...(searchQuery && { name: { contains: searchQuery, mode: 'insensitive' } }),
+        OR: [{ friendIds: { has: id } }, { friendOfIds: { has: id } }],
+        isDeleted: false
+      }
+    });
+
     // Determine if there's a next page and prepare pagination info
     const hasNextPage = friends.length > take;
     const nextCursor = hasNextPage ? friends[take - 1].id : null;
@@ -586,7 +594,7 @@ const getFriends = async (req: Request, res: Response, next: NextFunction) => {
       message: 'Friends fetched successfully',
       data: {
         friends: paginatedFriends,
-        pagination: { hasNextPage, nextCursor }
+        pagination: { hasNextPage, nextCursor, totalCount }
       }
     });
   } catch (error) {
