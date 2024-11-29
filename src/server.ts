@@ -105,7 +105,7 @@ io.on('connection', (socket) => {
               profilePicture: sender.profilePicture
             }
           };
-          io.to(chatId).emit(`chat:${chatId}:messages`, newMessage);
+          io.to(chatId).emit(`vanishmessages:add`, { chatId, message: newMessage });
           io.emit('chatlist:newMessage', { chatId, message: newMessage });
         }
       }
@@ -148,7 +148,7 @@ io.on('connection', (socket) => {
             profilePicture: sender.profilePicture
           }
         };
-        io.to(chatId).emit(`chat:${chatId}:messages:update`, deletedMessage);
+        io.to(chatId).emit('vanishmessages:update', { chatId, message: deletedMessage });
       }
     }
   });
@@ -208,17 +208,22 @@ io.on('connection', (socket) => {
     io.to(chatId).emit(`chat:${chatId}:messages:update`, deletedMessage);
   });
 
+  socket.on('updateChatSettings', ({ chatId, chatType }) => {
+    console.log('chat update', chatId, chatType);
+    io.to(chatId).emit(`chat:${chatId}:settings:update`, chatType);
+  });
+
   // Typing indicators
   // User starts typing
   socket.on('userTyping', ({ chatId, name }) => {
     // io.to(chatId).emit('userTyping', { name });
-    socket.broadcast.to(chatId).emit('userTyping', { name });
+    socket.broadcast.to(chatId).emit('userTyping', { chatId, name });
   });
 
   // User stops typing
   socket.on('userStoppedTyping', ({ chatId, name }) => {
     // io.to(chatId).emit('userStoppedTyping', { name });
-    socket.broadcast.to(chatId).emit('userStoppedTyping', { name });
+    socket.broadcast.to(chatId).emit('userStoppedTyping', { chatId, name });
   });
 
   // Online status updates
