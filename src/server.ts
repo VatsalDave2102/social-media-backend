@@ -227,6 +227,50 @@ io.on('connection', (socket) => {
     socket.emit('onlineStatus', onlineStatus);
   });
 
+  //send friend request
+  socket.on('sendFriendRequest', ({ senderId, receiverId }) => {
+    const receiverSocketId = onlineUsers.get(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('updateFriendRequestStatus', { senderId, receiverId });
+      io.to(receiverSocketId).emit('updateFriendRequestList', { receiverId });
+    }
+  });
+
+  //send friend request
+  socket.on('acceptFriendRequest', ({ senderId, receiverId }) => {
+    const receiverSocketId = onlineUsers.get(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('updateFriendRequestStatus', { senderId, receiverId });
+      io.to(receiverSocketId).emit('updateFriendList', { senderId, receiverId });
+    }
+  });
+
+  //remove Friend Request
+  socket.on('removeFriend', ({ senderId, receiverId }) => {
+    const receiverSocketId = onlineUsers.get(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('updateFriendList', { senderId, receiverId });
+      io.to(receiverSocketId).emit('updateFriendRequestStatus', { senderId, receiverId });
+    }
+  });
+
+  //cancel Friend Request
+  socket.on('cancelFriendRequest', ({ senderId, receiverId }) => {
+    const receiverSocketId = onlineUsers.get(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('updateFriendRequestStatus', { senderId, receiverId });
+      io.to(receiverSocketId).emit('updateFriendRequestList', { receiverId });
+    }
+  });
+
+  //remove Friend Request
+  socket.on('rejectFriendRequest', ({ receiverId, senderId }) => {
+    const receiverSocketId = onlineUsers.get(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('updateFriendRequestStatus', { senderId, receiverId });
+    }
+  });
+
   socket.on('disconnect', () => {
     onlineUsers.delete(userId);
     socket.broadcast.emit('userOffline', { userId });
