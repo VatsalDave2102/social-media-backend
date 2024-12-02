@@ -101,8 +101,8 @@ model Message {
   isDeleted      Boolean  @default(false)
 
   sender       User          @relation("SentMessages", fields: [senderId], references: [id])
-  oneOnOneChat OneOnOneChat? @relation(fields: [oneOnOneChatId], references: [id])
-  groupChat    GroupChat?    @relation(fields: [groupChatId], references: [id])
+  oneOnOneChat OneOnOneChat? @relation(fields: [oneOnOneChatId], references: [id],onDelete: Cascade)
+  groupChat    GroupChat?    @relation(fields: [groupChatId], references: [id],onDelete: Cascade)
 }
 
 enum ChatType {
