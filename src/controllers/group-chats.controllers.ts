@@ -396,7 +396,7 @@ const addMembersToGroupChat = async (req: Request, res: Response, next: NextFunc
     res.status(StatusCodes.CREATED).json({
       success: true,
       message: responseMessage,
-      data: null
+      data: newMemberIds
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
@@ -476,7 +476,7 @@ const removeMemberFromGroupChat = async (req: Request, res: Response, next: Next
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Member removed successfully!',
-      data: null
+      data: memberId
     });
   } catch (error) {
     // Pass any errors to the error handling middleware
