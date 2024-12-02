@@ -211,6 +211,9 @@ io.on('connection', (socket) => {
   socket.on('updateChatSettings', ({ chatId, chatType }) => {
     console.log('chat update', chatId, chatType);
     io.to(chatId).emit(`chat:${chatId}:settings:update`, chatType);
+    if (chatType === 'group') {
+      io.to(chatId).emit(`chatlist:update`);
+    }
   });
 
   // Typing indicators
@@ -273,6 +276,35 @@ io.on('connection', (socket) => {
     const receiverSocketId = onlineUsers.get(receiverId);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit('updateFriendRequestStatus', { senderId, receiverId });
+    }
+  });
+
+  //createGroupChat
+  socket.on('createGroupChat', ({ members }) => {
+    members.forEach((memberId: string) => {
+      const memberSocketId = onlineUsers.get(memberId);
+      if (memberSocketId) {
+        io.to(memberSocketId).emit('chatlist:update');
+      }
+    });
+  });
+
+  //addGroupMembers
+  socket.on('addGroupMembers', ({ members }) => {
+    members.forEach((memberId: string) => {
+      const memberSocketId = onlineUsers.get(memberId);
+      if (memberSocketId) {
+        io.to(memberSocketId).emit('chatlist:update');
+      }
+    });
+  });
+
+  //removeGroupMembers
+  socket.on('removeGroupMember', ({ memberId }) => {
+    console.log(memberId);
+    const memberSocketId = onlineUsers.get(memberId);
+    if (memberSocketId) {
+      io.to(memberSocketId).emit('chatlist:update');
     }
   });
 
