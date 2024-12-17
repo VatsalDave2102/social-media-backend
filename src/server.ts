@@ -210,7 +210,7 @@ io.on('connection', (socket) => {
 
   socket.on('updateChatSettings', ({ chatId, chatType }) => {
     console.log('chat update', chatId, chatType);
-    io.to(chatId).emit(`chat:${chatId}:settings:update`, chatType);
+    io.to(chatId).emit(`chat:settings:update`, { chatType, chatId });
     if (chatType === 'group') {
       io.to(chatId).emit(`chatlist:update`);
     }
